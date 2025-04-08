@@ -1,55 +1,60 @@
 const express = require('express');
-const { body } = require('express-validator');
 const router = express.Router();
-
 const companyController = require('../controllers/company');
-const validateRequest = require('../middleware/validator');
 const authMiddleware = require('../middleware/auth');
-const { upload } = require('../middleware/fileUpload');
+const { upload } = require('../utils/fileUpload');
 
-// Validation middleware
-const companyValidation = [
-    body('name').notEmpty().withMessage('Company name is required'),
-    body('registrationNumber').notEmpty().withMessage('Registration number is required'),
-    body('gstNumber').notEmpty().withMessage('GST number is required'),
-    body('panNumber').notEmpty().withMessage('PAN number is required'),
-    body('address').notEmpty().withMessage('Address is required'),
-    body('contactPerson').notEmpty().withMessage('Contact person is required'),
-    body('email').isEmail().withMessage('Please enter a valid email'),
-    body('phone').matches(/^[0-9]{10}$/).withMessage('Please enter a valid 10-digit phone number')
-];
+// Protect all company routes
+router.use(authMiddleware);
 
-// Routes
-router.use(authMiddleware); // Protect all company routes
-
-router.post('/', 
-    companyValidation,
-    validateRequest,
-    upload.array('documents', 5),
-    companyController.createCompany
+// Create a new company
+router.post('/',
+  upload.fields([
+    { name: 'contactPerson.idProof.document', maxCount: 1 },
+    { name: 'businessDetails.registrationCertificate', maxCount: 1 },
+    { name: 'bankDetails[0].bankStatement', maxCount: 1 },
+    { name: 'bankDetails[0].cancelledCheque', maxCount: 1 },
+    { name: 'bankDetails[1].bankStatement', maxCount: 1 },
+    { name: 'bankDetails[1].cancelledCheque', maxCount: 1 },
+    { name: 'bankDetails[2].bankStatement', maxCount: 1 },
+    { name: 'bankDetails[2].cancelledCheque', maxCount: 1 }
+  ]),
+  companyController.createCompany
 );
 
+// Get all companies with pagination and search
 router.get('/', companyController.getCompanies);
 
+// Get a single company
 router.get('/:id', companyController.getCompany);
 
+// Update a company
 router.put('/:id',
-    companyValidation,
-    validateRequest,
-    upload.array('documents', 5),
-    companyController.updateCompany
+  upload.fields([
+    { name: 'contactPerson.idProof.document', maxCount: 1 },
+    { name: 'businessDetails.registrationCertificate', maxCount: 1 },
+    { name: 'bankDetails[0].bankStatement', maxCount: 1 },
+    { name: 'bankDetails[0].cancelledCheque', maxCount: 1 },
+    { name: 'bankDetails[1].bankStatement', maxCount: 1 },
+    { name: 'bankDetails[1].cancelledCheque', maxCount: 1 },
+    { name: 'bankDetails[2].bankStatement', maxCount: 1 },
+    { name: 'bankDetails[2].cancelledCheque', maxCount: 1 }
+  ]),
+  companyController.updateCompany
 );
 
+// Delete a company
 router.delete('/:id', companyController.deleteCompany);
 
-// Document routes
+// Add documents to a company
 router.post('/:id/documents',
-    upload.array('documents', 5),
-    companyController.addDocuments
+  upload.array('documents', 5),
+  companyController.addDocuments
 );
 
+// Delete a document from a company
 router.delete('/:id/documents/:documentId',
-    companyController.deleteDocument
+  companyController.deleteDocument
 );
 
 module.exports = router; 

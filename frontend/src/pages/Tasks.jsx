@@ -19,6 +19,7 @@ const Tasks = () => {
     priority: 'medium',
     dueDate: '',
     companyId: '',
+    taskNumber: '',
   });
   const [editingTask, setEditingTask] = useState(null);
 
@@ -52,6 +53,7 @@ const Tasks = () => {
         priority: 'medium',
         dueDate: '',
         companyId: '',
+        taskNumber: '',
       });
       setEditingTask(null);
     } catch (err) {
@@ -67,6 +69,7 @@ const Tasks = () => {
       priority: task.priority,
       dueDate: task.dueDate,
       companyId: task.companyId,
+      taskNumber: task.taskNumber,
     });
     setEditingTask(task);
   };
@@ -167,6 +170,8 @@ const Tasks = () => {
               <option value="pending">Pending</option>
               <option value="in_progress">In Progress</option>
               <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="disputed">Disputed</option>
             </select>
           </div>
 
@@ -205,23 +210,34 @@ const Tasks = () => {
 
           <div className="form-group">
             <label htmlFor="companyId" className="form-label">
-              Company
+              Company Name
             </label>
-            <select
+            <input
+              type="text"
               id="companyId"
               name="companyId"
               value={formData.companyId}
               onChange={handleChange}
               className="form-input"
               required
-            >
-              <option value="">Select a company</option>
-              {companies.map((company) => (
-                <option key={company.id} value={company.id}>
-                  {company.name}
-                </option>
-              ))}
-            </select>
+              placeholder="Enter company name"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="taskNumber" className="form-label">
+              Task Number
+            </label>
+            <input
+              type="text"
+              id="taskNumber"
+              name="taskNumber"
+              value={formData.taskNumber}
+              onChange={handleChange}
+              className="form-input"
+              required
+              placeholder="Enter task number"
+            />
           </div>
 
           <div className="flex justify-end space-x-3">
@@ -236,6 +252,7 @@ const Tasks = () => {
                     priority: 'medium',
                     dueDate: '',
                     companyId: '',
+                    taskNumber: '',
                   });
                   setEditingTask(null);
                 }}
@@ -259,6 +276,7 @@ const Tasks = () => {
           <table className="table">
             <thead>
               <tr>
+                <th>Task Number</th>
                 <th>Title</th>
                 <th>Description</th>
                 <th>Status</th>
@@ -271,6 +289,7 @@ const Tasks = () => {
             <tbody>
               {tasks.map((task) => (
                 <tr key={task.id}>
+                  <td>{task.taskNumber}</td>
                   <td>{task.title}</td>
                   <td>{task.description}</td>
                   <td>

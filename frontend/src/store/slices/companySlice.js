@@ -1,6 +1,35 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-const backendUrl = import.meta.env.BACKEND_URL; 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+const prepareFormData = (companyData) => {
+  const formData = new FormData();
+
+  // Handle nested objects and arrays by converting them to JSON strings
+  const appendFormData = (data, parentKey = '') => {
+    if (data && typeof data === 'object' && !(data instanceof File)) {
+      Object.keys(data).forEach(key => {
+        const value = data[key];
+        const newKey = parentKey ? `${parentKey}[${key}]` : key;
+
+        if (value instanceof File) {
+          formData.append(newKey, value);
+        } else if (Array.isArray(value)) {
+          value.forEach((item, index) => {
+            appendFormData(item, `${newKey}[${index}]`);
+          });
+        } else if (value && typeof value === 'object') {
+          appendFormData(value, newKey);
+        } else {
+          formData.append(newKey, value === null ? '' : value);
+        }
+      });
+    }
+  };
+
+  appendFormData(companyData);
+  return formData;
+};
 
 export const fetchCompanies = createAsyncThunk(
   'company/fetchCompanies',
@@ -30,7 +59,8 @@ export const createCompany = createAsyncThunk(
   'company/createCompany',
   async (companyData, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${backendUrl}/api/companies`, companyData, {
+      const formData = prepareFormData(companyData);
+      const response = await axios.post(`${backendUrl}/api/companies`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -46,7 +76,8 @@ export const updateCompany = createAsyncThunk(
   'company/updateCompany',
   async ({ id, companyData }, { rejectWithValue }) => {
     try {
-      const response = await axios.put(`${backendUrl}/api/companies/${id}`, companyData, {
+      const formData = prepareFormData(companyData);
+      const response = await axios.put(`${backendUrl}/api/companies/${id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -126,7 +157,7 @@ const companySlice = createSlice({
       })
       .addCase(createCompany.fulfilled, (state, action) => {
         state.loading = false;
-        state.companies.push(action.payload);
+        state.companies.unshift(action.payload);
       })
       .addCase(createCompany.rejected, (state, action) => {
         state.loading = false;
@@ -139,11 +170,11 @@ const companySlice = createSlice({
       })
       .addCase(updateCompany.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.companies.findIndex((company) => company.id === action.payload.id);
+        const index = state.companies.findIndex((company) => company._id === action.payload._id);
         if (index !== -1) {
           state.companies[index] = action.payload;
         }
-        if (state.currentCompany?.id === action.payload.id) {
+        if (state.currentCompany?._id === action.payload._id) {
           state.currentCompany = action.payload;
         }
       })
@@ -158,8 +189,8 @@ const companySlice = createSlice({
       })
       .addCase(deleteCompany.fulfilled, (state, action) => {
         state.loading = false;
-        state.companies = state.companies.filter((company) => company.id !== action.payload);
-        if (state.currentCompany?.id === action.payload) {
+        state.companies = state.companies.filter((company) => company._id !== action.payload);
+        if (state.currentCompany?._id === action.payload) {
           state.currentCompany = null;
         }
       })

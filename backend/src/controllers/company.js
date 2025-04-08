@@ -1,14 +1,46 @@
 const Company = require('../models/Company');
 const ApiResponse = require('../utils/apiResponse');
 const logger = require('../utils/logger');
+const { uploadToStorage } = require('../utils/fileUpload');
+const { validateCompanyData } = require('../utils/validation');
 
 class CompanyController {
     async createCompany(req, res) {
         try {
-            const company = await Company.create(req.body);
-            return res.status(201).json(
-                ApiResponse.created('Company created successfully', company)
-            );
+            const companyData = JSON.parse(JSON.stringify(req.body));
+            
+            // Handle file uploads
+            if (req.files && req.files.length > 0) {
+                for (const file of req.files) {
+                    const uploadResult = await uploadToStorage(file);
+                    const fieldPath = file.fieldname.split('[');
+                    let target = companyData;
+                    
+                    // Navigate through nested object structure
+                    for (let i = 0; i < fieldPath.length - 1; i++) {
+                        const key = fieldPath[i].replace(/\]/g, '');
+                        if (!target[key]) {
+                            target[key] = fieldPath[i + 1].includes(']') ? {} : [];
+                        }
+                        target = target[key];
+                    }
+                    
+                    // Set the file URL in the appropriate field
+                    const lastKey = fieldPath[fieldPath.length - 1].replace(/\]/g, '');
+                    target[lastKey] = uploadResult.url;
+                }
+            }
+
+            // Validate company data
+            const validationResult = validateCompanyData(companyData);
+            if (!validationResult.isValid) {
+                return res.status(400).json({ message: validationResult.errors });
+            }
+
+            const company = new Company(companyData);
+            await company.save();
+
+            return res.status(201).json(company);
         } catch (error) {
             logger.error('Create Company Error:', error);
             return res.status(500).json(
@@ -19,31 +51,33 @@ class CompanyController {
 
     async getCompanies(req, res) {
         try {
-            const { page = 1, limit = 10, type, status, search } = req.query;
-            const query = {};
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+            const search = req.query.search || '';
 
-            if (type) query.type = type;
-            if (status) query.status = status;
-            if (search) {
-                query.$or = [
+            const searchQuery = search ? {
+                $or: [
                     { name: { $regex: search, $options: 'i' } },
                     { 'businessDetails.gstNumber': { $regex: search, $options: 'i' } },
-                    { 'businessDetails.panNumber': { $regex: search, $options: 'i' } }
-                ];
-            }
+                    { 'businessDetails.panNumber': { $regex: search, $options: 'i' } },
+                    { 'contactPerson.email': { $regex: search, $options: 'i' } }
+                ]
+            } : {};
 
-            const companies = await Company.find(query)
-                .limit(limit * 1)
+            const totalCompanies = await Company.countDocuments(searchQuery);
+            const totalPages = Math.ceil(totalCompanies / limit);
+
+            const companies = await Company.find(searchQuery)
+                .sort({ createdAt: -1 })
                 .skip((page - 1) * limit)
-                .exec();
-
-            const count = await Company.countDocuments(query);
+                .limit(limit);
 
             return res.status(200).json(
                 ApiResponse.success('Companies retrieved successfully', {
                     companies,
-                    totalPages: Math.ceil(count / limit),
-                    currentPage: page
+                    currentPage: page,
+                    totalPages,
+                    totalCompanies
                 })
             );
         } catch (error) {
@@ -76,15 +110,45 @@ class CompanyController {
 
     async updateCompany(req, res) {
         try {
-            const company = await Company.findById(req.params.id);
-            if (!company) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Company not found')
-                );
+            const companyData = JSON.parse(JSON.stringify(req.body));
+            
+            // Handle file uploads
+            if (req.files && req.files.length > 0) {
+                for (const file of req.files) {
+                    const uploadResult = await uploadToStorage(file);
+                    const fieldPath = file.fieldname.split('[');
+                    let target = companyData;
+                    
+                    // Navigate through nested object structure
+                    for (let i = 0; i < fieldPath.length - 1; i++) {
+                        const key = fieldPath[i].replace(/\]/g, '');
+                        if (!target[key]) {
+                            target[key] = fieldPath[i + 1].includes(']') ? {} : [];
+                        }
+                        target = target[key];
+                    }
+                    
+                    // Set the file URL in the appropriate field
+                    const lastKey = fieldPath[fieldPath.length - 1].replace(/\]/g, '');
+                    target[lastKey] = uploadResult.url;
+                }
             }
 
-            Object.assign(company, req.body);
-            await company.save();
+            // Validate company data
+            const validationResult = validateCompanyData(companyData);
+            if (!validationResult.isValid) {
+                return res.status(400).json({ message: validationResult.errors });
+            }
+
+            const company = await Company.findByIdAndUpdate(
+                req.params.id,
+                { $set: companyData },
+                { new: true, runValidators: true }
+            );
+
+            if (!company) {
+                return res.status(404).json({ message: 'Company not found' });
+            }
 
             return res.status(200).json(
                 ApiResponse.success('Company updated successfully', company)
@@ -99,14 +163,12 @@ class CompanyController {
 
     async deleteCompany(req, res) {
         try {
-            const company = await Company.findById(req.params.id);
+            const company = await Company.findByIdAndDelete(req.params.id);
             if (!company) {
                 return res.status(404).json(
                     ApiResponse.notFound('Company not found')
                 );
             }
-
-            await company.remove();
 
             return res.status(200).json(
                 ApiResponse.success('Company deleted successfully')
@@ -240,21 +302,18 @@ class CompanyController {
                 );
             }
 
-            if (!req.files || req.files.length === 0) {
-                return res.status(400).json(
-                    ApiResponse.error('No documents provided')
-                );
+            const uploadedDocs = [];
+            for (const file of req.files) {
+                const uploadResult = await uploadToStorage(file);
+                uploadedDocs.push({
+                    name: file.originalname,
+                    type: file.mimetype,
+                    url: uploadResult.url,
+                    uploadDate: new Date()
+                });
             }
 
-            const newDocuments = req.files.map(file => ({
-                name: file.originalname,
-                type: file.mimetype,
-                url: file.path,
-                uploadDate: new Date()
-            }));
-
-            company.documents = company.documents || [];
-            company.documents.push(...newDocuments);
+            company.documents = [...(company.documents || []), ...uploadedDocs];
             await company.save();
 
             return res.status(200).json(
@@ -277,17 +336,9 @@ class CompanyController {
                 );
             }
 
-            const documentIndex = company.documents.findIndex(
-                doc => doc._id.toString() === req.params.documentId
+            company.documents = company.documents.filter(
+                doc => doc._id.toString() !== req.params.documentId
             );
-
-            if (documentIndex === -1) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Document not found')
-                );
-            }
-
-            company.documents.splice(documentIndex, 1);
             await company.save();
 
             return res.status(200).json(

@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-const backendUrl = import.meta.env.BACKEND_URL;
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 export const fetchTasks = createAsyncThunk(
   'task/fetchTasks',
@@ -30,7 +30,14 @@ export const createTask = createAsyncThunk(
   'task/createTask',
   async (taskData, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${backendUrl}/api/tasks`, taskData);
+      // Generate a task number (you might want to move this to backend)
+      const taskNumber = `TASK-${Date.now()}`;
+      const response = await axios.post(`${backendUrl}/api/tasks`, {
+        ...taskData,
+        taskNumber,
+        clientCompany: taskData.companyId, // Using the entered company as client
+        providerCompany: taskData.companyId, // Using the same company as provider for now
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to create task');
