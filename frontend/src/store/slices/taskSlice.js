@@ -42,6 +42,7 @@ export const createTask = createAsyncThunk(
     } catch (error) {
       // Check if it's an authentication error
       if (error.response && error.response.status === 401) {
+        console.log("error", error);
         console.error('Authentication error during task creation');
         // Don't throw the error, just return a rejection
         return rejectWithValue('Authentication error. Please try again.');

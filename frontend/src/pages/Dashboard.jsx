@@ -12,8 +12,7 @@ import {
 const Dashboard = () => {
   const dispatch = useAppDispatch();
   const hel = useAppSelector((state) => state.companies);
-  console.log("hel = ");
-  console.log(hel);
+  
   const { companies } = useAppSelector((state) => state.companies);
   const { tasks } = useAppSelector((state) => state.tasks);
   const { banks } = useAppSelector((state) => state.banks);

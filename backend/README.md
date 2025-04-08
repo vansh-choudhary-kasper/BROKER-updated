@@ -97,7 +97,9 @@ npm start
 ### Companies
 
 - `POST /api/companies` - Create a new company
-- `GET /api/companies` - Get all companies
+- `GET 
+
+` - Get all companies
 - `GET /api/companies/:id` - Get a specific company
 - `PUT /api/companies/:id` - Update a company
 - `DELETE /api/companies/:id` - Delete a company

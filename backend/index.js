@@ -7,7 +7,7 @@ const morgan = require('morgan');
 const path = require('path');
 
 // Import routes (we'll create these next)
-const authRoutes = require('./routes/auth');
+const authRoutes = require('./src/routes/auth');
 const companyRoutes = require('./routes/companies');
 const taskRoutes = require('./routes/tasks');
 const expenseRoutes = require('./routes/expenses');
