@@ -399,3 +399,36 @@
 {"level":"info","message":"::1 - - [08/Apr/2025:08:59:40 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T08:59:40.135Z"}
 {"0":{"location":"body","msg":"Password must be at least 8 characters long","path":"password","type":"field","value":"Vansh"},"level":"warn","message":"Validation Error:","timestamp":"2025-04-08T08:59:40.177Z"}
 {"level":"info","message":"::1 - - [08/Apr/2025:08:59:40 +0000] \"POST /api/auth/login HTTP/1.1\" 400 179 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T08:59:40.181Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:09:02:31 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T09:02:31.330Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:09:02:31 +0000] \"POST /api/auth/login HTTP/1.1\" 200 315 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T09:02:31.815Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:09:05:21 +0000] \"OPTIONS /api/tasks HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T09:05:21.437Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:09:05:21 +0000] \"POST /api/tasks HTTP/1.1\" 401 53 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T09:05:21.451Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:09:12:44 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T09:12:44.242Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:09:12:44 +0000] \"POST /api/auth/login HTTP/1.1\" 200 315 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T09:12:44.418Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:09:12:58 +0000] \"OPTIONS /api/tasks HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T09:12:58.878Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:09:12:58 +0000] \"POST /api/tasks HTTP/1.1\" 401 53 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T09:12:58.887Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:09:14:28 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T09:14:28.099Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:09:14:28 +0000] \"POST /api/auth/login HTTP/1.1\" 200 315 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T09:14:28.226Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T09:16:19.949Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T09:16:20.614Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T09:16:41.325Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-08T09:16:41.817Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T09:17:14.320Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T09:17:14.814Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T09:17:37.477Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T09:17:37.967Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T09:17:59.167Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-08T09:17:59.653Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:09:27:02 +0000] \"OPTIONS /api/tasks HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T09:27:02.943Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:09:27:03 +0000] \"POST /api/tasks HTTP/1.1\" 401 53 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T09:27:03.010Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T10:23:36.345Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T10:23:42.010Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-08T10:23:42.570Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T10:41:00.284Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T10:41:00.987Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:10:41:25 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T10:41:25.403Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:10:41:25 +0000] \"POST /api/auth/login HTTP/1.1\" 200 315 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T10:41:25.576Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T10:52:44.274Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T10:52:45.423Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T10:52:46.438Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T10:52:47.415Z"}

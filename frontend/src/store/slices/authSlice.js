@@ -35,7 +35,9 @@ axios.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       // Token expired or invalid
       setStoredToken(null);
-      window.location.href = '/login';
+      // Instead of directly redirecting, we'll let the auth state handle the redirect
+      // This prevents automatic logout during task submission
+      console.log('Authentication error detected. Token may be expired or invalid.');
     }
     return Promise.reject(error);
   }

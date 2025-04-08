@@ -28,7 +28,7 @@ export const fetchTask = createAsyncThunk(
 
 export const createTask = createAsyncThunk(
   'task/createTask',
-  async (taskData, { rejectWithValue }) => {
+  async (taskData, { rejectWithValue, dispatch }) => {
     try {
       // Generate a task number (you might want to move this to backend)
       const taskNumber = `TASK-${Date.now()}`;
@@ -40,6 +40,12 @@ export const createTask = createAsyncThunk(
       });
       return response.data;
     } catch (error) {
+      // Check if it's an authentication error
+      if (error.response && error.response.status === 401) {
+        console.error('Authentication error during task creation');
+        // Don't throw the error, just return a rejection
+        return rejectWithValue('Authentication error. Please try again.');
+      }
       return rejectWithValue(error.response?.data?.message || 'Failed to create task');
     }
   }
@@ -52,6 +58,12 @@ export const updateTask = createAsyncThunk(
       const response = await axios.put(`${backendUrl}/api/tasks/${id}`, taskData);
       return response.data;
     } catch (error) {
+      // Check if it's an authentication error
+      if (error.response && error.response.status === 401) {
+        console.error('Authentication error during task update');
+        // Don't throw the error, just return a rejection
+        return rejectWithValue('Authentication error. Please try again.');
+      }
       return rejectWithValue(error.response?.data?.message || 'Failed to update task');
     }
   }

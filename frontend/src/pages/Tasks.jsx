@@ -41,7 +41,7 @@ const Tasks = () => {
     try {
       if (editingTask) {
         await dispatch(
-          updateTask({ id: editingTask.id, ...formData })
+          updateTask({ id: editingTask.id, taskData: formData })
         ).unwrap();
       } else {
         await dispatch(createTask(formData)).unwrap();
@@ -58,6 +58,11 @@ const Tasks = () => {
       setEditingTask(null);
     } catch (err) {
       console.error('Failed to save task:', err);
+      if (err.includes('Authentication error')) {
+        alert('Your session may have expired. Please try logging in again.');
+      } else {
+        alert(`Failed to save task: ${err}`);
+      }
     }
   };
 
