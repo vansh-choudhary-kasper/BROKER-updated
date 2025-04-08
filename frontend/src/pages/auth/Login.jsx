@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAppDispatch } from '../../store/hooks';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { login } from '../../store/slices/authSlice';
 
 const Login = () => {
@@ -11,6 +11,15 @@ const Login = () => {
   const [error, setError] = useState('');
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { isAuthenticated, loading } = useAppSelector((state) => state.auth);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('Already authenticated, redirecting to dashboard');
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,12 +34,19 @@ const Login = () => {
     setError('');
 
     try {
-      await dispatch(login(formData)).unwrap();
-      navigate('/');
+      console.log('Submitting login form with:', formData);
+      const result = await dispatch(login(formData)).unwrap();
+      console.log('Login successful, result:', result);
+      navigate('/', { replace: true });
     } catch (err) {
+      console.error('Login error:', err);
       setError(err.message || 'Failed to login');
     }
   };
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   return (
     <div className="app-container">

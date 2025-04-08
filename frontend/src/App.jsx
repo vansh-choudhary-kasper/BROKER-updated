@@ -18,25 +18,63 @@ const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAppSelector((state) => state.auth);
   
   if (loading) {
-    return <div>Loading...</div>; // You can replace this with a proper loading spinner
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
   
-  return isAuthenticated ? children : <Navigate to="/login" />;
+  if (!isAuthenticated) {
+    console.log('Not authenticated, redirecting to login');
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
 };
 
 // Auth checker component
 const AuthChecker = ({ children }) => {
   const dispatch = useAppDispatch();
-  const { loading } = useAppSelector((state) => state.auth);
+  const { loading, isAuthenticated } = useAppSelector((state) => state.auth);
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
-    dispatch(checkAuth());
-  }, [dispatch]);
+    console.log('AuthChecker mounted, token exists:', !!token);
+    if (token && !isAuthenticated) {
+      console.log('Dispatching checkAuth');
+      dispatch(checkAuth());
+    }
+  }, [dispatch, token, isAuthenticated]);
 
   if (loading) {
-    return <div>Loading...</div>; // You can replace this with a proper loading spinner
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
 
+  return children;
+};
+
+// Public route component (redirects to dashboard if already authenticated)
+const PublicRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAppSelector((state) => state.auth);
+  
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+  
+  if (isAuthenticated) {
+    console.log('Already authenticated, redirecting to dashboard');
+    return <Navigate to="/" replace />;
+  }
+  
   return children;
 };
 
@@ -47,8 +85,16 @@ function App() {
         <AuthChecker>
           <Routes>
             {/* Public routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            } />
+            <Route path="/register" element={
+              <PublicRoute>
+                <Register />
+              </PublicRoute>
+            } />
 
             {/* Protected routes */}
             <Route
