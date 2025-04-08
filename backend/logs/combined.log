@@ -1,0 +1,316 @@
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:00:24.987Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-07T18:00:25.732Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:00:38.222Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:00:40.014Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-07T18:00:40.481Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:14:40 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:14:40.941Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:19:13.987Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:19:16.266Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-07T18:19:16.854Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:19:21.453Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-07T18:19:22.095Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:19:31.190Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-07T18:19:31.668Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:19:43.505Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-07T18:19:44.177Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:28:09.097Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-07T18:28:09.817Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:28:22 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:28:22.599Z"}
+{"0":{"location":"body","msg":"Password must be at least 8 characters long","path":"password","type":"field","value":"vansh"},"1":{"location":"body","msg":"Password must contain at least one uppercase letter, one lowercase letter, one number and one special character","path":"password","type":"field","value":"vansh"},"2":{"location":"body","msg":"Invalid role","path":"role","type":"field"},"level":"warn","message":"Validation Error:","timestamp":"2025-04-07T18:28:22.661Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:28:22 +0000] \"POST /api/auth/register HTTP/1.1\" 400 438 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:28:22.667Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:30:30 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:30:30.422Z"}
+{"0":{"location":"body","msg":"Password must contain at least one uppercase letter, one lowercase letter, one number and one special character","path":"password","type":"field","value":"vansh21*"},"1":{"location":"body","msg":"Invalid role","path":"role","type":"field"},"level":"warn","message":"Validation Error:","timestamp":"2025-04-07T18:30:30.432Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:30:30 +0000] \"POST /api/auth/register HTTP/1.1\" 400 320 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:30:30.435Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:30:55 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:30:55.543Z"}
+{"0":{"location":"body","msg":"Invalid role","path":"role","type":"field"},"level":"warn","message":"Validation Error:","timestamp":"2025-04-07T18:30:55.548Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:30:55 +0000] \"POST /api/auth/register HTTP/1.1\" 400 128 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:30:55.553Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:31:38.220Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-07T18:31:38.707Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:31:39 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:31:39.191Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:31:39 +0000] \"POST /api/auth/register HTTP/1.1\" 500 26 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:31:39.564Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:32:11.380Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-07T18:32:12.448Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:32:16 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:32:16.157Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:32:16 +0000] \"POST /api/auth/register HTTP/1.1\" 500 26 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:32:16.364Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:33:18.376Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-07T18:33:18.829Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:33:20.847Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-07T18:33:21.323Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:33:22 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:33:22.471Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:33:22 +0000] \"POST /api/auth/register HTTP/1.1\" 500 26 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:33:22.504Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:33:31.122Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:33:31 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:33:31.995Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:33:32 +0000] \"POST /api/auth/register HTTP/1.1\" 500 26 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:33:32.024Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-07T18:33:32.214Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:34:48.785Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:34:50.560Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-07T18:34:51.679Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:34:51 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:34:51.822Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:34:51 +0000] \"POST /api/auth/register HTTP/1.1\" 500 26 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:34:51.852Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:35:02.813Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-07T18:35:03.487Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:35:05.816Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:35:07.597Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:35:08 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:35:08.599Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:35:08 +0000] \"POST /api/auth/register HTTP/1.1\" 500 26 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:35:08.628Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-07T18:35:08.883Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:35:18.643Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-07T18:35:19.379Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:35:33.697Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:35:35.324Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:35:35 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:35:35.597Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:35:35 +0000] \"POST /api/auth/register HTTP/1.1\" 500 26 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:35:35.627Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-07T18:35:35.826Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:36:10.809Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:36:11 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:36:11.195Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:36:11 +0000] \"POST /api/auth/register HTTP/1.1\" 500 26 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:36:11.230Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-07T18:36:11.610Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:36:36.092Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-07T18:36:36.806Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:36:38.764Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-07T18:36:39.225Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:36:42.149Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:36:42 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:36:42.300Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:36:42 +0000] \"POST /api/auth/register HTTP/1.1\" 500 26 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:36:42.333Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-07T18:36:42.614Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:37:00.997Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:37:02.640Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:37:04.919Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:37:05 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:37:05.113Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-07T18:37:05.826Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:37:06 +0000] \"POST /api/auth/register HTTP/1.1\" 500 26 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:37:06.377Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:37:14.320Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:37:14 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:37:14.512Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:37:14 +0000] \"POST /api/auth/register HTTP/1.1\" 500 26 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:37:14.542Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-07T18:37:15.346Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:37:21 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:37:21.142Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:37:21 +0000] \"POST /api/auth/register HTTP/1.1\" 500 26 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:37:21.152Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:37:35.116Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-07T18:37:35.603Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:37:38.260Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-07T18:37:38.686Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:37:40.145Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-07T18:37:40.626Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:37:42.869Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-07T18:37:43.273Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:37:47.332Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-07T18:37:48.101Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:37:48 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:37:48.700Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:37:48 +0000] \"POST /api/auth/register HTTP/1.1\" 500 26 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:37:48.899Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:38:16.835Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-07T18:38:17.742Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:38:19.924Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-07T18:38:20.576Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:38:33 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:38:33.479Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:38:33 +0000] \"POST /api/auth/register HTTP/1.1\" 500 26 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:38:33.698Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:39:00.539Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-07T18:39:01.302Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:39:01 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:39:01.338Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:39:01 +0000] \"POST /api/auth/register HTTP/1.1\" 500 26 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:39:01.636Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:39:13.337Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-07T18:39:13.764Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:39:15.926Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:39:15 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:39:15.951Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-07T18:39:16.433Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:39:16 +0000] \"POST /api/auth/register HTTP/1.1\" 500 26 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:39:16.755Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:39:38.399Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:39:39.996Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-07T18:39:40.802Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:39:51.185Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-07T18:39:51.917Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:39:53.478Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-07T18:39:53.928Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:39:57.283Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-07T18:39:57.955Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:40:12 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:40:12.722Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:40:12 +0000] \"POST /api/auth/register HTTP/1.1\" 500 26 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:40:12.931Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:40:24.340Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-07T18:40:24.806Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:40:29 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:40:29.381Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:40:29 +0000] \"POST /api/auth/register HTTP/1.1\" 500 26 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:40:29.588Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:40:51.460Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:40:51 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:40:51.578Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-07T18:40:52.231Z"}
+{"level":"info","message":"::1 - - [07/Apr/2025:18:40:52 +0000] \"POST /api/auth/register HTTP/1.1\" 201 315 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-07T18:40:52.973Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-07T18:42:17.665Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-07T18:42:18.452Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:11:09.125Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T04:11:10.344Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:16:13 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:16:13.905Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:16:14 +0000] \"POST /api/auth/register HTTP/1.1\" 201 303 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:16:14.178Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:21:30 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:21:30.610Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:21:30 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:21:30.744Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:21:37 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:21:37.635Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:21:37 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:21:37.763Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:25:15.768Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T04:25:16.289Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:25:18 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:25:18.139Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:25:18 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:25:18.334Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:25:25 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:25:25.476Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:25:25 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:25:25.601Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:25:34.756Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-08T04:25:35.221Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:25:58.049Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:25:59.412Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-08T04:25:59.830Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:26:00 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:26:00.418Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:26:00 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:26:00.554Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:26:27.744Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:26:28.922Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-08T04:26:29.566Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:26:29 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:26:29.796Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:26:29 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:26:29.960Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:26:39.190Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T04:26:39.661Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:26:39 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:26:39.835Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:26:40 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:26:40.312Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:27:08.367Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:27:08 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:27:08.619Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-08T04:27:09.211Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:27:09 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:27:09.462Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:27:18.639Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-08T04:27:19.112Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:27:31.674Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T04:27:32.227Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:27:41.732Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-08T04:27:42.187Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:27:43 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:27:43.352Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:27:43 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:27:43.504Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:27:50 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:27:50.693Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:27:50 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:27:50.822Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:28:13 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:28:13.814Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:28:13 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:28:13.940Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:53:42 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:53:42.041Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:53:42 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:53:42.164Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:54:54.235Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T04:54:54.848Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:55:02.710Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-08T04:55:03.227Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:55:05.951Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T04:55:06.379Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:55:16.187Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-08T04:55:16.601Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:55:18.645Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-08T04:55:19.067Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:55:28 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:55:28.192Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:55:28 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:55:28.390Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:55:48.421Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T04:55:48.891Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:56:51.826Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:56:52.831Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:56:53.912Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T04:56:54.332Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:56:55.341Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-08T04:56:55.765Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:56:59.101Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-08T04:56:59.567Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:59:02.642Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T04:59:03.127Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:59:04.862Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-08T04:59:05.337Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:59:18 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:59:18.679Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:59:18 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:59:18.732Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:59:22 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:59:22.246Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:59:32.142Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T04:59:32.604Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:59:33.388Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-08T04:59:33.811Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:59:42 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:59:42.475Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:59:42 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:59:42.525Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:04:59:44 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T04:59:44.470Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T04:59:53.231Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-08T04:59:53.758Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:00:04.576Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T05:00:05.113Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:00:08.809Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:00:09.956Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T05:00:10.386Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:00:13.802Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-08T05:00:14.211Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:00:15 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:00:15.124Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:00:15 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:00:15.178Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:00:16 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:00:16.710Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:00:16 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:00:16.941Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:00:30.521Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-08T05:00:31.012Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:00:36.166Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T05:00:36.626Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:00:38 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:00:38.842Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:00:38 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:00:38.891Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:00:39 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:00:39.829Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:00:47.220Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T05:00:47.680Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:01:07.690Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-08T05:01:08.142Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:01:09.247Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T05:01:09.651Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:01:11 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:01:11.473Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:01:11 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:01:11.538Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:01:20.529Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-08T05:01:20.951Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:01:24.371Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-08T05:01:24.793Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:01:30 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:01:30.685Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:01:30 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:01:30.747Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:30:00.282Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:30:01.322Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-08T05:30:01.767Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:30:19 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:30:19.569Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:30:19 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:30:19.657Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:30:32.367Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T05:30:32.841Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:30:33.756Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-08T05:30:34.178Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:30:34 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:30:34.959Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:30:35 +0000] \"POST /api/auth/login HTTP/1.1\" 401 33 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:30:35.017Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:31:07 +0000] \"OPTIONS /api/auth/register HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:31:07.950Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:31:08 +0000] \"POST /api/auth/register HTTP/1.1\" 201 315 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:31:08.115Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:31:30 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:31:30.475Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:31:30 +0000] \"POST /api/auth/login HTTP/1.1\" 200 315 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:31:30.579Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:33:30.736Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T05:33:31.371Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:33:32.456Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-08T05:33:32.934Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:33:35.446Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-00.su41bos.mongodb.net","timestamp":"2025-04-08T05:33:35.914Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:33:39.905Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-08T05:33:40.358Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:33:41.596Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:33:42.835Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:33:43.807Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-01.su41bos.mongodb.net","timestamp":"2025-04-08T05:33:44.272Z"}
+{"level":"info","message":"Server is running on port 5000","timestamp":"2025-04-08T05:33:46.366Z"}
+{"level":"info","message":"MongoDB Connected: ac-nwwfavj-shard-00-02.su41bos.mongodb.net","timestamp":"2025-04-08T05:33:46.813Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:38:50 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:38:50.540Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:38:50 +0000] \"POST /api/auth/login HTTP/1.1\" 200 315 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:38:50.687Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:39:15 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:39:15.343Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:39:15 +0000] \"POST /api/auth/login HTTP/1.1\" 200 315 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:39:15.445Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:39:34 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:39:34.783Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:39:34 +0000] \"POST /api/auth/login HTTP/1.1\" 200 315 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:39:34.879Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:41:18 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:41:18.289Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:41:18 +0000] \"POST /api/auth/login HTTP/1.1\" 200 315 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:41:18.385Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:42:27 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:42:27.939Z"}
+{"0":{"location":"body","msg":"Password must be at least 8 characters long","path":"password","type":"field","value":"Vansh"},"level":"warn","message":"Validation Error:","timestamp":"2025-04-08T05:42:27.942Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:42:27 +0000] \"POST /api/auth/login HTTP/1.1\" 400 179 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:42:27.943Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:42:35 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:42:35.357Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:42:35 +0000] \"POST /api/auth/login HTTP/1.1\" 200 315 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:42:35.487Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:44:28 +0000] \"OPTIONS /api/auth/me HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:44:28.718Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:44:28 +0000] \"OPTIONS /api/auth/me HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:44:28.721Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:44:28 +0000] \"GET /api/auth/me HTTP/1.1\" 404 45 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:44:28.725Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:44:28 +0000] \"GET /api/auth/me HTTP/1.1\" 404 45 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:44:28.729Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:45:02 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:45:02.985Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:45:03 +0000] \"POST /api/auth/login HTTP/1.1\" 200 315 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:45:03.083Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:45:05 +0000] \"OPTIONS /api/auth/me HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:45:05.825Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:45:05 +0000] \"OPTIONS /api/auth/me HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:45:05.833Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:45:05 +0000] \"GET /api/auth/me HTTP/1.1\" 404 45 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:45:05.841Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:45:05 +0000] \"GET /api/auth/me HTTP/1.1\" 404 45 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:45:05.853Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:48:26 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:48:26.036Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:48:26 +0000] \"POST /api/auth/login HTTP/1.1\" 200 315 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:48:26.138Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:48:26 +0000] \"OPTIONS /api/auth/me HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:48:26.169Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:48:26 +0000] \"GET /api/auth/me HTTP/1.1\" 404 45 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:48:26.181Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:48:45 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:48:45.064Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:48:45 +0000] \"POST /api/auth/login HTTP/1.1\" 200 315 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:48:45.161Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:48:45 +0000] \"OPTIONS /api/auth/me HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:48:45.194Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:48:45 +0000] \"GET /api/auth/me HTTP/1.1\" 404 45 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:48:45.210Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:51:05 +0000] \"OPTIONS /api/auth/login HTTP/1.1\" 204 0 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:51:05.105Z"}
+{"level":"info","message":"::1 - - [08/Apr/2025:05:51:05 +0000] \"POST /api/auth/login HTTP/1.1\" 200 315 \"http://localhost:5173/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0\"","timestamp":"2025-04-08T05:51:05.202Z"}
