@@ -58,11 +58,14 @@ export const AuthProvider = ({ children }) => {
   // Check authentication status on mount
   useEffect(() => {
     const checkAuth = async () => {
+      console.error("isAuthenticated", isAuthenticated);
       const storedToken = getStoredToken();
+      console.warn("storedToken", storedToken);
       if (storedToken && !isAuthenticated) {
         setLoading(true);
         try {
           const response = await axios.get(`${backendUrl}/api/auth/me`);
+          console.log("response.data", response.data);
           setUser(response.data);
           setToken(storedToken);
           setIsAuthenticated(true);

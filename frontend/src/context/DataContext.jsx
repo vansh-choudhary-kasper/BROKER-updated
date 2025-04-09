@@ -104,7 +104,8 @@ export const DataProvider = ({ children }) => {
     try {
       const response = await axios.get(`${backendUrl}/api/tasks`);
       // Ensure we always set an array
-      setTasks(Array.isArray(response.data) ? response.data : []);
+      console.log("tasks get successfully", response);
+      setTasks(Array.isArray(response?.data?.data?.tasks) ? response?.data?.data?.tasks : []);
       setLastFetchTime(prev => ({ ...prev, tasks: now }));
     } catch (err) {
       setError(prev => ({ 
@@ -205,8 +206,10 @@ export const DataProvider = ({ children }) => {
     
     try {
       const response = await axios.post(`${backendUrl}/api/tasks`, taskData);
-      setTasks(prev => [...prev, response.data]);
-      return response.data;
+      console.log("task posted successfully", response);
+      setTasks(prev => [...prev, response?.data?.data]);
+      setError('');
+      return response?.data?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to add task';
       setError(prev => ({ ...prev, tasks: errorMessage }));

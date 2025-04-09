@@ -34,6 +34,13 @@ const taskSchema = new mongoose.Schema({
     // Company that will execute the task
   },
 
+  assignedTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+    // User that is assigned to the task
+  },
+
   // Task status tracking
   status: {
     type: String,

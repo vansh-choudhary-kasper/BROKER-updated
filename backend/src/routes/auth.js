@@ -46,4 +46,7 @@ router.post('/reset-password',
     authController.resetPassword
 );
 
+// Get current user route
+router.get('/me', authMiddleware, authController.getCurrentUser);
+
 module.exports = router; 

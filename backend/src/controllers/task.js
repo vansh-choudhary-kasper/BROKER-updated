@@ -16,14 +16,31 @@ class TaskController {
                 priority,
                 status,
                 assignedTo,
-                company
+                company,
+                clientCompany,
+                providerCompany,
+                taskNumber,
+                timeline,
+                financialDetails
             } = req.body;
 
-            // Verify company exists
-            const companyExists = await Company.findById(company);
-            if (!companyExists) {
+            // Use clientCompany from new field or fall back to old company field
+            const finalClientCompany = clientCompany || company;
+            const finalProviderCompany = providerCompany;
+
+            // Verify client company exists
+            const clientCompanyExists = await Company.findById(finalClientCompany);
+            if (!clientCompanyExists) {
                 return res.status(404).json(
-                    ApiResponse.notFound('Company not found')
+                    ApiResponse.notFound('Client company not found')
+                );
+            }
+
+            // Verify provider company exists
+            const providerCompanyExists = await Company.findById(finalProviderCompany);
+            if (!providerCompanyExists) {
+                return res.status(404).json(
+                    ApiResponse.notFound('Provider company not found')
                 );
             }
 
@@ -50,24 +67,28 @@ class TaskController {
                 priority,
                 status,
                 assignedTo,
-                company,
+                clientCompany: finalClientCompany,
+                providerCompany: finalProviderCompany,
+                taskNumber,
+                timeline,
+                financialDetails,
                 attachments,
                 createdBy: req.user.userId
             });
 
             // Send email notification to assigned user
-            await emailService.sendEmail(
-                userExists.email,
-                'New Task Assigned',
-                `
-                <h1>New Task Assigned</h1>
-                <p>You have been assigned a new task:</p>
-                <h2>${title}</h2>
-                <p><strong>Description:</strong> ${description}</p>
-                <p><strong>Due Date:</strong> ${new Date(dueDate).toLocaleDateString()}</p>
-                <p><strong>Priority:</strong> ${priority}</p>
-                `
-            );
+            // await emailService.sendEmail(
+            //     userExists.email,
+            //     'New Task Assigned',
+            //     `
+            //     <h1>New Task Assigned</h1>
+            //     <p>You have been assigned a new task:</p>
+            //     <h2>${title}</h2>
+            //     <p><strong>Description:</strong> ${description}</p>
+            //     <p><strong>Due Date:</strong> ${new Date(dueDate).toLocaleDateString()}</p>
+            //     <p><strong>Priority:</strong> ${priority}</p>
+            //     `
+            // );
 
             return res.status(201).json(
                 ApiResponse.created('Task created successfully', task)
@@ -82,16 +103,26 @@ class TaskController {
 
     async getTasks(req, res) {
         try {
-            const { page = 1, limit = 10, status, priority, company } = req.query;
+            const { page = 1, limit = 10, status, priority, company, clientCompany, providerCompany } = req.query;
             const query = {};
 
             if (status) query.status = status;
             if (priority) query.priority = priority;
-            if (company) query.company = company;
+            
+            // Handle both old and new company fields in query
+            if (clientCompany) {
+                query.clientCompany = clientCompany;
+            } else if (company) {
+                query.clientCompany = company;
+            }
+            if (providerCompany) {
+                query.providerCompany = providerCompany;
+            }
 
             const tasks = await Task.find(query)
                 .populate('assignedTo', 'name email')
-                .populate('company', 'name')
+                .populate('clientCompany', 'name')
+                .populate('providerCompany', 'name')
                 .limit(limit * 1)
                 .skip((page - 1) * limit)
                 .exec();
@@ -117,7 +148,8 @@ class TaskController {
         try {
             const task = await Task.findById(req.params.id)
                 .populate('assignedTo', 'name email')
-                .populate('company', 'name')
+                .populate('clientCompany', 'name')
+                .populate('providerCompany', 'name')
                 .populate('comments.user', 'name');
 
             if (!task) {
@@ -146,7 +178,12 @@ class TaskController {
                 priority,
                 status,
                 assignedTo,
-                company
+                company,
+                clientCompany,
+                providerCompany,
+                taskNumber,
+                timeline,
+                financialDetails
             } = req.body;
 
             const task = await Task.findById(req.params.id);
@@ -156,11 +193,23 @@ class TaskController {
                 );
             }
 
-            // Verify company exists
-            const companyExists = await Company.findById(company);
-            if (!companyExists) {
+            // Use clientCompany from new field or fall back to old company field
+            const finalClientCompany = clientCompany || company;
+            const finalProviderCompany = providerCompany;
+
+            // Verify client company exists
+            const clientCompanyExists = await Company.findById(finalClientCompany);
+            if (!clientCompanyExists) {
                 return res.status(404).json(
-                    ApiResponse.notFound('Company not found')
+                    ApiResponse.notFound('Client company not found')
+                );
+            }
+
+            // Verify provider company exists
+            const providerCompanyExists = await Company.findById(finalProviderCompany);
+            if (!providerCompanyExists) {
+                return res.status(404).json(
+                    ApiResponse.notFound('Provider company not found')
                 );
             }
 
@@ -180,7 +229,11 @@ class TaskController {
                 priority,
                 status,
                 assignedTo,
-                company
+                clientCompany: finalClientCompany,
+                providerCompany: finalProviderCompany,
+                taskNumber,
+                timeline,
+                financialDetails
             });
 
             // Add new attachments if any

@@ -1,39 +1,75 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useData } from '../context/DataContext';
+import { debounce } from 'lodash';
 
 const Expenses = () => {
   const {
     expenses,
-    companies,
     loading,
     error,
     fetchExpenses,
-    createExpense,
+    addExpense,
     updateExpense,
     deleteExpense,
-    fetchCompanies,
+    totalExpenses
   } = useData();
 
-  const [formData, setFormData] = useState({
+  const initialFormState = {
+    title: '',
     description: '',
     amount: '',
     date: '',
     category: '',
     paymentMethod: '',
-    companyId: '',
-  });
+    status: 'pending',
+    isRecurring: false,
+    recurringFrequency: 'monthly',
+  };
+
+  const [formData, setFormData] = useState(initialFormState);
   const [editingExpense, setEditingExpense] = useState(null);
+  const [filters, setFilters] = useState({
+    search: '',
+    category: '',
+    status: '',
+    paymentMethod: '',
+    page: 1,
+    limit: 10
+  });
+  const [showForm, setShowForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Debounced search function
+  const debouncedSearch = useCallback(
+    debounce((value) => {
+      setFilters(prev => ({ ...prev, search: value, page: 1 }));
+    }, 500),
+    []
+  );
+
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    debouncedSearch(value);
+  };
 
   useEffect(() => {
-    fetchExpenses();
-    fetchCompanies();
-  }, [fetchExpenses, fetchCompanies]);
+    fetchExpenses({
+      search: filters.search,
+      category: filters.category,
+      status: filters.status,
+      paymentMethod: filters.paymentMethod,
+      page: filters.page,
+      limit: filters.limit
+    });
+  }, [fetchExpenses, filters]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
       ...prev,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
@@ -41,19 +77,13 @@ const Expenses = () => {
     e.preventDefault();
     try {
       if (editingExpense) {
-        await updateExpense(editingExpense.id, formData);
+        await updateExpense(editingExpense._id, formData);
       } else {
-        await createExpense(formData);
+        await addExpense(formData);
       }
-      setFormData({
-        description: '',
-        amount: '',
-        date: '',
-        category: '',
-        paymentMethod: '',
-        companyId: '',
-      });
+      setFormData(initialFormState);
       setEditingExpense(null);
+      setShowForm(false);
     } catch (err) {
       console.error('Failed to save expense:', err);
       alert(`Failed to save expense: ${err}`);
@@ -62,14 +92,18 @@ const Expenses = () => {
 
   const handleEdit = (expense) => {
     setFormData({
-      description: expense.description,
-      amount: expense.amount,
-      date: expense.date,
-      category: expense.category,
-      paymentMethod: expense.paymentMethod,
-      companyId: expense.companyId,
+      title: expense.title || '',
+      description: expense.description || '',
+      amount: expense.amount || '',
+      date: expense.date || '',
+      category: expense.category || '',
+      paymentMethod: expense.paymentMethod || '',
+      status: expense.status || 'pending',
+      isRecurring: expense.isRecurring || false,
+      recurringFrequency: expense.recurringFrequency || 'monthly',
     });
     setEditingExpense(expense);
+    setShowForm(true);
   };
 
   const handleDelete = async (id) => {
@@ -83,238 +117,410 @@ const Expenses = () => {
     }
   };
 
+  const getStatusBadgeClass = (status) => {
+    switch (status) {
+      case 'paid':
+        return 'bg-green-100 text-green-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'overdue':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   const getCategoryBadgeClass = (category) => {
     switch (category) {
-      case 'travel':
-        return 'badge-warning';
-      case 'office':
-        return 'badge-success';
       case 'utilities':
-        return 'badge-info';
+        return 'bg-blue-100 text-blue-800';
+      case 'rent':
+        return 'bg-purple-100 text-purple-800';
+      case 'maintenance':
+        return 'bg-orange-100 text-orange-800';
+      case 'supplies':
+        return 'bg-teal-100 text-teal-800';
       default:
-        return 'badge-primary';
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getPaymentMethodBadgeClass = (method) => {
     switch (method) {
       case 'cash':
-        return 'badge-success';
+        return 'bg-green-100 text-green-800';
       case 'credit_card':
-        return 'badge-warning';
+        return 'bg-blue-100 text-blue-800';
       case 'bank_transfer':
-        return 'badge-info';
+        return 'bg-purple-100 text-purple-800';
+      case 'upi':
+        return 'bg-orange-100 text-orange-800';
       default:
-        return 'badge-primary';
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  // Check if expenses is an array before rendering
   const expensesList = Array.isArray(expenses) ? expenses : [];
-  
-  // Check if companies is an array before rendering
-  const companiesList = Array.isArray(companies) ? companies : [];
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">Expenses</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-semibold text-gray-900">Expenses</h1>
+        <button
+          onClick={() => setShowForm(true)}
+          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+        >
+          Add Expense
+        </button>
+      </div>
 
       {error && (
-        <div className="error-message" role="alert">
-          {typeof error === 'string' ? error : 'An error occurred'}
+        <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4" role="alert">
+          <p className="text-red-700">{typeof error === 'string' ? error : 'An error occurred'}</p>
         </div>
       )}
 
-      <div className="card">
-        <div className="card-header">
-          <h2 className="card-title">
-            {editingExpense ? 'Edit Expense' : 'Add New Expense'}
-          </h2>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="form-group">
-            <label htmlFor="description" className="form-label">
-              Description
-            </label>
-            <input
-              type="text"
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              className="form-input"
-              required
-              placeholder="Enter expense description"
-            />
+      {/* Filters */}
+      <div className="bg-white p-4 rounded-lg shadow mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <div className="relative">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                placeholder="Search by title, description..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md pl-10"
+              />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            <p className="mt-1 text-sm text-gray-500">
+              Search by title or description
+            </p>
           </div>
-
-          <div className="form-group">
-            <label htmlFor="amount" className="form-label">
-              Amount
-            </label>
-            <input
-              type="number"
-              id="amount"
-              name="amount"
-              value={formData.amount}
-              onChange={handleChange}
-              className="form-input"
-              required
-              placeholder="Enter amount"
-              min="0"
-              step="0.01"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="date" className="form-label">
-              Date
-            </label>
-            <input
-              type="date"
-              id="date"
-              name="date"
-              value={formData.date}
-              onChange={handleChange}
-              className="form-input"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="category" className="form-label">
-              Category
-            </label>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
             <select
-              id="category"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="form-input"
-              required
+              value={filters.category}
+              onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value, page: 1 }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
-              <option value="">Select a category</option>
-              <option value="travel">Travel</option>
-              <option value="office">Office</option>
+              <option value="">All Categories</option>
               <option value="utilities">Utilities</option>
-              <option value="other">Other</option>
+              <option value="rent">Rent</option>
+              <option value="maintenance">Maintenance</option>
+              <option value="supplies">Supplies</option>
             </select>
           </div>
-
-          <div className="form-group">
-            <label htmlFor="paymentMethod" className="form-label">
-              Payment Method
-            </label>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
             <select
-              id="paymentMethod"
-              name="paymentMethod"
-              value={formData.paymentMethod}
-              onChange={handleChange}
-              className="form-input"
-              required
+              value={filters.status}
+              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value, page: 1 }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
-              <option value="">Select a payment method</option>
+              <option value="">All Status</option>
+              <option value="paid">Paid</option>
+              <option value="pending">Pending</option>
+              <option value="overdue">Overdue</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+            <select
+              value={filters.paymentMethod}
+              onChange={(e) => setFilters(prev => ({ ...prev, paymentMethod: e.target.value, page: 1 }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="">All Methods</option>
               <option value="cash">Cash</option>
               <option value="credit_card">Credit Card</option>
               <option value="bank_transfer">Bank Transfer</option>
-              <option value="other">Other</option>
+              <option value="upi">UPI</option>
             </select>
           </div>
-
-          <div className="form-group">
-            <label htmlFor="companyId" className="form-label">
-              Company
-            </label>
-            <select
-              id="companyId"
-              name="companyId"
-              value={formData.companyId}
-              onChange={handleChange}
-              className="form-input"
-              required
-            >
-              <option value="">Select a company</option>
-              {companiesList.map((company) => (
-                <option key={company._id} value={company._id}>
-                  {company.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex justify-end space-x-3">
-            {editingExpense && (
-              <button
-                type="button"
-                onClick={() => {
-                  setFormData({
-                    description: '',
-                    amount: '',
-                    date: '',
-                    category: '',
-                    paymentMethod: '',
-                    companyId: '',
-                  });
-                  setEditingExpense(null);
-                }}
-                className="btn btn-outline"
-              >
-                Cancel
-              </button>
-            )}
-            <button type="submit" className="btn btn-primary">
-              {editingExpense ? 'Update Expense' : 'Add Expense'}
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
 
-      <div className="card">
-        <div className="card-header">
-          <h2 className="card-title">Expense List</h2>
+      {/* Expense Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-gray-900">
+                {editingExpense ? 'Edit Expense' : 'Add New Expense'}
+              </h2>
+              <button
+                onClick={() => {
+                  setShowForm(false);
+                  setFormData(initialFormState);
+                  setEditingExpense(null);
+                }}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                    Title *
+                  </label>
+                  <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
+                    Amount *
+                  </label>
+                  <input
+                    type="number"
+                    id="amount"
+                    name="amount"
+                    value={formData.amount}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    required
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="date" className="block text-sm font-medium text-gray-700">
+                    Date *
+                  </label>
+                  <input
+                    type="date"
+                    id="date"
+                    name="date"
+                    value={formData.date}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+                    Category *
+                  </label>
+                  <select
+                    id="category"
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    required
+                  >
+                    <option value="">Select a category</option>
+                    <option value="utilities">Utilities</option>
+                    <option value="rent">Rent</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="supplies">Supplies</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="paymentMethod" className="block text-sm font-medium text-gray-700">
+                    Payment Method *
+                  </label>
+                  <select
+                    id="paymentMethod"
+                    name="paymentMethod"
+                    value={formData.paymentMethod}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    required
+                  >
+                    <option value="">Select a payment method</option>
+                    <option value="cash">Cash</option>
+                    <option value="credit_card">Credit Card</option>
+                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="upi">UPI</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                    Status *
+                  </label>
+                  <select
+                    id="status"
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    required
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="paid">Paid</option>
+                    <option value="overdue">Overdue</option>
+                  </select>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                    Description
+                  </label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    rows={3}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="isRecurring"
+                      name="isRecurring"
+                      checked={formData.isRecurring}
+                      onChange={handleChange}
+                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="isRecurring" className="ml-2 block text-sm text-gray-900">
+                      Recurring Expense
+                    </label>
+                  </div>
+                </div>
+
+                {formData.isRecurring && (
+                  <div>
+                    <label htmlFor="recurringFrequency" className="block text-sm font-medium text-gray-700">
+                      Recurring Frequency *
+                    </label>
+                    <select
+                      id="recurringFrequency"
+                      name="recurringFrequency"
+                      value={formData.recurringFrequency}
+                      onChange={handleChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      required
+                    >
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end space-x-3 mt-6">
+                {editingExpense && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData(initialFormState);
+                      setEditingExpense(null);
+                    }}
+                    className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Cancel
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  {editingExpense ? 'Update Expense' : 'Add Expense'}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-        <div className="table-container">
-          <table className="table">
-            <thead>
+      )}
+
+      {/* Expense List */}
+      <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
+          <h2 className="text-lg font-medium text-gray-900">Expense List</h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
               <tr>
-                <th>Description</th>
-                <th>Amount</th>
-                <th>Date</th>
-                <th>Category</th>
-                <th>Payment Method</th>
-                <th>Company</th>
-                <th>Actions</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Title
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Amount
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Date
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Category
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Payment Method
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="bg-white divide-y divide-gray-200">
               {expensesList.map((expense) => (
-                <tr key={expense.id}>
-                  <td>{expense.description}</td>
-                  <td>₹{parseFloat(expense.amount).toFixed(2)}</td>
-                  <td>{new Date(expense.date).toLocaleDateString()}</td>
-                  <td>
-                    <span className={`badge ${getCategoryBadgeClass(expense.category)}`}>
+                <tr key={expense._id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {expense.title}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    ₹{expense.amount}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(expense.date).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getCategoryBadgeClass(expense.category)}`}>
                       {expense.category}
                     </span>
                   </td>
-                  <td>
-                    <span className={`badge ${getPaymentMethodBadgeClass(expense.paymentMethod)}`}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getPaymentMethodBadgeClass(expense.paymentMethod)}`}>
                       {expense.paymentMethod}
                     </span>
                   </td>
-                  <td>
-                    {companiesList.find(c => c._id === expense.companyId)?.name || 'Unknown'}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(expense.status)}`}>
+                      {expense.status}
+                    </span>
                   </td>
-                  <td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
                       onClick={() => handleEdit(expense)}
-                      className="btn btn-sm btn-outline mr-2"
+                      className="text-indigo-600 hover:text-indigo-900 mr-4"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(expense.id)}
-                      className="btn btn-sm btn-danger"
+                      onClick={() => handleDelete(expense._id)}
+                      className="text-red-600 hover:text-red-900"
                     >
                       Delete
                     </button>
@@ -323,6 +529,29 @@ const Expenses = () => {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex justify-between items-center mt-4 p-4">
+          <div className="text-sm text-gray-700">
+            Showing {expenses.length} of {totalExpenses || expenses.length} expenses
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setFilters(prev => ({ ...prev, page: prev.page - 1 }))}
+              disabled={filters.page === 1}
+              className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setFilters(prev => ({ ...prev, page: prev.page + 1 }))}
+              disabled={expenses.length < filters.limit || expenses.length === 0}
+              className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </div>
