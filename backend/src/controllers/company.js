@@ -76,6 +76,7 @@ class CompanyController {
                 .skip((page - 1) * limit)
                 .limit(limit);
 
+            console.log("companies", companies);
             return res.status(200).json(
                 ApiResponse.success('Companies retrieved successfully', {
                     companies,

@@ -1,37 +1,55 @@
 import { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { fetchCompanies } from '../store/slices/companySlice';
-import { fetchTasks } from '../store/slices/taskSlice';
-import { fetchBanks } from '../store/slices/bankSlice';
-import { fetchExpenses } from '../store/slices/expenseSlice';
+import { useData } from '../context/DataContext';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell
 } from 'recharts';
 
 const Dashboard = () => {
-  const dispatch = useAppDispatch();
-  const hel = useAppSelector((state) => state.companies);
+  const {
+    companies,
+    tasks,
+    banks,
+    expenses,
+    loading,
+    error,
+    fetchCompanies,
+    fetchTasks,
+    fetchBanks,
+    fetchExpenses,
+  } = useData();
+  console.log("companies", companies , "tasks", tasks, "banks", banks, "expenses", expenses);
+
+  // Check if any data is still loading
+  const isLoading = loading.companies || loading.tasks || loading.banks || loading.expenses;
   
-  const { companies } = useAppSelector((state) => state.companies);
-  const { tasks } = useAppSelector((state) => state.tasks);
-  const { banks } = useAppSelector((state) => state.banks);
-  const { expenses } = useAppSelector((state) => state.expenses);
+  // Check if there are any errors
+  const hasError = error.companies || error.tasks || error.banks || error.expenses;
 
-  useEffect(() => {
-    dispatch(fetchCompanies());
-    dispatch(fetchTasks());
-    dispatch(fetchBanks());
-    dispatch(fetchExpenses());
-  }, [dispatch]);
-
-  // Calculate statistics
-  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-  const pendingTasks = tasks.filter((task) => task.status === 'pending').length;
-  const inProgressTasks = tasks.filter((task) => task.status === 'in_progress').length;
-  const completedTasks = tasks.filter((task) => task.status === 'completed').length;
-  const cancelledTasks = tasks.filter((task) => task.status === 'cancelled').length;
-  const disputedTasks = tasks.filter((task) => task.status === 'disputed').length;
+  // Calculate statistics with null checks
+  const totalExpenses = Array.isArray(expenses) 
+    ? expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0) 
+    : 0;
+  
+  const pendingTasks = Array.isArray(tasks) 
+    ? tasks.filter((task) => task.status === 'pending').length 
+    : 0;
+  
+  const inProgressTasks = Array.isArray(tasks) 
+    ? tasks.filter((task) => task.status === 'in_progress').length 
+    : 0;
+  
+  const completedTasks = Array.isArray(tasks) 
+    ? tasks.filter((task) => task.status === 'completed').length 
+    : 0;
+  
+  const cancelledTasks = Array.isArray(tasks) 
+    ? tasks.filter((task) => task.status === 'cancelled').length 
+    : 0;
+  
+  const disputedTasks = Array.isArray(tasks) 
+    ? tasks.filter((task) => task.status === 'disputed').length 
+    : 0;
 
   // Prepare data for charts
   const taskStatusData = [
@@ -42,20 +60,24 @@ const Dashboard = () => {
     { name: 'Disputed', value: disputedTasks }
   ];
 
-  const expenseCategories = expenses.reduce((acc, expense) => {
-    acc[expense.category] = (acc[expense.category] || 0) + expense.amount;
-    return acc;
-  }, {});
+  const expenseCategories = Array.isArray(expenses) 
+    ? expenses.reduce((acc, expense) => {
+        acc[expense.category] = (acc[expense.category] || 0) + (expense.amount || 0);
+        return acc;
+      }, {})
+    : {};
 
   const expenseCategoryData = Object.entries(expenseCategories).map(([name, value]) => ({
     name: name.charAt(0).toUpperCase() + name.slice(1).replace('_', ' '),
     value
   }));
 
-  const companyTypes = companies.reduce((acc, company) => {
-    acc[company.type] = (acc[company.type] || 0) + 1;
-    return acc;
-  }, {});
+  const companyTypes = Array.isArray(companies) 
+    ? companies.reduce((acc, company) => {
+        acc[company.type] = (acc[company.type] || 0) + 1;
+        return acc;
+      }, {})
+    : {};
 
   const companyTypeData = Object.entries(companyTypes).map(([name, value]) => ({
     name: name.charAt(0).toUpperCase() + name.slice(1),
@@ -67,44 +89,110 @@ const Dashboard = () => {
   const nextWeek = new Date();
   nextWeek.setDate(today.getDate() + 7);
   
-  const upcomingTasks = tasks
-    .filter(task => {
-      const endDate = new Date(task.timeline.endDate);
-      return endDate >= today && endDate <= nextWeek && task.status !== 'completed' && task.status !== 'cancelled';
-    })
-    .sort((a, b) => new Date(a.timeline.endDate) - new Date(b.timeline.endDate))
-    .slice(0, 5);
+  const upcomingTasks = Array.isArray(tasks) 
+    ? tasks
+        .filter(task => {
+          // Check if task has a dueDate property
+          const dueDate = task.dueDate || (task.timeline && task.timeline.endDate);
+          if (!dueDate) return false;
+          
+          const endDate = new Date(dueDate);
+          return endDate >= today && endDate <= nextWeek && task.status !== 'completed' && task.status !== 'cancelled';
+        })
+        .sort((a, b) => {
+          const dateA = new Date(a.dueDate || (a.timeline && a.timeline.endDate));
+          const dateB = new Date(b.dueDate || (b.timeline && b.timeline.endDate));
+          return dateA - dateB;
+        })
+        .slice(0, 5)
+    : [];
 
   // Get recent bank transactions
-  const recentTransactions = banks
-    .flatMap(bank => 
-      bank.transactions.map(transaction => ({
-        ...transaction,
-        bankName: bank.bankName,
-        accountName: bank.accountName
-      }))
-    )
-    .sort((a, b) => new Date(b.date) - new Date(a.date))
-    .slice(0, 5);
+  const recentTransactions = Array.isArray(banks) 
+    ? banks
+        .flatMap(bank => {
+          // Check if bank has transactions property
+          if (!bank.transactions) return [];
+          
+          return bank.transactions.map(transaction => ({
+            ...transaction,
+            bankName: bank.bankName,
+            accountName: bank.accountName
+          }));
+        })
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 5)
+    : [];
 
   // Get recent activities
   const recentActivities = [
-    ...tasks.map((task) => ({
+    ...(Array.isArray(tasks) ? tasks.map((task) => ({
       ...task,
       type: 'task',
-      date: new Date(task.createdAt),
-    })),
-    ...expenses.map((expense) => ({
+      date: new Date(task.createdAt || task.created_at || new Date()),
+    })) : []),
+    ...(Array.isArray(expenses) ? expenses.map((expense) => ({
       ...expense,
       type: 'expense',
-      date: new Date(expense.date),
-    })),
+      date: new Date(expense.date || expense.createdAt || expense.created_at || new Date()),
+    })) : []),
   ]
     .sort((a, b) => b.date - a.date)
     .slice(0, 5);
 
   // Colors for charts
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+
+  // Loading skeleton component
+  const LoadingSkeleton = () => (
+    <div className="animate-pulse">
+      <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="bg-gray-200 rounded h-24"></div>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="bg-gray-200 rounded h-64"></div>
+        ))}
+      </div>
+      <div className="bg-gray-200 rounded h-48 mb-6"></div>
+      <div className="bg-gray-200 rounded h-48"></div>
+    </div>
+  );
+
+  if (isLoading) {
+    return <LoadingSkeleton />;
+  }
+
+  if (hasError) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+        <div className="card p-6 bg-red-50 border border-red-200">
+          <h2 className="text-xl font-semibold text-red-700 mb-2">Error Loading Data</h2>
+          <p className="text-red-600">
+            {error.companies && <div>Companies: {error.companies}</div>}
+            {error.tasks && <div>Tasks: {error.tasks}</div>}
+            {error.banks && <div>Banks: {error.banks}</div>}
+            {error.expenses && <div>Expenses: {error.expenses}</div>}
+          </p>
+          <button 
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            onClick={() => {
+              fetchCompanies();
+              fetchTasks();
+              fetchBanks();
+              fetchExpenses();
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -114,7 +202,7 @@ const Dashboard = () => {
       <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-title">Total Companies</div>
-          <div className="stat-value">{companies.length}</div>
+          <div className="stat-value">{Array.isArray(companies) ? companies.length : 0}</div>
         </div>
         <div className="stat-card">
           <div className="stat-title">Total Expenses</div>

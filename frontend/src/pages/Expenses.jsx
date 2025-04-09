@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import {
-  fetchExpenses,
-  createExpense,
-  updateExpense,
-  deleteExpense,
-} from '../store/slices/expenseSlice';
-import { fetchCompanies } from '../store/slices/companySlice';
+import { useData } from '../context/DataContext';
 
 const Expenses = () => {
-  const dispatch = useAppDispatch();
-  const { expenses, loading, error } = useAppSelector((state) => state.expenses);
-  const { companies } = useAppSelector((state) => state.companies);
+  const {
+    expenses,
+    companies,
+    loading,
+    error,
+    fetchExpenses,
+    createExpense,
+    updateExpense,
+    deleteExpense,
+    fetchCompanies,
+  } = useData();
+
   const [formData, setFormData] = useState({
     description: '',
     amount: '',
@@ -23,9 +25,9 @@ const Expenses = () => {
   const [editingExpense, setEditingExpense] = useState(null);
 
   useEffect(() => {
-    dispatch(fetchExpenses());
-    dispatch(fetchCompanies());
-  }, [dispatch]);
+    fetchExpenses();
+    fetchCompanies();
+  }, [fetchExpenses, fetchCompanies]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,11 +41,9 @@ const Expenses = () => {
     e.preventDefault();
     try {
       if (editingExpense) {
-        await dispatch(
-          updateExpense({ id: editingExpense.id, ...formData })
-        ).unwrap();
+        await updateExpense(editingExpense.id, formData);
       } else {
-        await dispatch(createExpense(formData)).unwrap();
+        await createExpense(formData);
       }
       setFormData({
         description: '',
@@ -56,6 +56,7 @@ const Expenses = () => {
       setEditingExpense(null);
     } catch (err) {
       console.error('Failed to save expense:', err);
+      alert(`Failed to save expense: ${err}`);
     }
   };
 
@@ -74,9 +75,10 @@ const Expenses = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this expense?')) {
       try {
-        await dispatch(deleteExpense(id)).unwrap();
+        await deleteExpense(id);
       } catch (err) {
         console.error('Failed to delete expense:', err);
+        alert(`Failed to delete expense: ${err}`);
       }
     }
   };
@@ -107,13 +109,19 @@ const Expenses = () => {
     }
   };
 
+  // Check if expenses is an array before rendering
+  const expensesList = Array.isArray(expenses) ? expenses : [];
+  
+  // Check if companies is an array before rendering
+  const companiesList = Array.isArray(companies) ? companies : [];
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-gray-900">Expenses</h1>
 
       {error && (
         <div className="error-message" role="alert">
-          {error}
+          {typeof error === 'string' ? error : 'An error occurred'}
         </div>
       )}
 
@@ -226,8 +234,8 @@ const Expenses = () => {
               required
             >
               <option value="">Select a company</option>
-              {companies.map((company) => (
-                <option key={company.id} value={company.id}>
+              {companiesList.map((company) => (
+                <option key={company._id} value={company._id}>
                   {company.name}
                 </option>
               ))}
@@ -279,7 +287,7 @@ const Expenses = () => {
               </tr>
             </thead>
             <tbody>
-              {expenses.map((expense) => (
+              {expensesList.map((expense) => (
                 <tr key={expense.id}>
                   <td>{expense.description}</td>
                   <td>₹{parseFloat(expense.amount).toFixed(2)}</td>
@@ -295,23 +303,21 @@ const Expenses = () => {
                     </span>
                   </td>
                   <td>
-                    {companies.find((c) => c.id === expense.companyId)?.name}
+                    {companiesList.find(c => c._id === expense.companyId)?.name || 'Unknown'}
                   </td>
                   <td>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEdit(expense)}
-                        className="btn btn-outline"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(expense.id)}
-                        className="btn btn-danger"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleEdit(expense)}
+                      className="btn btn-sm btn-outline mr-2"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(expense.id)}
+                      className="btn btn-sm btn-danger"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}

@@ -1,17 +1,15 @@
 import { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { logout } from '../store/slices/authSlice';
+import { useAuth } from '../context/AuthContext';
 
 const MainLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const dispatch = useAppDispatch();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useAppSelector((state) => state.auth);
 
   const handleLogout = () => {
-    dispatch(logout());
+    logout();
     navigate('/login');
   };
 
@@ -149,10 +147,12 @@ const MainLayout = () => {
           <div className="flex items-center justify-between p-4">
             <h2 className="text-xl font-semibold">Broker Management System</h2>
             <div className="flex items-center space-x-4">
-              <span className="text-gray-600">{user?.name}</span>
+              <span className="text-sm text-gray-600">
+                {user?.name || 'User'}
+              </span>
               <button
                 onClick={handleLogout}
-                className="btn btn-danger"
+                className="px-3 py-1 text-sm text-white bg-red-500 rounded hover:bg-red-600"
               >
                 Logout
               </button>
@@ -161,7 +161,7 @@ const MainLayout = () => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+        <main className="flex-1 overflow-y-auto p-4">
           <Outlet />
         </main>
       </div>

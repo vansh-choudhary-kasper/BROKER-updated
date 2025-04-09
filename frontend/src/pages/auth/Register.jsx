@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAppDispatch } from '../../store/hooks';
-import { register } from '../../store/slices/authSlice';
+import { useAuth } from '../../context/AuthContext';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +10,7 @@ const Register = () => {
     confirmPassword: '',
   });
   const [error, setError] = useState('');
-  const dispatch = useAppDispatch();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -32,7 +31,7 @@ const Register = () => {
     }
 
     try {
-      await dispatch(register(formData)).unwrap();
+      await register(formData);
       navigate('/');
     } catch (err) {
       setError(err.message || 'Failed to register');
@@ -122,16 +121,16 @@ const Register = () => {
               Create Account
             </button>
           </div>
-
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link to="/login" className="text-primary-color hover:underline">
-                Sign in here
-              </Link>
-            </p>
-          </div>
         </form>
+
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600">
+            Already have an account?{' '}
+            <Link to="/login" className="text-blue-600 hover:text-blue-800">
+              Sign in here
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

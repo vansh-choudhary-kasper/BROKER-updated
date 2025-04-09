@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { login } from '../../store/slices/authSlice';
+import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -9,9 +8,8 @@ const Login = () => {
     password: '',
   });
   const [error, setError] = useState('');
-  const dispatch = useAppDispatch();
+  const { login, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
-  const { isAuthenticated, loading } = useAppSelector((state) => state.auth);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -35,8 +33,8 @@ const Login = () => {
 
     try {
       console.log('Submitting login form with:', formData);
-      const result = await dispatch(login(formData)).unwrap();
-      console.log('Login successful, result:', result);
+      await login(formData);
+      console.log('Login successful');
       navigate('/', { replace: true });
     } catch (err) {
       console.error('Login error:', err);
@@ -99,16 +97,16 @@ const Login = () => {
               Sign In
             </button>
           </div>
-
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-primary-color hover:underline">
-                Register here
-              </Link>
-            </p>
-          </div>
         </form>
+
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600">
+            Don't have an account?{' '}
+            <Link to="/register" className="text-blue-600 hover:text-blue-800">
+              Register
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

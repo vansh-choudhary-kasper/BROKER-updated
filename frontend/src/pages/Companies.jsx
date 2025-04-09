@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import {
-  fetchCompanies,
-  createCompany,
-  updateCompany,
-  deleteCompany,
-} from '../store/slices/companySlice';
+import { useData } from '../context/DataContext';
 import BankDetailsForm from '../components/BankDetailsForm';
 
 const Companies = () => {
-  const dispatch = useAppDispatch();
-  const { companies, loading, error } = useAppSelector((state) => state.companies);
+  const { 
+    companies, 
+    loading, 
+    error, 
+    fetchCompanies, 
+    addCompany, 
+    updateCompany, 
+    deleteCompany,
+    totalCompanies 
+  } = useData();
+  
   const initialFormState = {
     name: '',
     type: 'client',
@@ -74,10 +77,24 @@ const Companies = () => {
 
   const [formData, setFormData] = useState(initialFormState);
   const [editingCompany, setEditingCompany] = useState(null);
+  const [filters, setFilters] = useState({
+    status: '',
+    type: '',
+    search: '',
+    page: 1,
+    limit: 10
+  });
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchCompanies());
-  }, [dispatch]);
+    fetchCompanies({
+      status: filters.status,
+      type: filters.type,
+      search: filters.search,
+      page: filters.page,
+      limit: filters.limit
+    });
+  }, [fetchCompanies, filters]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -127,16 +144,14 @@ const Companies = () => {
     e.preventDefault();
     try {
       if (editingCompany) {
-        await dispatch(
-          updateCompany({ id: editingCompany.id, ...formData })
-        ).unwrap();
+        await updateCompany(editingCompany._id, formData);
       } else {
-        await dispatch(createCompany(formData)).unwrap();
+        await addCompany(formData);
       }
       setFormData(initialFormState);
       setEditingCompany(null);
-    } catch (err) {
-      console.error('Failed to save company:', err);
+    } catch (error) {
+      console.error('Error submitting form:', error);
     }
   };
 
@@ -148,63 +163,127 @@ const Companies = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this company?')) {
       try {
-        await dispatch(deleteCompany(id)).unwrap();
-      } catch (err) {
-        console.error('Failed to delete company:', err);
+        await deleteCompany(id);
+      } catch (error) {
+        console.error('Error deleting company:', error);
       }
     }
   };
 
+  // Check if companies is an array before rendering
+  const companiesList = Array.isArray(companies) ? companies : [];
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-900">Companies</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-semibold text-gray-900">Companies</h1>
+        <button
+          onClick={() => setShowForm(true)}
+          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+        >
+          Add Company
+        </button>
+      </div>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded" role="alert">
-          {error}
+      {/* Filters */}
+      <div className="bg-white p-4 rounded-lg shadow mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <input
+              type="text"
+              value={filters.search}
+              onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+              placeholder="Search companies..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select
+              value={filters.status}
+              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="blacklisted">Blacklisted</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+            <select
+              value={filters.type}
+              onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="">All Types</option>
+              <option value="client">Client</option>
+              <option value="provider">Provider</option>
+              <option value="both">Both</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Items per page</label>
+            <select
+              value={filters.limit}
+              onChange={(e) => setFilters(prev => ({ ...prev, limit: Number(e.target.value) }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100">100</option>
+            </select>
+          </div>
         </div>
-      )}
+      </div>
 
-      <div className="bg-white shadow rounded-lg p-6">
-        <div className="border-b border-gray-200 pb-4">
-          <h2 className="text-xl font-semibold text-gray-800">
+      {/* Company Form */}
+      <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
+          <h2 className="text-lg font-medium text-gray-900">
             {editingCompany ? 'Edit Company' : 'Add New Company'}
           </h2>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
-          {/* Basic Company Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Company Name *
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                required
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* Basic Information */}
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                  Company Name *
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  required
+                />
+              </div>
 
-            <div>
-              <label htmlFor="type" className="block text-sm font-medium text-gray-700">
-                Company Type *
-              </label>
-              <select
-                id="type"
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                required
-              >
-                <option value="client">Client</option>
-                <option value="provider">Provider</option>
-                <option value="both">Both</option>
-              </select>
+              <div>
+                <label htmlFor="type" className="block text-sm font-medium text-gray-700">
+                  Company Type *
+                </label>
+                <select
+                  id="type"
+                  name="type"
+                  value={formData.type}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  required
+                >
+                  <option value="client">Client</option>
+                  <option value="provider">Provider</option>
+                  <option value="both">Both</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -254,13 +333,12 @@ const Companies = () => {
                   onChange={handleChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   required
-                  pattern="[0-9]{10}"
                 />
               </div>
 
               <div>
                 <label htmlFor="contactPerson.designation" className="block text-sm font-medium text-gray-700">
-                  Designation
+                  Designation *
                 </label>
                 <input
                   type="text"
@@ -269,6 +347,7 @@ const Companies = () => {
                   value={formData.contactPerson.designation}
                   onChange={handleChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  required
                 />
               </div>
 
@@ -283,7 +362,6 @@ const Companies = () => {
                   value={formData.contactPerson.alternatePhone}
                   onChange={handleChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  pattern="[0-9]{10}"
                 />
               </div>
             </div>
@@ -388,13 +466,7 @@ const Companies = () => {
                   id="businessDetails.registrationCertificate"
                   name="businessDetails.registrationCertificate"
                   onChange={handleFileChange}
-                  className="mt-1 block w-full text-sm text-gray-500
-                    file:mr-4 file:py-2 file:px-4
-                    file:rounded-md file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-indigo-50 file:text-indigo-700
-                    hover:file:bg-indigo-100"
-                  accept=".pdf,.jpg,.jpeg,.png"
+                  className="mt-1 block w-full"
                 />
               </div>
             </div>
@@ -406,7 +478,7 @@ const Companies = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="legalDetails.registeredName" className="block text-sm font-medium text-gray-700">
-                  Registered Name
+                  Registered Name *
                 </label>
                 <input
                   type="text"
@@ -415,12 +487,13 @@ const Companies = () => {
                   value={formData.legalDetails.registeredName}
                   onChange={handleChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  required
                 />
               </div>
 
               <div>
                 <label htmlFor="legalDetails.registeredOffice.address" className="block text-sm font-medium text-gray-700">
-                  Registered Office Address
+                  Registered Office Address *
                 </label>
                 <input
                   type="text"
@@ -429,12 +502,13 @@ const Companies = () => {
                   value={formData.legalDetails.registeredOffice.address}
                   onChange={handleChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  required
                 />
               </div>
 
               <div>
                 <label htmlFor="legalDetails.registeredOffice.city" className="block text-sm font-medium text-gray-700">
-                  City
+                  City *
                 </label>
                 <input
                   type="text"
@@ -443,12 +517,13 @@ const Companies = () => {
                   value={formData.legalDetails.registeredOffice.city}
                   onChange={handleChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  required
                 />
               </div>
 
               <div>
                 <label htmlFor="legalDetails.registeredOffice.state" className="block text-sm font-medium text-gray-700">
-                  State
+                  State *
                 </label>
                 <input
                   type="text"
@@ -457,12 +532,13 @@ const Companies = () => {
                   value={formData.legalDetails.registeredOffice.state}
                   onChange={handleChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  required
                 />
               </div>
 
               <div>
                 <label htmlFor="legalDetails.registeredOffice.country" className="block text-sm font-medium text-gray-700">
-                  Country
+                  Country *
                 </label>
                 <input
                   type="text"
@@ -471,12 +547,13 @@ const Companies = () => {
                   value={formData.legalDetails.registeredOffice.country}
                   onChange={handleChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  required
                 />
               </div>
 
               <div>
                 <label htmlFor="legalDetails.registeredOffice.pincode" className="block text-sm font-medium text-gray-700">
-                  Pincode
+                  Pincode *
                 </label>
                 <input
                   type="text"
@@ -485,7 +562,7 @@ const Companies = () => {
                   value={formData.legalDetails.registeredOffice.pincode}
                   onChange={handleChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  pattern="[0-9]{6}"
+                  required
                 />
               </div>
             </div>
@@ -567,7 +644,6 @@ const Companies = () => {
                   onChange={handleChange}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   required
-                  pattern="[0-9]{6}"
                 />
               </div>
 
@@ -588,74 +664,77 @@ const Companies = () => {
           </div>
 
           {/* Bank Details */}
-          <BankDetailsForm
-            bankDetails={formData.bankDetails}
-            onChange={(index, field, value) => {
-              const newBankDetails = [...formData.bankDetails];
-              newBankDetails[index] = {
-                ...newBankDetails[index],
-                [field]: value
-              };
-              setFormData(prev => ({
-                ...prev,
-                bankDetails: newBankDetails
-              }));
-            }}
-            onFileChange={(index, field, file) => {
-              const newBankDetails = [...formData.bankDetails];
-              newBankDetails[index] = {
-                ...newBankDetails[index],
-                [field]: file
-              };
-              setFormData(prev => ({
-                ...prev,
-                bankDetails: newBankDetails
-              }));
-            }}
-            onAdd={() => {
-              setFormData(prev => ({
-                ...prev,
-                bankDetails: [...prev.bankDetails, {
-                  accountNumber: '',
-                  ifscCode: '',
-                  bankName: '',
-                  branchName: '',
-                  accountType: '',
-                  accountHolderName: '',
-                  accountHolderPan: '',
-                  accountHolderAadhar: '',
-                  bankStatement: null,
-                  cancelledCheque: null
-                }]
-              }));
-            }}
-            onRemove={(index) => {
-              setFormData(prev => ({
-                ...prev,
-                bankDetails: prev.bankDetails.filter((_, i) => i !== index)
-              }));
-            }}
-          />
+          <div className="border-t border-gray-200 pt-4">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Bank Details</h3>
+            <BankDetailsForm
+              bankDetails={formData.bankDetails}
+              onChange={(index, field, value) => {
+                const newBankDetails = [...formData.bankDetails];
+                newBankDetails[index] = {
+                  ...newBankDetails[index],
+                  [field]: value
+                };
+                setFormData(prev => ({
+                  ...prev,
+                  bankDetails: newBankDetails
+                }));
+              }}
+              onFileChange={(index, field, file) => {
+                const newBankDetails = [...formData.bankDetails];
+                newBankDetails[index] = {
+                  ...newBankDetails[index],
+                  [field]: file
+                };
+                setFormData(prev => ({
+                  ...prev,
+                  bankDetails: newBankDetails
+                }));
+              }}
+              onAdd={() => {
+                setFormData(prev => ({
+                  ...prev,
+                  bankDetails: [...prev.bankDetails, {
+                    accountNumber: '',
+                    ifscCode: '',
+                    bankName: '',
+                    branchName: '',
+                    accountType: '',
+                    accountHolderName: '',
+                    accountHolderPan: '',
+                    accountHolderAadhar: '',
+                    bankStatement: null,
+                    cancelledCheque: null
+                  }]
+                }));
+              }}
+              onRemove={(index) => {
+                setFormData(prev => ({
+                  ...prev,
+                  bankDetails: prev.bankDetails.filter((_, i) => i !== index)
+                }));
+              }}
+            />
 
-          <div className="flex justify-end space-x-3 mt-6">
-            {editingCompany && (
+            <div className="flex justify-end space-x-3 mt-6">
+              {editingCompany && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormData(initialFormState);
+                    setEditingCompany(null);
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Cancel
+                </button>
+              )}
               <button
-                type="button"
-                onClick={() => {
-                  setFormData(initialFormState);
-                  setEditingCompany(null);
-                }}
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                type="submit"
+                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
-                Cancel
+                {editingCompany ? 'Update Company' : 'Add Company'}
               </button>
-            )}
-            <button
-              type="submit"
-              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              {editingCompany ? 'Update Company' : 'Add Company'}
-            </button>
+            </div>
           </div>
         </form>
       </div>
@@ -690,7 +769,7 @@ const Companies = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {companies.map((company) => (
+              {companiesList.map((company) => (
                 <tr key={company._id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {company.name}
@@ -732,6 +811,29 @@ const Companies = () => {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex justify-between items-center mt-4">
+          <div className="text-sm text-gray-700">
+            Showing {companies.length} of {totalCompanies} companies
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setFilters(prev => ({ ...prev, page: prev.page - 1 }))}
+              disabled={filters.page === 1}
+              className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setFilters(prev => ({ ...prev, page: prev.page + 1 }))}
+              disabled={companies.length < filters.limit}
+              className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </div>

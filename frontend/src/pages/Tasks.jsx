@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import {
-  fetchTasks,
-  createTask,
-  updateTask,
-  deleteTask,
-} from '../store/slices/taskSlice';
-import { fetchCompanies } from '../store/slices/companySlice';
+import { useData } from '../context/DataContext';
 
 const Tasks = () => {
-  const dispatch = useAppDispatch();
-  const { tasks, loading, error } = useAppSelector((state) => state.tasks);
-  const { companies } = useAppSelector((state) => state.companies);
+  const {
+    tasks,
+    companies,
+    loading,
+    error,
+    fetchTasks,
+    createTask,
+    updateTask,
+    deleteTask,
+    fetchCompanies,
+  } = useData();
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -24,9 +26,9 @@ const Tasks = () => {
   const [editingTask, setEditingTask] = useState(null);
 
   useEffect(() => {
-    dispatch(fetchTasks());
-    dispatch(fetchCompanies());
-  }, [dispatch]);
+    fetchTasks();
+    fetchCompanies();
+  }, [fetchTasks, fetchCompanies]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,11 +42,9 @@ const Tasks = () => {
     e.preventDefault();
     try {
       if (editingTask) {
-        await dispatch(
-          updateTask({ id: editingTask.id, taskData: formData })
-        ).unwrap();
+        await updateTask(editingTask.id, formData);
       } else {
-        await dispatch(createTask(formData)).unwrap();
+        await createTask(formData);
       }
       setFormData({
         title: '',
@@ -82,21 +82,28 @@ const Tasks = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this task?')) {
       try {
-        await dispatch(deleteTask(id)).unwrap();
+        await deleteTask(id);
       } catch (err) {
         console.error('Failed to delete task:', err);
+        alert(`Failed to delete task: ${err}`);
       }
     }
   };
 
   const getStatusBadgeClass = (status) => {
     switch (status) {
+      case 'pending':
+        return 'badge-warning';
+      case 'in_progress':
+        return 'badge-info';
       case 'completed':
         return 'badge-success';
-      case 'in_progress':
-        return 'badge-warning';
-      default:
+      case 'cancelled':
         return 'badge-danger';
+      case 'disputed':
+        return 'badge-danger';
+      default:
+        return 'badge-secondary';
     }
   };
 
@@ -111,13 +118,19 @@ const Tasks = () => {
     }
   };
 
+  // Check if tasks is an array before rendering
+  const tasksList = Array.isArray(tasks) ? tasks : [];
+  
+  // Check if companies is an array before rendering
+  const companiesList = Array.isArray(companies) ? companies : [];
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-gray-900">Tasks</h1>
 
       {error && (
         <div className="error-message" role="alert">
-          {error}
+          {typeof error === 'string' ? error : 'An error occurred'}
         </div>
       )}
 
@@ -217,16 +230,21 @@ const Tasks = () => {
             <label htmlFor="companyId" className="form-label">
               Company Name
             </label>
-            <input
-              type="text"
+            <select
               id="companyId"
               name="companyId"
               value={formData.companyId}
               onChange={handleChange}
               className="form-input"
               required
-              placeholder="Enter company name"
-            />
+            >
+              <option value="">Select a company</option>
+              {companiesList.map((company) => (
+                <option key={company._id} value={company._id}>
+                  {company.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="form-group">
@@ -292,14 +310,14 @@ const Tasks = () => {
               </tr>
             </thead>
             <tbody>
-              {tasks.map((task) => (
+              {tasksList.map((task) => (
                 <tr key={task.id}>
                   <td>{task.taskNumber}</td>
                   <td>{task.title}</td>
                   <td>{task.description}</td>
                   <td>
                     <span className={`badge ${getStatusBadgeClass(task.status)}`}>
-                      {task.status}
+                      {task.status.replace('_', ' ')}
                     </span>
                   </td>
                   <td>
@@ -309,23 +327,21 @@ const Tasks = () => {
                   </td>
                   <td>{new Date(task.dueDate).toLocaleDateString()}</td>
                   <td>
-                    {companies.find((c) => c.id === task.companyId)?.name}
+                    {companiesList.find(c => c._id === task.companyId)?.name || 'Unknown'}
                   </td>
                   <td>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEdit(task)}
-                        className="btn btn-outline"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(task.id)}
-                        className="btn btn-danger"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleEdit(task)}
+                      className="btn btn-sm btn-outline mr-2"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(task.id)}
+                      className="btn btn-sm btn-danger"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}

@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import {
-  fetchBanks,
-  createBank,
-  updateBank,
-  deleteBank,
-} from '../store/slices/bankSlice';
-import { fetchCompanies } from '../store/slices/companySlice';
+import { useData } from '../context/DataContext';
 
 const Banks = () => {
-  const dispatch = useAppDispatch();
-  const { banks, loading, error } = useAppSelector((state) => state.banks);
-  const { companies } = useAppSelector((state) => state.companies);
+  const {
+    banks,
+    companies,
+    loading,
+    error,
+    fetchBanks,
+    createBank,
+    updateBank,
+    deleteBank,
+    fetchCompanies,
+  } = useData();
+
   const [formData, setFormData] = useState({
     accountNumber: '',
     accountName: '',
@@ -23,9 +25,9 @@ const Banks = () => {
   const [editingBank, setEditingBank] = useState(null);
 
   useEffect(() => {
-    dispatch(fetchBanks());
-    dispatch(fetchCompanies());
-  }, [dispatch]);
+    fetchBanks();
+    fetchCompanies();
+  }, [fetchBanks, fetchCompanies]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,11 +41,9 @@ const Banks = () => {
     e.preventDefault();
     try {
       if (editingBank) {
-        await dispatch(
-          updateBank({ id: editingBank.id, ...formData })
-        ).unwrap();
+        await updateBank(editingBank.id, formData);
       } else {
-        await dispatch(createBank(formData)).unwrap();
+        await createBank(formData);
       }
       setFormData({
         accountNumber: '',
@@ -56,6 +56,7 @@ const Banks = () => {
       setEditingBank(null);
     } catch (err) {
       console.error('Failed to save bank account:', err);
+      alert(`Failed to save bank account: ${err}`);
     }
   };
 
@@ -74,12 +75,19 @@ const Banks = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this bank account?')) {
       try {
-        await dispatch(deleteBank(id)).unwrap();
+        await deleteBank(id);
       } catch (err) {
         console.error('Failed to delete bank account:', err);
+        alert(`Failed to delete bank account: ${err}`);
       }
     }
   };
+
+  // Check if banks is an array before rendering
+  const banksList = Array.isArray(banks) ? banks : [];
+  
+  // Check if companies is an array before rendering
+  const companiesList = Array.isArray(companies) ? companies : [];
 
   return (
     <div className="space-y-6">
@@ -87,7 +95,7 @@ const Banks = () => {
 
       {error && (
         <div className="error-message" role="alert">
-          {error}
+          {typeof error === 'string' ? error : 'An error occurred'}
         </div>
       )}
 
@@ -191,8 +199,8 @@ const Banks = () => {
               required
             >
               <option value="">Select a company</option>
-              {companies.map((company) => (
-                <option key={company.id} value={company.id}>
+              {companiesList.map((company) => (
+                <option key={company._id} value={company._id}>
                   {company.name}
                 </option>
               ))}
@@ -244,7 +252,7 @@ const Banks = () => {
               </tr>
             </thead>
             <tbody>
-              {banks.map((bank) => (
+              {banksList.map((bank) => (
                 <tr key={bank.id}>
                   <td>{bank.accountNumber}</td>
                   <td>{bank.accountName}</td>
@@ -252,23 +260,21 @@ const Banks = () => {
                   <td>{bank.ifscCode}</td>
                   <td>{bank.branch}</td>
                   <td>
-                    {companies.find((c) => c.id === bank.companyId)?.name}
+                    {companiesList.find(c => c._id === bank.companyId)?.name || 'Unknown'}
                   </td>
                   <td>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEdit(bank)}
-                        className="btn btn-outline"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(bank.id)}
-                        className="btn btn-danger"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleEdit(bank)}
+                      className="btn btn-sm btn-outline mr-2"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(bank.id)}
+                      className="btn btn-sm btn-danger"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))}
