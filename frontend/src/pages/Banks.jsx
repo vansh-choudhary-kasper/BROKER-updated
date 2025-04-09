@@ -4,22 +4,27 @@ import { debounce } from 'lodash';
 
 const Banks = () => {
   const {
-    bankAccounts,
+    banks,
     loading,
     error,
-    fetchBankAccounts,
-    addBankAccount,
-    updateBankAccount,
-    deleteBankAccount,
-    totalBankAccounts
+    fetchBanks,
+    addBank,
+    updateBank,
+    deleteBank,
+    totalBanks
   } = useData();
 
   const initialFormState = {
+    name: '',
     accountName: '',
     accountNumber: '',
     bankName: '',
     ifscCode: '',
-    branchName: '',
+    branch: '',
+    address: '',
+    contactPerson: '',
+    email: '',
+    phone: '',
     accountType: 'savings',
     isActive: true,
   };
@@ -52,14 +57,8 @@ const Banks = () => {
   };
 
   useEffect(() => {
-    fetchBankAccounts({
-      search: filters.search,
-      accountType: filters.accountType,
-      isActive: filters.isActive,
-      page: filters.page,
-      limit: filters.limit
-    });
-  }, [fetchBankAccounts, filters]);
+    fetchBanks();
+  }, [fetchBanks]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -73,9 +72,9 @@ const Banks = () => {
     e.preventDefault();
     try {
       if (editingAccount) {
-        await updateBankAccount(editingAccount._id, formData);
+        await updateBank(editingAccount._id, formData);
       } else {
-        await addBankAccount(formData);
+        await addBank(formData);
       }
       setFormData(initialFormState);
       setEditingAccount(null);
@@ -88,11 +87,16 @@ const Banks = () => {
 
   const handleEdit = (account) => {
     setFormData({
+      name: account.name || '',
       accountName: account.accountName || '',
       accountNumber: account.accountNumber || '',
       bankName: account.bankName || '',
       ifscCode: account.ifscCode || '',
-      branchName: account.branchName || '',
+      branch: account.branch || '',
+      address: account.address || '',
+      contactPerson: account.contactPerson || '',
+      email: account.email || '',
+      phone: account.phone || '',
       accountType: account.accountType || 'savings',
       isActive: account.isActive ?? true,
     });
@@ -103,7 +107,7 @@ const Banks = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this bank account?')) {
       try {
-        await deleteBankAccount(id);
+        await deleteBank(id);
       } catch (err) {
         console.error('Failed to delete bank account:', err);
         alert(`Failed to delete bank account: ${err}`);
@@ -117,6 +121,8 @@ const Banks = () => {
         return 'bg-green-100 text-green-800';
       case 'current':
         return 'bg-blue-100 text-blue-800';
+      case 'fixed_deposit':
+        return 'bg-purple-100 text-purple-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -126,7 +132,7 @@ const Banks = () => {
     return isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
   };
 
-  const bankAccountsList = Array.isArray(bankAccounts) ? bankAccounts : [];
+  const bankAccountsList = Array.isArray(banks) ? banks : [];
 
   return (
     <div className="space-y-6">
@@ -179,6 +185,7 @@ const Banks = () => {
               <option value="">All Types</option>
               <option value="savings">Savings</option>
               <option value="current">Current</option>
+              <option value="fixed_deposit">Fixed Deposit</option>
             </select>
           </div>
           <div>
@@ -220,6 +227,21 @@ const Banks = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                    Bank Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    required
+                  />
+                </div>
+
+                <div>
                   <label htmlFor="accountName" className="block text-sm font-medium text-gray-700">
                     Account Name *
                   </label>
@@ -250,21 +272,6 @@ const Banks = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="bankName" className="block text-sm font-medium text-gray-700">
-                    Bank Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="bankName"
-                    name="bankName"
-                    value={formData.bankName}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    required
-                  />
-                </div>
-
-                <div>
                   <label htmlFor="ifscCode" className="block text-sm font-medium text-gray-700">
                     IFSC Code *
                   </label>
@@ -280,15 +287,76 @@ const Banks = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="branchName" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="branch" className="block text-sm font-medium text-gray-700">
                     Branch Name *
                   </label>
                   <input
                     type="text"
-                    id="branchName"
-                    name="branchName"
-                    value={formData.branchName}
+                    id="branch"
+                    name="branch"
+                    value={formData.branch}
                     onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+                    Address *
+                  </label>
+                  <input
+                    type="text"
+                    id="address"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="contactPerson" className="block text-sm font-medium text-gray-700">
+                    Contact Person *
+                  </label>
+                  <input
+                    type="text"
+                    id="contactPerson"
+                    name="contactPerson"
+                    value={formData.contactPerson}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                    Phone Number *
+                  </label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    pattern="[0-9]{10}"
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     required
                   />
@@ -308,6 +376,7 @@ const Banks = () => {
                   >
                     <option value="savings">Savings</option>
                     <option value="current">Current</option>
+                    <option value="fixed_deposit">Fixed Deposit</option>
                   </select>
                 </div>
 
@@ -404,7 +473,7 @@ const Banks = () => {
                     {account.ifscCode}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {account.branchName}
+                    {account.branch}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getAccountTypeBadgeClass(account.accountType)}`}>
@@ -439,7 +508,7 @@ const Banks = () => {
         {/* Pagination */}
         <div className="flex justify-between items-center mt-4 p-4">
           <div className="text-sm text-gray-700">
-            Showing {bankAccounts.length} of {totalBankAccounts || bankAccounts.length} accounts
+            Showing {banks?.length} of {totalBanks || banks?.length} accounts
           </div>
           <div className="flex space-x-2">
             <button
@@ -451,7 +520,7 @@ const Banks = () => {
             </button>
             <button
               onClick={() => setFilters(prev => ({ ...prev, page: prev.page + 1 }))}
-              disabled={bankAccounts.length < filters.limit || bankAccounts.length === 0}
+              disabled={banks?.length < filters.limit || banks?.length === 0}
               className="px-3 py-1 border border-gray-300 rounded-md disabled:opacity-50"
             >
               Next

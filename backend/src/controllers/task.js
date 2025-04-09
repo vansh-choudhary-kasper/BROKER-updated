@@ -249,22 +249,23 @@ class TaskController {
 
             await task.save();
 
-            // Send email notification if assigned user changed
-            if (task.assignedTo.toString() !== assignedTo) {
-                await emailService.sendEmail(
-                    userExists.email,
-                    'Task Assigned to You',
-                    `
-                    <h1>Task Assigned</h1>
-                    <p>You have been assigned a task:</p>
-                    <h2>${title}</h2>
-                    <p><strong>Description:</strong> ${description}</p>
-                    <p><strong>Due Date:</strong> ${new Date(dueDate).toLocaleDateString()}</p>
-                    <p><strong>Priority:</strong> ${priority}</p>
-                    `
-                );
-            }
+            // // Send email notification if assigned user changed
+            // if (task.assignedTo.toString() !== assignedTo) {
+            //     await emailService.sendEmail(
+            //         userExists.email,
+            //         'Task Assigned to You',
+            //         `
+            //         <h1>Task Assigned</h1>
+            //         <p>You have been assigned a task:</p>
+            //         <h2>${title}</h2>
+            //         <p><strong>Description:</strong> ${description}</p>
+            //         <p><strong>Due Date:</strong> ${new Date(dueDate).toLocaleDateString()}</p>
+            //         <p><strong>Priority:</strong> ${priority}</p>
+            //         `
+            //     );
+            // }
 
+            console.log("task updated successfully", task);
             return res.status(200).json(
                 ApiResponse.success('Task updated successfully', task)
             );
@@ -278,14 +279,12 @@ class TaskController {
 
     async deleteTask(req, res) {
         try {
-            const task = await Task.findById(req.params.id);
+            const task = await Task.findByIdAndDelete(req.params.id);
             if (!task) {
                 return res.status(404).json(
                     ApiResponse.notFound('Task not found')
                 );
             }
-
-            await task.remove();
 
             return res.status(200).json(
                 ApiResponse.success('Task deleted successfully')

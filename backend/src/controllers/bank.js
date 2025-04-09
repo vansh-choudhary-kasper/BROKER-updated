@@ -5,7 +5,9 @@ const logger = require('../utils/logger');
 class BankController {
     async createBank(req, res) {
         try {
+            console.log("create bank", req.body);
             const bank = await Bank.create(req.body);
+            {bank ? console.log("bank created", bank) : console.log("bank not created")}
             return res.status(201).json(
                 ApiResponse.created('Bank account created successfully', bank)
             );

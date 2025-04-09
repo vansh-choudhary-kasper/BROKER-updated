@@ -204,7 +204,7 @@ const Tasks = () => {
       clientCompany: task.clientCompany || task.company || '',
       providerCompany: task.providerCompany || '',
       taskNumber: task.taskNumber || '',
-      assignedTo: task.assignedTo || '',
+      assignedTo: task.assignedTo._id || '',
       timeline: {
         startDate: task.timeline?.startDate || '',
         endDate: task.timeline?.endDate || '',

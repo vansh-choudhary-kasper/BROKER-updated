@@ -136,7 +136,7 @@ export const DataProvider = ({ children }) => {
     try {
       const response = await axios.get(`${backendUrl}/api/banks`);
       // Ensure we always set an array
-      setBanks(Array.isArray(response.data) ? response.data : []);
+      setBanks(Array.isArray(response?.data?.data?.banks) ? response?.data?.data?.banks : []);
       setLastFetchTime(prev => ({ ...prev, banks: now }));
     } catch (err) {
       setError(prev => ({ 
@@ -167,7 +167,7 @@ export const DataProvider = ({ children }) => {
     try {
       const response = await axios.get(`${backendUrl}/api/expenses`);
       // Ensure we always set an array
-      setExpenses(Array.isArray(response.data) ? response.data : []);
+      setExpenses(Array.isArray(response?.data?.data?.expenses) ? response?.data?.data?.expenses : []);
       setLastFetchTime(prev => ({ ...prev, expenses: now }));
     } catch (err) {
       setError(prev => ({ 
@@ -226,8 +226,8 @@ export const DataProvider = ({ children }) => {
     
     try {
       const response = await axios.post(`${backendUrl}/api/banks`, bankData);
-      setBanks(prev => [...prev, response.data]);
-      return response.data;
+      setBanks(prev => [...prev, response?.data?.data]);
+      return response?.data?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to add bank';
       setError(prev => ({ ...prev, banks: errorMessage }));
@@ -244,8 +244,8 @@ export const DataProvider = ({ children }) => {
     
     try {
       const response = await axios.post(`${backendUrl}/api/expenses`, expenseData);
-      setExpenses(prev => [...prev, response.data]);
-      return response.data;
+      setExpenses(prev => [...prev, response?.data?.data]);
+      return response?.data?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to add expense';
       setError(prev => ({ ...prev, expenses: errorMessage }));
@@ -283,9 +283,9 @@ export const DataProvider = ({ children }) => {
     try {
       const response = await axios.put(`${backendUrl}/api/tasks/${id}`, taskData);
       setTasks(prev => 
-        prev.map(task => task._id === id ? response.data : task)
+        prev.map(task => task._id === id ? response?.data?.data : task)
       );
-      return response.data;
+      return response?.data?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to update task';
       setError(prev => ({ ...prev, tasks: errorMessage }));
@@ -303,9 +303,9 @@ export const DataProvider = ({ children }) => {
     try {
       const response = await axios.put(`${backendUrl}/api/banks/${id}`, bankData);
       setBanks(prev => 
-        prev.map(bank => bank._id === id ? response.data : bank)
+        prev.map(bank => bank._id === id ? response?.data?.data : bank)
       );
-      return response.data;
+      return response?.data?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to update bank';
       setError(prev => ({ ...prev, banks: errorMessage }));
@@ -323,9 +323,9 @@ export const DataProvider = ({ children }) => {
     try {
       const response = await axios.put(`${backendUrl}/api/expenses/${id}`, expenseData);
       setExpenses(prev => 
-        prev.map(expense => expense._id === id ? response.data : expense)
+        prev.map(expense => expense._id === id ? response?.data?.data : expense)
       );
-      return response.data;
+      return response?.data?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to update expense';
       setError(prev => ({ ...prev, expenses: errorMessage }));
