@@ -66,7 +66,7 @@ class ExpenseController {
 
     async getExpenses(req, res) {
         try {
-            const { page = 1, limit = 10, startDate, endDate, category, company } = req.query;
+            const { page = 1, limit = 10, startDate, endDate, category, company, search } = req.query;
             const query = {};
 
             if (startDate && endDate) {
@@ -77,10 +77,18 @@ class ExpenseController {
             }
             if (category) query.category = category;
             if (company) query.company = company;
+            
+            // Add search functionality
+            if (search) {
+                query.$or = [
+                    { title: { $regex: search, $options: 'i' } },
+                    { description: { $regex: search, $options: 'i' } }
+                ];
+            }
 
             const expenses = await Expense.find(query)
                 .populate('company', 'name')
-                .populate('bank', 'name')
+                .populate('bank', 'bankName')
                 .limit(limit * 1)
                 .skip((page - 1) * limit)
                 .exec();
@@ -91,7 +99,8 @@ class ExpenseController {
                 ApiResponse.success('Expenses retrieved successfully', {
                     expenses,
                     totalPages: Math.ceil(count / limit),
-                    currentPage: page
+                    currentPage: page,
+                    total: count
                 })
             );
         } catch (error) {
@@ -197,14 +206,12 @@ class ExpenseController {
 
     async deleteExpense(req, res) {
         try {
-            const expense = await Expense.findById(req.params.id);
+            const expense = await Expense.findByIdAndDelete(req.params.id);
             if (!expense) {
                 return res.status(404).json(
                     ApiResponse.notFound('Expense not found')
                 );
             }
-
-            await expense.remove();
 
             return res.status(200).json(
                 ApiResponse.success('Expense deleted successfully')
@@ -280,6 +287,31 @@ class ExpenseController {
             );
         } catch (error) {
             logger.error('Delete Receipt Error:', error);
+            return res.status(500).json(
+                ApiResponse.serverError()
+            );
+        }
+    }
+
+    async updateExpenseStatus(req, res) {
+        try {
+            const { status } = req.body;
+            const expense = await Expense.findById(req.params.id);
+            
+            if (!expense) {
+                return res.status(404).json(
+                    ApiResponse.notFound('Expense not found')
+                );
+            }
+
+            expense.status = status;
+            await expense.save();
+
+            return res.status(200).json(
+                ApiResponse.success('Expense status updated successfully', expense)
+            );
+        } catch (error) {
+            logger.error('Update Expense Status Error:', error);
             return res.status(500).json(
                 ApiResponse.serverError()
             );

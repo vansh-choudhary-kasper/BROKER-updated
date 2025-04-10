@@ -13,6 +13,9 @@ export const DataProvider = ({ children }) => {
   const [banks, setBanks] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [totalCompanies, setTotalCompanies] = useState(0);
+  const [totalTasks, setTotalTasks] = useState(0);
+  const [totalBanks, setTotalBanks] = useState(0);
+  const [totalExpenses, setTotalExpenses] = useState(0);
   const [loading, setLoading] = useState({
     companies: false,
     tasks: false,
@@ -88,7 +91,7 @@ export const DataProvider = ({ children }) => {
   }, [token, lastFetchTime.companies]);
 
   // Fetch tasks with debounce
-  const fetchTasks = useCallback(async () => {
+  const fetchTasks = useCallback(async (filters = {}) => {
     if (!token) return;
     
     // Check if we've fetched recently
@@ -102,10 +105,25 @@ export const DataProvider = ({ children }) => {
     setError(prev => ({ ...prev, tasks: null }));
     
     try {
-      const response = await axios.get(`${backendUrl}/api/tasks`);
-      // Ensure we always set an array
+      // Convert filters object to query parameters
+      const queryParams = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          queryParams.append(key, value);
+        }
+      });
+
+      const response = await axios.get(`${backendUrl}/api/tasks?${queryParams.toString()}`);
       console.log("tasks get successfully", response);
-      setTasks(Array.isArray(response?.data?.data?.tasks) ? response?.data?.data?.tasks : []);
+      
+      if (response.data && response.data.data) {
+        setTasks(response.data.data.tasks || []);
+        setTotalTasks(response.data.data.total || 0);
+      } else {
+        setTasks([]);
+        setTotalTasks(0);
+      }
+      
       setLastFetchTime(prev => ({ ...prev, tasks: now }));
     } catch (err) {
       setError(prev => ({ 
@@ -114,13 +132,14 @@ export const DataProvider = ({ children }) => {
       }));
       // Set empty array on error to prevent undefined errors
       setTasks([]);
+      setTotalTasks(0);
     } finally {
       setLoading(prev => ({ ...prev, tasks: false }));
     }
   }, [token, lastFetchTime.tasks]);
 
   // Fetch banks with debounce
-  const fetchBanks = useCallback(async () => {
+  const fetchBanks = useCallback(async (filters = {}) => {
     if (!token) return;
     
     // Check if we've fetched recently
@@ -134,9 +153,25 @@ export const DataProvider = ({ children }) => {
     setError(prev => ({ ...prev, banks: null }));
     
     try {
-      const response = await axios.get(`${backendUrl}/api/banks`);
-      // Ensure we always set an array
-      setBanks(Array.isArray(response?.data?.data?.banks) ? response?.data?.data?.banks : []);
+      // Convert filters object to query parameters
+      const queryParams = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          queryParams.append(key, value);
+        }
+      });
+
+      const response = await axios.get(`${backendUrl}/api/banks?${queryParams.toString()}`);
+      console.log("banks fetched successfully", response);
+      
+      if (response.data && response.data.data) {
+        setBanks(response.data.data.banks || []);
+        setTotalBanks(response.data.data.total || response.data.data.banks?.length || 0);
+      } else {
+        setBanks([]);
+        setTotalBanks(0);
+      }
+      
       setLastFetchTime(prev => ({ ...prev, banks: now }));
     } catch (err) {
       setError(prev => ({ 
@@ -145,13 +180,14 @@ export const DataProvider = ({ children }) => {
       }));
       // Set empty array on error to prevent undefined errors
       setBanks([]);
+      setTotalBanks(0);
     } finally {
       setLoading(prev => ({ ...prev, banks: false }));
     }
   }, [token, lastFetchTime.banks]);
 
   // Fetch expenses with debounce
-  const fetchExpenses = useCallback(async () => {
+  const fetchExpenses = useCallback(async (filters = {}) => {
     if (!token) return;
     
     // Check if we've fetched recently
@@ -165,9 +201,25 @@ export const DataProvider = ({ children }) => {
     setError(prev => ({ ...prev, expenses: null }));
     
     try {
-      const response = await axios.get(`${backendUrl}/api/expenses`);
-      // Ensure we always set an array
-      setExpenses(Array.isArray(response?.data?.data?.expenses) ? response?.data?.data?.expenses : []);
+      // Convert filters object to query parameters
+      const queryParams = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          queryParams.append(key, value);
+        }
+      });
+
+      const response = await axios.get(`${backendUrl}/api/expenses?${queryParams.toString()}`);
+      console.log("expenses fetched successfully", response);
+      
+      if (response.data && response.data.data) {
+        setExpenses(response.data.data.expenses || []);
+        setTotalExpenses(response.data.data.total || response.data.data.expenses?.length || 0);
+      } else {
+        setExpenses([]);
+        setTotalExpenses(0);
+      }
+      
       setLastFetchTime(prev => ({ ...prev, expenses: now }));
     } catch (err) {
       setError(prev => ({ 
@@ -176,6 +228,7 @@ export const DataProvider = ({ children }) => {
       }));
       // Set empty array on error to prevent undefined errors
       setExpenses([]);
+      setTotalExpenses(0);
     } finally {
       setLoading(prev => ({ ...prev, expenses: false }));
     }
@@ -428,6 +481,9 @@ export const DataProvider = ({ children }) => {
         banks,
         expenses,
         totalCompanies,
+        totalTasks,
+        totalBanks,
+        totalExpenses,
         loading,
         error,
         

@@ -15,17 +15,17 @@ const Banks = () => {
   } = useData();
 
   const initialFormState = {
-    name: '',
     accountName: '',
     accountNumber: '',
     bankName: '',
     ifscCode: '',
-    branch: '',
+    branchName: '',
     address: '',
     contactPerson: '',
     email: '',
     phone: '',
     accountType: 'savings',
+    balance: 0,
     isActive: true,
   };
 
@@ -57,8 +57,8 @@ const Banks = () => {
   };
 
   useEffect(() => {
-    fetchBanks();
-  }, [fetchBanks]);
+    fetchBanks(filters);
+  }, [fetchBanks, filters]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -79,25 +79,26 @@ const Banks = () => {
       setFormData(initialFormState);
       setEditingAccount(null);
       setShowForm(false);
+      fetchBanks(filters);
     } catch (err) {
       console.error('Failed to save bank account:', err);
-      alert(`Failed to save bank account: ${err}`);
+      alert(`Failed to save bank account: ${err.message || err}`);
     }
   };
 
   const handleEdit = (account) => {
     setFormData({
-      name: account.name || '',
       accountName: account.accountName || '',
       accountNumber: account.accountNumber || '',
       bankName: account.bankName || '',
       ifscCode: account.ifscCode || '',
-      branch: account.branch || '',
+      branchName: account.branchName || '',
       address: account.address || '',
       contactPerson: account.contactPerson || '',
       email: account.email || '',
       phone: account.phone || '',
       accountType: account.accountType || 'savings',
+      balance: account.balance || 0,
       isActive: account.isActive ?? true,
     });
     setEditingAccount(account);
@@ -108,9 +109,10 @@ const Banks = () => {
     if (window.confirm('Are you sure you want to delete this bank account?')) {
       try {
         await deleteBank(id);
+        fetchBanks(filters);
       } catch (err) {
         console.error('Failed to delete bank account:', err);
-        alert(`Failed to delete bank account: ${err}`);
+        alert(`Failed to delete bank account: ${err.message || err}`);
       }
     }
   };
@@ -227,21 +229,6 @@ const Banks = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Bank Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    required
-                  />
-                </div>
-
-                <div>
                   <label htmlFor="accountName" className="block text-sm font-medium text-gray-700">
                     Account Name *
                   </label>
@@ -283,18 +270,35 @@ const Banks = () => {
                     onChange={handleChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     required
+                    pattern="[A-Z]{4}0[A-Z0-9]{6}"
+                    title="IFSC code should be 11 characters long (e.g., SBIN0123456)"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="branch" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="bankName" className="block text-sm font-medium text-gray-700">
+                    Bank Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="bankName"
+                    name="bankName"
+                    value={formData.bankName}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="branchName" className="block text-sm font-medium text-gray-700">
                     Branch Name *
                   </label>
                   <input
                     type="text"
-                    id="branch"
-                    name="branch"
-                    value={formData.branch}
+                    id="branchName"
+                    name="branchName"
+                    value={formData.branchName}
                     onChange={handleChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     required
@@ -343,6 +347,8 @@ const Banks = () => {
                     onChange={handleChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     required
+                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                    title="Please enter a valid email address"
                   />
                 </div>
 
@@ -359,6 +365,7 @@ const Banks = () => {
                     pattern="[0-9]{10}"
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     required
+                    title="Please enter a valid 10-digit phone number"
                   />
                 </div>
 
@@ -380,6 +387,22 @@ const Banks = () => {
                   </select>
                 </div>
 
+                <div>
+                  <label htmlFor="balance" className="block text-sm font-medium text-gray-700">
+                    Balance
+                  </label>
+                  <input
+                    type="number"
+                    id="balance"
+                    name="balance"
+                    value={formData.balance}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+
                 <div className="md:col-span-2">
                   <div className="flex items-center">
                     <input
@@ -398,18 +421,17 @@ const Banks = () => {
               </div>
 
               <div className="flex justify-end space-x-3 mt-6">
-                {editingAccount && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormData(initialFormState);
-                      setEditingAccount(null);
-                    }}
-                    className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    Cancel
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForm(false);
+                    setFormData(initialFormState);
+                    setEditingAccount(null);
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Cancel
+                </button>
                 <button
                   type="submit"
                   className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -473,7 +495,7 @@ const Banks = () => {
                     {account.ifscCode}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {account.branch}
+                    {account.branchName}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getAccountTypeBadgeClass(account.accountType)}`}>
@@ -532,4 +554,4 @@ const Banks = () => {
   );
 };
 
-export default Banks; 
+export default Banks;

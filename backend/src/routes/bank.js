@@ -9,10 +9,12 @@ const { upload } = require('../middleware/fileUpload');
 
 // Validation middleware
 const bankValidation = [
-    body('name').notEmpty().withMessage('Bank name is required'),
+    body('accountName').notEmpty().withMessage('Account name is required'),
     body('accountNumber').notEmpty().withMessage('Account number is required'),
     body('ifscCode').notEmpty().withMessage('IFSC code is required'),
-    body('branch').notEmpty().withMessage('Branch name is required'),
+    body('bankName').notEmpty().withMessage('Bank name is required'),
+    body('branchName').notEmpty().withMessage('Branch name is required'),
+    body('accountType').isIn(['savings', 'current', 'fixed_deposit']).withMessage('Invalid account type'),
     body('address').notEmpty().withMessage('Address is required'),
     body('contactPerson').notEmpty().withMessage('Contact person is required'),
     body('email').isEmail().withMessage('Please enter a valid email'),
@@ -48,8 +50,19 @@ router.post('/:id/documents',
     bankController.addDocuments
 );
 
-router.delete('/:id/documents/:documentId',
-    bankController.deleteDocument
-);
+router.delete('/:id/documents/:docId', bankController.removeDocument);
+
+// Transaction routes
+router.post('/:id/transactions', [
+    body('type').isIn(['credit', 'debit']).withMessage('Transaction type must be credit or debit'),
+    body('amount').isNumeric().withMessage('Amount must be a number'),
+    body('date').isISO8601().withMessage('Invalid date format'),
+    validateRequest
+], bankController.addTransaction);
+
+router.get('/:id/transactions', bankController.getTransactions);
+
+// Toggle bank status
+router.patch('/:id/toggle-status', bankController.toggleBankStatus);
 
 module.exports = router; 

@@ -5,9 +5,13 @@ import { debounce } from 'lodash';
 const Expenses = () => {
   const {
     expenses,
+    companies,
+    banks,
     loading,
     error,
     fetchExpenses,
+    fetchCompanies,
+    fetchBanks,
     addExpense,
     updateExpense,
     deleteExpense,
@@ -18,12 +22,11 @@ const Expenses = () => {
     title: '',
     description: '',
     amount: '',
-    date: '',
-    category: '',
-    paymentMethod: '',
+    date: new Date().toISOString().split('T')[0],
+    category: 'travel',
+    company: '',
+    bank: '',
     status: 'pending',
-    isRecurring: false,
-    recurringFrequency: 'monthly',
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -54,6 +57,7 @@ const Expenses = () => {
     debouncedSearch(value);
   };
 
+  // Fetch expenses, companies, and banks when component mounts
   useEffect(() => {
     fetchExpenses({
       search: filters.search,
@@ -63,7 +67,9 @@ const Expenses = () => {
       page: filters.page,
       limit: filters.limit
     });
-  }, [fetchExpenses, filters]);
+    fetchCompanies();
+    fetchBanks();
+  }, [fetchExpenses, fetchCompanies, fetchBanks, filters]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -84,6 +90,7 @@ const Expenses = () => {
       setFormData(initialFormState);
       setEditingExpense(null);
       setShowForm(false);
+      fetchExpenses(filters);
     } catch (err) {
       console.error('Failed to save expense:', err);
       alert(`Failed to save expense: ${err}`);
@@ -95,12 +102,11 @@ const Expenses = () => {
       title: expense.title || '',
       description: expense.description || '',
       amount: expense.amount || '',
-      date: expense.date || '',
-      category: expense.category || '',
-      paymentMethod: expense.paymentMethod || '',
+      date: expense.date ? new Date(expense.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      category: expense.category || 'travel',
+      company: expense.company?._id || '',
+      bank: expense.bank?._id || '',
       status: expense.status || 'pending',
-      isRecurring: expense.isRecurring || false,
-      recurringFrequency: expense.recurringFrequency || 'monthly',
     });
     setEditingExpense(expense);
     setShowForm(true);
@@ -110,20 +116,21 @@ const Expenses = () => {
     if (window.confirm('Are you sure you want to delete this expense?')) {
       try {
         await deleteExpense(id);
+        fetchExpenses(filters);
       } catch (err) {
         console.error('Failed to delete expense:', err);
-        alert(`Failed to delete expense: ${err}`);
+        alert(`Failed to delete expense: ${err.message || err}`);
       }
     }
   };
 
   const getStatusBadgeClass = (status) => {
     switch (status) {
-      case 'paid':
-        return 'bg-green-100 text-green-800';
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
-      case 'overdue':
+      case 'approved':
+        return 'bg-green-100 text-green-800';
+      case 'rejected':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -132,29 +139,20 @@ const Expenses = () => {
 
   const getCategoryBadgeClass = (category) => {
     switch (category) {
+      case 'travel':
+        return 'bg-blue-100 text-blue-800';
+      case 'entertainment':
+        return 'bg-purple-100 text-purple-800';
+      case 'client_gift':
+        return 'bg-pink-100 text-pink-800';
+      case 'office_supplies':
+        return 'bg-indigo-100 text-indigo-800';
       case 'utilities':
-        return 'bg-blue-100 text-blue-800';
-      case 'rent':
-        return 'bg-purple-100 text-purple-800';
-      case 'maintenance':
-        return 'bg-orange-100 text-orange-800';
-      case 'supplies':
-        return 'bg-teal-100 text-teal-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getPaymentMethodBadgeClass = (method) => {
-    switch (method) {
-      case 'cash':
         return 'bg-green-100 text-green-800';
-      case 'credit_card':
-        return 'bg-blue-100 text-blue-800';
-      case 'bank_transfer':
-        return 'bg-purple-100 text-purple-800';
-      case 'upi':
-        return 'bg-orange-100 text-orange-800';
+      case 'marketing':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'other':
+        return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -182,7 +180,7 @@ const Expenses = () => {
 
       {/* Filters */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
             <div className="relative">
@@ -211,10 +209,13 @@ const Expenses = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
               <option value="">All Categories</option>
+              <option value="travel">Travel</option>
+              <option value="entertainment">Entertainment</option>
+              <option value="client_gift">Client Gift</option>
+              <option value="office_supplies">Office Supplies</option>
               <option value="utilities">Utilities</option>
-              <option value="rent">Rent</option>
-              <option value="maintenance">Maintenance</option>
-              <option value="supplies">Supplies</option>
+              <option value="marketing">Marketing</option>
+              <option value="other">Other</option>
             </select>
           </div>
           <div>
@@ -225,23 +226,9 @@ const Expenses = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
               <option value="">All Status</option>
-              <option value="paid">Paid</option>
               <option value="pending">Pending</option>
-              <option value="overdue">Overdue</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
-            <select
-              value={filters.paymentMethod}
-              onChange={(e) => setFilters(prev => ({ ...prev, paymentMethod: e.target.value, page: 1 }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            >
-              <option value="">All Methods</option>
-              <option value="cash">Cash</option>
-              <option value="credit_card">Credit Card</option>
-              <option value="bank_transfer">Bank Transfer</option>
-              <option value="upi">UPI</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
             </select>
           </div>
         </div>
@@ -330,30 +317,55 @@ const Expenses = () => {
                     required
                   >
                     <option value="">Select a category</option>
+                    <option value="travel">Travel</option>
+                    <option value="entertainment">Entertainment</option>
+                    <option value="client_gift">Client Gift</option>
+                    <option value="office_supplies">Office Supplies</option>
                     <option value="utilities">Utilities</option>
-                    <option value="rent">Rent</option>
-                    <option value="maintenance">Maintenance</option>
-                    <option value="supplies">Supplies</option>
+                    <option value="marketing">Marketing</option>
+                    <option value="other">Other</option>
                   </select>
                 </div>
 
                 <div>
-                  <label htmlFor="paymentMethod" className="block text-sm font-medium text-gray-700">
-                    Payment Method *
+                  <label htmlFor="company" className="block text-sm font-medium text-gray-700">
+                    Company *
                   </label>
                   <select
-                    id="paymentMethod"
-                    name="paymentMethod"
-                    value={formData.paymentMethod}
+                    id="company"
+                    name="company"
+                    value={formData.company}
                     onChange={handleChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     required
                   >
-                    <option value="">Select a payment method</option>
-                    <option value="cash">Cash</option>
-                    <option value="credit_card">Credit Card</option>
-                    <option value="bank_transfer">Bank Transfer</option>
-                    <option value="upi">UPI</option>
+                    <option value="">Select a company</option>
+                    {companies && companies.map(company => (
+                      <option key={company._id} value={company._id}>
+                        {company.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="bank" className="block text-sm font-medium text-gray-700">
+                    Bank *
+                  </label>
+                  <select
+                    id="bank"
+                    name="bank"
+                    value={formData.bank}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    required
+                  >
+                    <option value="">Select a bank</option>
+                    {banks && banks.map(bank => (
+                      <option key={bank._id} value={bank._id}>
+                        {bank.bankName} - {bank.accountNumber}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -370,61 +382,24 @@ const Expenses = () => {
                     required
                   >
                     <option value="pending">Pending</option>
-                    <option value="paid">Paid</option>
-                    <option value="overdue">Overdue</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
                   </select>
                 </div>
+              </div>
 
-                <div className="md:col-span-2">
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                    Description
-                  </label>
-                  <textarea
-                    id="description"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    rows={3}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="isRecurring"
-                      name="isRecurring"
-                      checked={formData.isRecurring}
-                      onChange={handleChange}
-                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="isRecurring" className="ml-2 block text-sm text-gray-900">
-                      Recurring Expense
-                    </label>
-                  </div>
-                </div>
-
-                {formData.isRecurring && (
-                  <div>
-                    <label htmlFor="recurringFrequency" className="block text-sm font-medium text-gray-700">
-                      Recurring Frequency *
-                    </label>
-                    <select
-                      id="recurringFrequency"
-                      name="recurringFrequency"
-                      value={formData.recurringFrequency}
-                      onChange={handleChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      required
-                    >
-                      <option value="daily">Daily</option>
-                      <option value="weekly">Weekly</option>
-                      <option value="monthly">Monthly</option>
-                      <option value="yearly">Yearly</option>
-                    </select>
-                  </div>
-                )}
+              <div className="md:col-span-2">
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                  Description
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={3}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                />
               </div>
 
               <div className="flex justify-end space-x-3 mt-6">
@@ -474,7 +449,10 @@ const Expenses = () => {
                   Category
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Payment Method
+                  Company
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Bank
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
@@ -501,10 +479,11 @@ const Expenses = () => {
                       {expense.category}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getPaymentMethodBadgeClass(expense.paymentMethod)}`}>
-                      {expense.paymentMethod}
-                    </span>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {expense.company?.name || 'N/A'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {expense.bank?.bankName || 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(expense.status)}`}>

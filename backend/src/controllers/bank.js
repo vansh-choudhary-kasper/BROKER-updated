@@ -5,7 +5,6 @@ const logger = require('../utils/logger');
 class BankController {
     async createBank(req, res) {
         try {
-            console.log("create bank", req.body);
             const bank = await Bank.create(req.body);
             {bank ? console.log("bank created", bank) : console.log("bank not created")}
             return res.status(201).json(
@@ -110,7 +109,7 @@ class BankController {
                 );
             }
 
-            await bank.remove();
+            await Bank.deleteOne({ _id: req.params.id });
 
             return res.status(200).json(
                 ApiResponse.success('Bank account deleted successfully')

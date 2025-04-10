@@ -103,7 +103,7 @@ class TaskController {
 
     async getTasks(req, res) {
         try {
-            const { page = 1, limit = 10, status, priority, company, clientCompany, providerCompany } = req.query;
+            const { page = 1, limit = 10, status, priority, company, clientCompany, providerCompany, search } = req.query;
             const query = {};
 
             if (status) query.status = status;
@@ -117,6 +117,16 @@ class TaskController {
             }
             if (providerCompany) {
                 query.providerCompany = providerCompany;
+            }
+
+            // Add search functionality
+            if (search) {
+                console.error("search", search);
+                query.$or = [
+                    { title: { $regex: search, $options: 'i' } },
+                    { description: { $regex: search, $options: 'i' } },
+                    { taskNumber: { $regex: search, $options: 'i' } }
+                ];
             }
 
             const tasks = await Task.find(query)
@@ -133,7 +143,8 @@ class TaskController {
                 ApiResponse.success('Tasks retrieved successfully', {
                     tasks,
                     totalPages: Math.ceil(count / limit),
-                    currentPage: page
+                    currentPage: page,
+                    total: count
                 })
             );
         } catch (error) {
