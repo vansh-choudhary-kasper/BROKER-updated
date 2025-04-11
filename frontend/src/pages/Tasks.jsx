@@ -24,42 +24,23 @@ const Tasks = () => {
   const initialFormState = {
     title: '',
     description: '',
-    status: 'pending',
-    priority: 'medium',
-    dueDate: '',
     clientCompany: '',
     providerCompany: '',
-    assignedTo: '',
-    broker: '',
-    brokerCommissionRate: 0,
-    timeline: {
-      startDate: '',
-      endDate: '',
+    helperBroker: {
+      broker: '',
+      commission: 0,
+      status: 'pending',
+      paymentDate: ''
     },
-    financialDetails: {
-      clientAmount: {
-        amount: 0,
-        gst: 0,
-        totalAmount: 0,
-      },
-      providerAmount: {
-        amount: 0,
-        gst: 0,
-        totalAmount: 0,
-      },
-      brokerCommission: {
-        amount: 0,
-        gst: 0,
-        totalAmount: 0,
-      },
-    },
+    payment: {
+      amount: 0,
+      currency: 'USD'
+    }
   };
 
   const [formData, setFormData] = useState(initialFormState);
   const [editingTask, setEditingTask] = useState(null);
   const [filters, setFilters] = useState({
-    status: '',
-    priority: '',
     search: '',
     page: 1,
     limit: 10
@@ -84,8 +65,6 @@ const Tasks = () => {
 
   useEffect(() => {
     fetchTasks({
-      status: filters.status,
-      priority: filters.priority,
       search: filters.search,
       page: filters.page,
       limit: filters.limit
@@ -129,44 +108,17 @@ const Tasks = () => {
     }
   };
 
-  // Calculate total amounts when base amount or GST changes
+  // Calculate total amounts when base amount changes
   const calculateTotals = () => {
-    const clientAmount = parseFloat(formData.financialDetails.clientAmount.amount) || 0;
-    const clientGST = parseFloat(formData.financialDetails.clientAmount.gst) || 0;
-    const providerAmount = parseFloat(formData.financialDetails.providerAmount.amount) || 0;
-    const providerGST = parseFloat(formData.financialDetails.providerAmount.gst) || 0;
-    const brokerAmount = parseFloat(formData.financialDetails.brokerCommission.amount) || 0;
-    const brokerGST = parseFloat(formData.financialDetails.brokerCommission.gst) || 0;
-
-    setFormData(prev => ({
-      ...prev,
-      financialDetails: {
-        clientAmount: {
-          ...prev.financialDetails.clientAmount,
-          totalAmount: clientAmount + clientGST,
-        },
-        providerAmount: {
-          ...prev.financialDetails.providerAmount,
-          totalAmount: providerAmount + providerGST,
-        },
-        brokerCommission: {
-          ...prev.financialDetails.brokerCommission,
-          totalAmount: brokerAmount + brokerGST,
-        },
-      },
-    }));
+    // No need to calculate totals anymore as we've simplified the payment structure
+    // This function is kept for backward compatibility but doesn't need to do anything
   };
 
   // Call calculateTotals when relevant fields change
   useEffect(() => {
     calculateTotals();
   }, [
-    formData.financialDetails.clientAmount.amount,
-    formData.financialDetails.clientAmount.gst,
-    formData.financialDetails.providerAmount.amount,
-    formData.financialDetails.providerAmount.gst,
-    formData.financialDetails.brokerCommission.amount,
-    formData.financialDetails.brokerCommission.gst,
+    formData.payment.amount
   ]);
 
   const handleSubmit = async (e) => {
@@ -174,8 +126,10 @@ const Tasks = () => {
     try {
       const taskData = {
         ...formData,
-        assignedTo: formData.assignedTo || user?._id || '67f4b49b41e62c5fd0f06588',
-        company: formData.clientCompany,
+        payment: {
+          ...formData.payment,
+          amount: parseFloat(formData.payment.amount) || 0
+        }
       };
       
       if (editingTask) {
@@ -201,35 +155,18 @@ const Tasks = () => {
     setFormData({
       title: task.title || '',
       description: task.description || '',
-      status: task.status || 'pending',
-      priority: task.priority || 'medium',
-      dueDate: task.dueDate || '',
-      clientCompany: task.clientCompany || task.company || '',
+      clientCompany: task.clientCompany || '',
       providerCompany: task.providerCompany || '',
-      assignedTo: task.assignedTo._id || '',
-      broker: task.broker || '',
-      brokerCommissionRate: task.brokerCommissionRate || 0,
-      timeline: {
-        startDate: task.timeline?.startDate || '',
-        endDate: task.timeline?.endDate || '',
+      helperBroker: {
+        broker: task.helperBroker?.broker || '',
+        commission: task.helperBroker?.commission || 0,
+        status: task.helperBroker?.status || 'pending',
+        paymentDate: task.helperBroker?.paymentDate || ''
       },
-      financialDetails: {
-        clientAmount: {
-          amount: task.financialDetails?.clientAmount?.amount || 0,
-          gst: task.financialDetails?.clientAmount?.gst || 0,
-          totalAmount: task.financialDetails?.clientAmount?.totalAmount || 0,
-        },
-        providerAmount: {
-          amount: task.financialDetails?.providerAmount?.amount || 0,
-          gst: task.financialDetails?.providerAmount?.gst || 0,
-          totalAmount: task.financialDetails?.providerAmount?.totalAmount || 0,
-        },
-        brokerCommission: {
-          amount: task.financialDetails?.brokerCommission?.amount || 0,
-          gst: task.financialDetails?.brokerCommission?.gst || 0,
-          totalAmount: task.financialDetails?.brokerCommission?.totalAmount || 0,
-        },
-      },
+      payment: {
+        amount: task.payment?.amount || 0,
+        currency: task.payment?.currency || 'USD'
+      }
     });
     setEditingTask(task);
     setShowForm(true);
@@ -243,34 +180,6 @@ const Tasks = () => {
         console.error('Failed to delete task:', err);
         alert(`Failed to delete task: ${err}`);
       }
-    }
-  };
-
-  const getStatusBadgeClass = (status) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'in-progress':
-        return 'bg-blue-100 text-blue-800';
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      case 'disputed':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getPriorityBadgeClass = (priority) => {
-    switch (priority) {
-      case 'high':
-        return 'bg-red-100 text-red-800';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-green-100 text-green-800';
     }
   };
 
@@ -299,7 +208,7 @@ const Tasks = () => {
       {/* Filters */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="md:col-span-2">
+          <div className="md:col-span-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
             <div className="relative">
               <input
@@ -318,34 +227,6 @@ const Tasks = () => {
             <p className="mt-1 text-sm text-gray-500">
               Search by task title, description, or task number
             </p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <select
-              value={filters.status}
-              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value, page: 1 }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            >
-              <option value="">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="in-progress">In Progress</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
-              <option value="disputed">Disputed</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-            <select
-              value={filters.priority}
-              onChange={(e) => setFilters(prev => ({ ...prev, priority: e.target.value, page: 1 }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            >
-              <option value="">All Priorities</option>
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
           </div>
         </div>
       </div>
@@ -393,7 +274,7 @@ const Tasks = () => {
 
                   <div className="md:col-span-2">
                     <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                      Description *
+                      Description
                     </label>
                     <textarea
                       id="description"
@@ -402,7 +283,6 @@ const Tasks = () => {
                       onChange={handleChange}
                       rows="3"
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      required
                     />
                   </div>
                 </div>
@@ -453,19 +333,25 @@ const Tasks = () => {
                       ))}
                     </select>
                   </div>
+                </div>
+              </div>
 
+              {/* Helper Broker Information */}
+              <div className="border-t border-gray-200 pt-4">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Helper Broker Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="broker" className="block text-sm font-medium text-gray-700">
-                      Broker
+                    <label htmlFor="helperBroker.broker" className="block text-sm font-medium text-gray-700">
+                      Helper Broker
                     </label>
                     <select
-                      id="broker"
-                      name="broker"
-                      value={formData.broker}
+                      id="helperBroker.broker"
+                      name="helperBroker.broker"
+                      value={formData.helperBroker.broker}
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     >
-                      <option value="">Select a broker</option>
+                      <option value="">Select a helper broker</option>
                       {brokersList.map((broker) => (
                         <option key={broker._id} value={broker._id}>
                           {broker.name}
@@ -475,14 +361,14 @@ const Tasks = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="brokerCommissionRate" className="block text-sm font-medium text-gray-700">
-                      Broker Commission Rate (%)
+                    <label htmlFor="helperBroker.commission" className="block text-sm font-medium text-gray-700">
+                      Helper Broker Commission (%)
                     </label>
                     <input
                       type="number"
-                      id="brokerCommissionRate"
-                      name="brokerCommissionRate"
-                      value={formData.brokerCommissionRate}
+                      id="helperBroker.commission"
+                      name="helperBroker.commission"
+                      value={formData.helperBroker.commission}
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                       min="0"
@@ -490,273 +376,71 @@ const Tasks = () => {
                       step="0.01"
                     />
                   </div>
-                </div>
-              </div>
 
-              {/* Task Details */}
-              <div className="border-t border-gray-200 pt-4">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Task Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="status" className="block text-sm font-medium text-gray-700">
-                      Status *
+                    <label htmlFor="helperBroker.status" className="block text-sm font-medium text-gray-700">
+                      Payment Status
                     </label>
                     <select
-                      id="status"
-                      name="status"
-                      value={formData.status}
+                      id="helperBroker.status"
+                      name="helperBroker.status"
+                      value={formData.helperBroker.status}
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      required
                     >
                       <option value="pending">Pending</option>
-                      <option value="in-progress">In Progress</option>
-                      <option value="completed">Completed</option>
-                      <option value="cancelled">Cancelled</option>
-                      <option value="disputed">Disputed</option>
+                      <option value="paid">Paid</option>
                     </select>
                   </div>
 
                   <div>
-                    <label htmlFor="priority" className="block text-sm font-medium text-gray-700">
-                      Priority *
-                    </label>
-                    <select
-                      id="priority"
-                      name="priority"
-                      value={formData.priority}
-                      onChange={handleChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      required
-                    >
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">
-                      Due Date *
+                    <label htmlFor="helperBroker.paymentDate" className="block text-sm font-medium text-gray-700">
+                      Payment Date
                     </label>
                     <input
                       type="date"
-                      id="dueDate"
-                      name="dueDate"
-                      value={formData.dueDate}
+                      id="helperBroker.paymentDate"
+                      name="helperBroker.paymentDate"
+                      value={formData.helperBroker.paymentDate}
+                      onChange={handleChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Information */}
+              <div className="border-t border-gray-200 pt-4">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Payment Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="payment.amount" className="block text-sm font-medium text-gray-700">
+                      Amount *
+                    </label>
+                    <input
+                      type="number"
+                      id="payment.amount"
+                      name="payment.amount"
+                      value={formData.payment.amount}
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                       required
+                      min="0"
+                      step="0.01"
                     />
                   </div>
-
                   <div>
-                    <label htmlFor="assignedTo" className="block text-sm font-medium text-gray-700">
-                      Assigned To
+                    <label htmlFor="payment.currency" className="block text-sm font-medium text-gray-700">
+                      Currency
                     </label>
                     <input
                       type="text"
-                      id="assignedTo"
-                      name="assignedTo"
-                      value={formData.assignedTo}
+                      id="payment.currency"
+                      name="payment.currency"
+                      value={formData.payment.currency}
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      placeholder="Enter user ID or leave blank to assign to yourself"
                     />
-                  </div>
-                </div>
-              </div>
-
-              {/* Timeline */}
-              <div className="border-t border-gray-200 pt-4">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Timeline</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="timeline.startDate" className="block text-sm font-medium text-gray-700">
-                      Start Date *
-                    </label>
-                    <input
-                      type="date"
-                      id="timeline.startDate"
-                      name="timeline.startDate"
-                      value={formData.timeline.startDate}
-                      onChange={handleChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="timeline.endDate" className="block text-sm font-medium text-gray-700">
-                      End Date *
-                    </label>
-                    <input
-                      type="date"
-                      id="timeline.endDate"
-                      name="timeline.endDate"
-                      value={formData.timeline.endDate}
-                      onChange={handleChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Financial Details */}
-              <div className="border-t border-gray-200 pt-4">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Financial Details</h3>
-                
-                <div className="mb-6">
-                  <h4 className="font-medium text-gray-700 mb-3">Client Amount</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label htmlFor="financialDetails.clientAmount.amount" className="block text-sm font-medium text-gray-700">
-                        Base Amount *
-                      </label>
-                      <input
-                        type="number"
-                        id="financialDetails.clientAmount.amount"
-                        name="financialDetails.clientAmount.amount"
-                        value={formData.financialDetails.clientAmount.amount}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        required
-                        min="0"
-                        step="0.01"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="financialDetails.clientAmount.gst" className="block text-sm font-medium text-gray-700">
-                        GST *
-                      </label>
-                      <input
-                        type="number"
-                        id="financialDetails.clientAmount.gst"
-                        name="financialDetails.clientAmount.gst"
-                        value={formData.financialDetails.clientAmount.gst}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        required
-                        min="0"
-                        step="0.01"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="financialDetails.clientAmount.totalAmount" className="block text-sm font-medium text-gray-700">
-                        Total Amount
-                      </label>
-                      <input
-                        type="number"
-                        id="financialDetails.clientAmount.totalAmount"
-                        name="financialDetails.clientAmount.totalAmount"
-                        value={formData.financialDetails.clientAmount.totalAmount}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-50"
-                        readOnly
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <h4 className="font-medium text-gray-700 mb-3">Provider Amount</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label htmlFor="financialDetails.providerAmount.amount" className="block text-sm font-medium text-gray-700">
-                        Base Amount *
-                      </label>
-                      <input
-                        type="number"
-                        id="financialDetails.providerAmount.amount"
-                        name="financialDetails.providerAmount.amount"
-                        value={formData.financialDetails.providerAmount.amount}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        required
-                        min="0"
-                        step="0.01"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="financialDetails.providerAmount.gst" className="block text-sm font-medium text-gray-700">
-                        GST *
-                      </label>
-                      <input
-                        type="number"
-                        id="financialDetails.providerAmount.gst"
-                        name="financialDetails.providerAmount.gst"
-                        value={formData.financialDetails.providerAmount.gst}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        required
-                        min="0"
-                        step="0.01"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="financialDetails.providerAmount.totalAmount" className="block text-sm font-medium text-gray-700">
-                        Total Amount
-                      </label>
-                      <input
-                        type="number"
-                        id="financialDetails.providerAmount.totalAmount"
-                        name="financialDetails.providerAmount.totalAmount"
-                        value={formData.financialDetails.providerAmount.totalAmount}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-50"
-                        readOnly
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="font-medium text-gray-700 mb-3">Broker Commission</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label htmlFor="financialDetails.brokerCommission.amount" className="block text-sm font-medium text-gray-700">
-                        Base Amount *
-                      </label>
-                      <input
-                        type="number"
-                        id="financialDetails.brokerCommission.amount"
-                        name="financialDetails.brokerCommission.amount"
-                        value={formData.financialDetails.brokerCommission.amount}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        required
-                        min="0"
-                        step="0.01"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="financialDetails.brokerCommission.gst" className="block text-sm font-medium text-gray-700">
-                        GST *
-                      </label>
-                      <input
-                        type="number"
-                        id="financialDetails.brokerCommission.gst"
-                        name="financialDetails.brokerCommission.gst"
-                        value={formData.financialDetails.brokerCommission.gst}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        required
-                        min="0"
-                        step="0.01"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="financialDetails.brokerCommission.totalAmount" className="block text-sm font-medium text-gray-700">
-                        Total Amount
-                      </label>
-                      <input
-                        type="number"
-                        id="financialDetails.brokerCommission.totalAmount"
-                        name="financialDetails.brokerCommission.totalAmount"
-                        value={formData.financialDetails.brokerCommission.totalAmount}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-50"
-                        readOnly
-                      />
-                    </div>
                   </div>
                 </div>
               </div>
@@ -802,25 +486,19 @@ const Tasks = () => {
                   Title
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Priority
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Due Date
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Client Company
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Provider Company
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Broker
+                  Helper Broker
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Commission Rate
+                  Helper Commission
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Payment Amount
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -836,30 +514,22 @@ const Tasks = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {task.title}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(task.status)}`}>
-                      {task.status.replace('-', ' ')}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getPriorityBadgeClass(task.priority)}`}>
-                      {task.priority}
-                    </span>
-                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(task.dueDate).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {companiesList.find(c => c._id === task.clientCompany || c._id === task.company)?.name || 'Unknown'}
+                    {companiesList.find(c => c._id === task.clientCompany)?.name || 'Unknown'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {companiesList.find(c => c._id === task.providerCompany)?.name || 'Unknown'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {brokersList.find(b => b._id === task.broker)?.name || '-'}
+                    {brokersList.find(b => b._id === task.helperBroker?.broker)?.name || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {task.brokerCommissionRate ? `${task.brokerCommissionRate}%` : '-'}
+                    {task.helperBroker?.commission ? `${task.helperBroker.commission}%` : '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {task.payment?.amount ? 
+                      `${task.payment.currency} ${task.payment.amount}` : 
+                      '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button

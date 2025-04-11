@@ -49,10 +49,12 @@ const Dashboard = () => {
         
         // Calculate stats
         const totalTasks = tasksRes.data.length;
-        const totalCommission = tasksRes.data.reduce((sum, task) => 
-          sum + (task.financialDetails?.adminCommission?.amount || 0), 0);
-        const pendingCommission = tasksRes.data.reduce((sum, task) => 
-          sum + (task.financialDetails?.adminCommission?.status === 'pending' ? task.financialDetails.adminCommission.amount : 0), 0);
+        const totalCommission = tasksRes.data.reduce(
+          (sum, task) => sum + (task.helperBroker?.commission || 0), 0
+        );
+        const pendingCommission = tasksRes.data.reduce(
+          (sum, task) => sum + (task.helperBroker?.status === 'pending' ? task.helperBroker.commission : 0), 0
+        );
         
         setStats({
           totalTasks,
@@ -235,6 +237,44 @@ const Dashboard = () => {
                         />
                       </TableCell>
                       <TableCell>{broker.financialSummary.totalTasks}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Paper>
+        </Grid>
+
+        {/* Commission Card */}
+        <Grid item xs={12}>
+          <Paper sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Commission Details
+            </Typography>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Task ID</TableCell>
+                    <TableCell>Commission</TableCell>
+                    <TableCell>Status</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {recentTasks.map((task) => (
+                    <TableRow key={task._id}>
+                      <TableCell>{task._id.slice(-6)}</TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          ₹{task.helperBroker?.commission?.toLocaleString()}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={task.helperBroker?.status || 'pending'}
+                          color={task.helperBroker?.status === 'paid' ? 'success' : 'warning'}
+                        />
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

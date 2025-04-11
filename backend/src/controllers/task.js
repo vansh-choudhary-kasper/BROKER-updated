@@ -14,7 +14,6 @@ class TaskController {
         this.getTasks = this.getTasks.bind(this);
         this.getTask = this.getTask.bind(this);
         this.deleteTask = this.deleteTask.bind(this);
-        this.updateTaskStatus = this.updateTaskStatus.bind(this);
         this.addComment = this.addComment.bind(this);
         this.deleteComment = this.deleteComment.bind(this);
         this.addAttachments = this.addAttachments.bind(this);
@@ -48,28 +47,18 @@ class TaskController {
             const {
                 title,
                 description,
-                dueDate,
-                priority,
-                status,
-                assignedTo,
-                company,
+                taskNumber,
                 clientCompany,
                 providerCompany,
-                timeline,
-                financialDetails,
-                broker,
-                brokerCommissionRate
+                helperBroker,
+                payment
             } = req.body;
 
-            // Generate task number
-            const taskNumber = await this.generateTaskNumber();
-
-            // Use clientCompany from new field or fall back to old company field
-            const finalClientCompany = clientCompany || company;
-            const finalProviderCompany = providerCompany;
+            // Generate task number if not provided
+            const finalTaskNumber = taskNumber || await this.generateTaskNumber();
 
             // Verify client company exists
-            const clientCompanyExists = await Company.findById(finalClientCompany);
+            const clientCompanyExists = await Company.findById(clientCompany);
             if (!clientCompanyExists) {
                 return res.status(404).json(
                     ApiResponse.notFound('Client company not found')
@@ -77,98 +66,57 @@ class TaskController {
             }
 
             // Verify provider company exists
-            const providerCompanyExists = await Company.findById(finalProviderCompany);
+            const providerCompanyExists = await Company.findById(providerCompany);
             if (!providerCompanyExists) {
                 return res.status(404).json(
                     ApiResponse.notFound('Provider company not found')
                 );
             }
 
-            // Verify user exists
-            const userExists = await User.findById(assignedTo);
-            if (!userExists) {
-                return res.status(404).json(
-                    ApiResponse.notFound('User not found')
-                );
-            }
-
-            // Verify broker exists if provided
-            let brokerDoc;
-            if (broker) {
-                brokerDoc = await Broker.findById(broker);
+            // Verify helper broker exists if provided
+            if (helperBroker && helperBroker.broker) {
+                const brokerDoc = await Broker.findById(helperBroker.broker);
                 if (!brokerDoc) {
                     return res.status(404).json(
-                        ApiResponse.notFound('Broker not found')
+                        ApiResponse.notFound('Helper broker not found')
                     );
                 }
             }
 
-            // Create task with attachments
-            const attachments = req.files ? req.files.map(file => ({
-                name: file.originalname,
-                type: file.mimetype,
-                url: file.path,
-                uploadDate: new Date()
-            })) : [];
-
-            const task = await Task.create({
+            // Create the task
+            const task = new Task({
                 title,
                 description,
-                dueDate,
-                priority,
-                status,
-                assignedTo,
-                clientCompany: finalClientCompany,
-                providerCompany: finalProviderCompany,
-                taskNumber,
-                timeline,
-                financialDetails,
-                attachments,
-                broker,
-                brokerCommissionRate,
-                createdBy: req.user.userId
+                taskNumber: finalTaskNumber,
+                clientCompany,
+                providerCompany,
+                helperBroker,
+                payment
             });
 
-            // Update broker's referrals if broker is provided
-            if (brokerDoc && brokerCommissionRate) {
-                brokerDoc.referrals.push({
-                    company: finalClientCompany,
-                    task: task._id,
-                    date: new Date(),
-                    commission: brokerCommissionRate,
-                    status: 'pending'
-                });
-                await brokerDoc.save();
+            await task.save();
+
+            // Send email notifications
+            try {
+                await emailService.sendTaskCreatedEmail(task);
+            } catch (emailError) {
+                logger.error('Email notification error:', emailError);
+                // Continue execution even if email fails
             }
 
-            // Send email notification to assigned user
-            // await emailService.sendEmail(
-            //     userExists.email,
-            //     'New Task Assigned',
-            //     `
-            //     <h1>New Task Assigned</h1>
-            //     <p>You have been assigned a new task:</p>
-            //     <h2>${title}</h2>
-            //     <p><strong>Description:</strong> ${description}</p>
-            //     <p><strong>Due Date:</strong> ${new Date(dueDate).toLocaleDateString()}</p>
-            //     <p><strong>Priority:</strong> ${priority}</p>
-            //     `
-            // );
-
             return res.status(201).json(
-                ApiResponse.created('Task created successfully', task)
+                ApiResponse.success('Task created successfully', task)
             );
         } catch (error) {
             logger.error('Create Task Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError()
+                ApiResponse.error('Failed to create task', error.message)
             );
         }
     }
 
     async getTasks(req, res) {
         try {
-            console.error("get task is called");
             const { page = 1, limit = 10, status, priority, company, clientCompany, providerCompany, search } = req.query;
             const query = {};
 
@@ -202,7 +150,6 @@ class TaskController {
                 .exec();
 
             const count = await Task.countDocuments(query);
-            console.error("response is sent successfully");
             return res.status(200).json(
                 ApiResponse.success('Tasks retrieved successfully', {
                     tasks,
@@ -250,17 +197,11 @@ class TaskController {
             const {
                 title,
                 description,
-                dueDate,
-                priority,
-                status,
-                assignedTo,
+                taskNumber,
                 clientCompany,
                 providerCompany,
-                taskNumber,
-                timeline,
-                financialDetails,
-                broker,
-                brokerCommissionRate
+                helperBroker,
+                payment
             } = req.body;
 
             // Find the task
@@ -291,145 +232,66 @@ class TaskController {
                 }
             }
 
-            // Verify user exists if provided
-            if (assignedTo) {
-                const userExists = await User.findById(assignedTo);
-                if (!userExists) {
-                    return res.status(404).json(
-                        ApiResponse.notFound('User not found')
-                    );
-                }
-            }
-
-            // Handle broker update
-            let brokerDoc;
-            if (broker) {
-                brokerDoc = await Broker.findById(broker);
+            // Verify helper broker exists if provided
+            if (helperBroker && helperBroker.broker) {
+                const brokerDoc = await Broker.findById(helperBroker.broker);
                 if (!brokerDoc) {
                     return res.status(404).json(
-                        ApiResponse.notFound('Broker not found')
+                        ApiResponse.notFound('Helper broker not found')
                     );
-                }
-
-                // If broker is changed, update the referrals
-                if (task.broker && task.broker.toString() !== broker) {
-                    // Remove old referral
-                    const oldBroker = await Broker.findById(task.broker);
-                    if (oldBroker) {
-                        oldBroker.referrals = oldBroker.referrals.filter(
-                            ref => ref.task.toString() !== task._id.toString()
-                        );
-                        await oldBroker.save();
-                    }
-
-                    // Add new referral if commission rate is provided
-                    if (brokerCommissionRate) {
-                        brokerDoc.referrals.push({
-                            company: clientCompany || task.clientCompany,
-                            task: task._id,
-                            date: new Date(),
-                            commission: brokerCommissionRate,
-                            status: 'pending'
-                        });
-                        await brokerDoc.save();
-                    }
-                } else if (brokerCommissionRate && task.brokerCommissionRate !== brokerCommissionRate) {
-                    // Update existing referral's commission
-                    const referralIndex = brokerDoc.referrals.findIndex(
-                        ref => ref.task.toString() === task._id.toString()
-                    );
-                    if (referralIndex !== -1) {
-                        brokerDoc.referrals[referralIndex].commission = brokerCommissionRate;
-                        await brokerDoc.save();
-                    }
                 }
             }
 
-            // Update task
-            const updatedTask = await Task.findByIdAndUpdate(
-                id,
-                {
-                    title,
-                    description,
-                    dueDate,
-                    priority,
-                    status,
-                    assignedTo,
-                    clientCompany,
-                    providerCompany,
-                    taskNumber,
-                    timeline,
-                    financialDetails,
-                    broker,
-                    brokerCommissionRate
-                },
-                { new: true }
-            );
+            // Update task fields
+            if (title) task.title = title;
+            if (description !== undefined) task.description = description;
+            if (taskNumber) task.taskNumber = taskNumber;
+            if (clientCompany) task.clientCompany = clientCompany;
+            if (providerCompany) task.providerCompany = providerCompany;
+            if (helperBroker) task.helperBroker = helperBroker;
+            if (payment) task.payment = payment;
+
+            await task.save();
+
+            // Send email notifications
+            try {
+                await emailService.sendTaskUpdatedEmail(task);
+            } catch (emailError) {
+                logger.error('Email notification error:', emailError);
+                // Continue execution even if email fails
+            }
 
             return res.status(200).json(
-                ApiResponse.success('Task updated successfully', updatedTask)
+                ApiResponse.success('Task updated successfully', task)
             );
         } catch (error) {
             logger.error('Update Task Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError()
+                ApiResponse.error('Failed to update task', error.message)
             );
         }
     }
 
     async deleteTask(req, res) {
         try {
-            const task = await Task.findByIdAndDelete(req.params.id);
+            const { id } = req.params;
+            
+            const task = await Task.findById(id);
             if (!task) {
                 return res.status(404).json(
                     ApiResponse.notFound('Task not found')
                 );
             }
-
+            
+            await task.remove();
+            
             return res.status(200).json(
                 ApiResponse.success('Task deleted successfully')
             );
         } catch (error) {
             logger.error('Delete Task Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError()
-            );
-        }
-    }
-
-    async updateTaskStatus(req, res) {
-        try {
-            const { status } = req.body;
-            const task = await Task.findById(req.params.id);
-            if (!task) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Task not found')
-                );
-            }
-
-            task.status = status;
-            await task.save();
-
-            // Send email notification about status change
-            const assignedUser = await User.findById(task.assignedTo);
-            if (assignedUser) {
-                await emailService.sendEmail(
-                    assignedUser.email,
-                    'Task Status Updated',
-                    `
-                    <h1>Task Status Updated</h1>
-                    <p>The status of your task "${task.title}" has been updated to: ${status}</p>
-                    `
-                );
-            }
-
-            return res.status(200).json(
-                ApiResponse.success('Task status updated successfully', task)
-            );
-        } catch (error) {
-            logger.error('Update Task Status Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError()
+                ApiResponse.error('Failed to delete task', error.message)
             );
         }
     }

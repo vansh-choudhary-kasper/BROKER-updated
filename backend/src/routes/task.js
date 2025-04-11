@@ -10,12 +10,16 @@ const { upload } = require('../middleware/fileUpload');
 // Validation middleware
 const taskValidation = [
     body('title').notEmpty().withMessage('Task title is required'),
-    body('description').notEmpty().withMessage('Task description is required'),
-    body('dueDate').isISO8601().withMessage('Invalid due date'),
-    body('priority').isIn(['low', 'medium', 'high']).withMessage('Invalid priority level'),
-    body('status').isIn(['pending', 'in-progress', 'completed', 'cancelled']).withMessage('Invalid status'),
-    body('assignedTo').isMongoId().withMessage('Invalid user ID'),
-    body('company').isMongoId().withMessage('Invalid company ID')
+    body('description').optional(),
+    body('taskNumber').optional(),
+    body('clientCompany').isMongoId().withMessage('Invalid client company ID'),
+    body('providerCompany').isMongoId().withMessage('Invalid provider company ID'),
+    body('helperBroker.broker').optional().isMongoId().withMessage('Invalid helper broker ID'),
+    body('helperBroker.commission').optional().isFloat({ min: 0, max: 100 }).withMessage('Commission must be between 0 and 100'),
+    body('helperBroker.status').optional().isIn(['pending', 'paid']).withMessage('Invalid helper broker status'),
+    body('helperBroker.paymentDate').optional().isISO8601().withMessage('Invalid payment date format'),
+    body('payment.amount').isFloat({ min: 0 }).withMessage('Payment amount must be positive'),
+    body('payment.currency').optional().isString().withMessage('Currency must be a string')
 ];
 
 // Routes
@@ -40,13 +44,6 @@ router.put('/:id',
 );
 
 router.delete('/:id', taskController.deleteTask);
-
-// Task status routes
-router.patch('/:id/status',
-    body('status').isIn(['pending', 'in-progress', 'completed', 'cancelled']).withMessage('Invalid status'),
-    validateRequest,
-    taskController.updateTaskStatus
-);
 
 // Task comment routes
 router.post('/:id/comments',

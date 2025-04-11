@@ -10,7 +10,6 @@ const taskSchema = new mongoose.Schema({
   },
   description: {
     type: String,
-    required: true
     // Detailed explanation of the task requirements and scope
   },
   taskNumber: {
@@ -59,146 +58,26 @@ const taskSchema = new mongoose.Schema({
     // When the helper broker was paid
   },
 
-  // Task status tracking
-  status: {
-    type: String,
-    enum: ['pending', 'in_progress', 'completed', 'cancelled', 'disputed'],
-    default: 'pending'
-    // Current state of the task
-  },
-
-  // Financial tracking
-  financialDetails: {
-    clientAmount: {
-      amount: { type: Number, required: true }, // Base amount
-      gst: { type: Number, required: true }, // GST amount
-      tds: { type: Number }, // TDS amount if applicable
-      totalAmount: { type: Number, required: true }, // Total amount including taxes
-      currency: { type: String, default: 'INR' }, // Currency of transaction
-      paymentTerms: String, // Payment terms and conditions
-      paymentSchedule: [{ // Payment installment details
-        dueDate: Date, // When payment is due
-        amount: Number, // Amount for this installment
-        status: { type: String, enum: ['pending', 'paid', 'overdue'] } // Payment status
-      }]
+  payment: {
+    amount: { 
+      type: Number,
+      default: 0,
+      min: 0
+      // Total payment amount for the task
     },
-    providerAmount: {
-      amount: { type: Number, required: true }, // Base amount to provider
-      gst: { type: Number, required: true }, // GST amount
-      tds: { type: Number }, // TDS amount if applicable
-      totalAmount: { type: Number, required: true }, // Total amount including taxes
-      currency: { type: String, default: 'INR' }, // Currency of transaction
-      paymentTerms: String, // Payment terms and conditions
-      paymentSchedule: [{ // Payment installment details
-        dueDate: Date, // When payment is due
-        amount: Number, // Amount for this installment
-        status: { type: String, enum: ['pending', 'paid', 'overdue'] } // Payment status
-      }]
-    },
-    adminCommission: {
-      amount: { type: Number, required: true }, // Base commission amount
-      gst: { type: Number, required: true }, // GST on commission
-      totalAmount: { type: Number, required: true }, // Total commission including GST
-      currency: { type: String, default: 'INR' }, // Currency of transaction
-      status: { type: String, enum: ['pending', 'paid'], default: 'pending' } // Payment status
-    }
-  },
-
-  // Timeline tracking
-  timeline: {
-    startDate: { type: Date, required: true }, // When task should start
-    endDate: { type: Date, required: true }, // When task should end
-    actualStartDate: Date, // When task actually started
-    actualEndDate: Date, // When task actually ended
-  },
-
-  // Document management
-  documents: [{
-    name: String, // Document name
-    type: String, // Type of document
-    url: String, // Where document is stored
-    uploadDate: Date, // When document was uploaded
-    uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Who uploaded it
-  }],
-
-  // Legal agreements
-  agreements: [{
-    type: { type: String, enum: ['client', 'provider', 'broker'] }, // Type of agreement
-    document: { type: String, url: String }, // Agreement document
-    signedBy: {
-      name: String, // Who signed
-      designation: String, // Their role
-      signature: { type: String, url: String }, // Their signature
-      date: Date // When they signed
-    }
-  }],
-
-  // Payment tracking
-  payments: [{
-    type: {
+    currency: {
       type: String,
-      enum: ['client', 'provider', 'helper_broker'],
-      required: true
-      // Who made the payment
+      required: true,
+      default: 'USD'
+      // Currency of the payment
     },
-    amount: { type: Number, required: true }, // Payment amount
-    date: { type: Date, required: true }, // When payment was made
-    mode: { type: String, required: true }, // How payment was made
-    reference: String, // Payment reference number
-    bankDetails: { // Bank account details
-      accountNumber: String,
-      ifscCode: String,
-      bankName: String,
-      branchName: String
-    },
-    status: {
-      type: String,
-      enum: ['pending', 'completed', 'failed', 'disputed'],
-      default: 'pending'
-      // Payment status
-    },
-    documents: [{ type: String, url: String }], // Payment proof documents
-    verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Who verified the payment
-    verificationDate: Date // When payment was verified
-  }],
-
-  // Communication and notes
-  notes: [{
-    content: String, // Note content
-    createdBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-      // Who created the note
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now
-      // When note was created
-    }
-  }],
-
-  // Dispute management
-  disputes: [{
-    date: Date, // When dispute arose
-    type: String, // Type of dispute
-    description: String, // What the dispute is about
-    status: { type: String, enum: ['open', 'resolved', 'closed'] }, // Current status
-    resolution: String, // How it was resolved
-    documents: [{ type: String, url: String }], // Supporting documents
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Who reported the dispute
-    resolvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Who resolved it
-    resolutionDate: Date // When it was resolved
-  }],
+  },
 
   // Timestamps
   createdAt: {
     type: Date,
     default: Date.now
   },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
 }, {
   timestamps: true
 });
