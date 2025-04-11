@@ -17,6 +17,7 @@ const taskRoutes = require('./routes/task');
 const bankRoutes = require('./routes/bank');
 const expenseRoutes = require('./routes/expense');
 const brokerRoutes = require('./routes/broker');
+const dashboardRoutes = require('./routes/dashboard');
 
 // Create Express app
 const app = express();
@@ -28,7 +29,14 @@ connectDB();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(morgan('combined', { stream: logger.stream }));
+app.use(cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true
+}));
+
+// Remove Morgan logging middleware
+// app.use(morgan(morganFormat, { stream: logger.stream }));
+
 app.use(rateLimiter);
 app.use(securityMiddleware);
 
@@ -42,6 +50,7 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/banks', bankRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/brokers', brokerRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Error handling
 app.use(errorHandler);

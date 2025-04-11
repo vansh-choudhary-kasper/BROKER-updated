@@ -24,6 +24,7 @@ export const DataProvider = ({ children }) => {
     banks: false,
     expenses: false,
     brokers: false,
+    profitLoss: false
   });
   const [error, setError] = useState({
     companies: null,
@@ -31,6 +32,7 @@ export const DataProvider = ({ children }) => {
     banks: null,
     expenses: null,
     brokers: null,
+    profitLoss: null
   });
   const [lastFetchTime, setLastFetchTime] = useState({
     companies: 0,
@@ -38,6 +40,17 @@ export const DataProvider = ({ children }) => {
     banks: 0,
     expenses: 0,
     brokers: 0,
+    profitLoss: 0
+  });
+
+  // Add profit-loss state
+  const [profitLossData, setProfitLossData] = useState({
+    monthly: [],
+    yearly: [],
+    currentMonth: 0,
+    lastMonth: 0,
+    currentYear: 0,
+    lastYear: 0
   });
 
   // Debounce time in milliseconds (5 seconds)
@@ -67,7 +80,6 @@ export const DataProvider = ({ children }) => {
       });
 
       const response = await axios.get(`${backendUrl}/api/companies?${queryParams.toString()}`);
-      console.log("response", response);
       // Handle both array response and paginated response
       if (response.data && typeof response.data === 'object') {
         if (Array.isArray(response.data?.data)) {
@@ -119,7 +131,6 @@ export const DataProvider = ({ children }) => {
       });
 
       const response = await axios.get(`${backendUrl}/api/tasks?${queryParams.toString()}`);
-      console.log("tasks get successfully", response);
       
       if (response.data && response.data.data) {
         setTasks(response.data.data.tasks || []);
@@ -167,7 +178,6 @@ export const DataProvider = ({ children }) => {
       });
 
       const response = await axios.get(`${backendUrl}/api/banks?${queryParams.toString()}`);
-      console.log("banks fetched successfully", response);
       
       if (response.data && response.data.data) {
         setBanks(response.data.data.banks || []);
@@ -215,7 +225,6 @@ export const DataProvider = ({ children }) => {
       });
 
       const response = await axios.get(`${backendUrl}/api/expenses?${queryParams.toString()}`);
-      console.log("expenses fetched successfully", response);
       
       if (response.data && response.data.data) {
         setExpenses(response.data.data.expenses || []);
@@ -288,6 +297,42 @@ export const DataProvider = ({ children }) => {
     }
   }, [token, lastFetchTime.brokers]);
 
+  // Fetch profit and loss data with debounce
+  const fetchProfitLoss = useCallback(async () => {
+    if (!token) return;
+    
+    // Check if we've fetched recently
+    const now = Date.now();
+    if (now - lastFetchTime.profitLoss < DEBOUNCE_TIME) {
+      console.log('Skipping profit-loss fetch - too soon since last fetch');
+      return;
+    }
+    
+    setLoading(prev => ({ ...prev, profitLoss: true }));
+    setError(prev => ({ ...prev, profitLoss: null }));
+    
+    try {
+      const response = await axios.get(`${backendUrl}/api/dashboard/profit-loss`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data && response.data.success) {
+        setProfitLossData(response.data.data);
+      } else {
+        throw new Error('Failed to fetch profit and loss data');
+      }
+      
+      setLastFetchTime(prev => ({ ...prev, profitLoss: now }));
+    } catch (err) {
+      setError(prev => ({ 
+        ...prev, 
+        profitLoss: err.response?.data?.message || 'Failed to fetch profit and loss data' 
+      }));
+    } finally {
+      setLoading(prev => ({ ...prev, profitLoss: false }));
+    }
+  }, [token, lastFetchTime.profitLoss]);
+
   // Add company
   const addCompany = async (companyData) => {
     setLoading(prev => ({ ...prev, companies: true }));
@@ -313,7 +358,6 @@ export const DataProvider = ({ children }) => {
     
     try {
       const response = await axios.post(`${backendUrl}/api/tasks`, taskData);
-      console.log("task posted successfully", response);
       setTasks(prev => [...prev, response?.data?.data]);
       setError('');
       return response?.data?.data;
@@ -518,14 +562,14 @@ export const DataProvider = ({ children }) => {
   // Fetch all data when token changes
   useEffect(() => {
     if (token) {
-      console.log('Token changed, fetching all data');
       fetchCompanies();
       fetchTasks();
       fetchBanks();
       fetchExpenses();
       fetchBrokers();
+      fetchProfitLoss();
     }
-  }, [token, fetchCompanies, fetchTasks, fetchBanks, fetchExpenses, fetchBrokers]);
+  }, [token, fetchCompanies, fetchTasks, fetchBanks, fetchExpenses, fetchBrokers, fetchProfitLoss]);
 
   // Add broker
   const addBroker = async (brokerData) => {
@@ -779,6 +823,7 @@ export const DataProvider = ({ children }) => {
         totalBrokers,
         loading,
         error,
+        profitLossData,
         
         // Actions
         fetchCompanies,
@@ -786,6 +831,7 @@ export const DataProvider = ({ children }) => {
         fetchBanks,
         fetchExpenses,
         fetchBrokers,
+        fetchProfitLoss,
         addCompany,
         addTask,
         addBank,

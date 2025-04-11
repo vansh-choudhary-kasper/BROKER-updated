@@ -23,7 +23,7 @@ const ProtectedRoute = ({ children }) => {
   }
   
   if (!isAuthenticated) {
-    console.log('Not authenticated, redirecting to login');
+    console.error('Not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
   
@@ -59,7 +59,6 @@ const PublicRoute = ({ children }) => {
   }
   
   if (isAuthenticated) {
-    console.log('Already authenticated, redirecting to dashboard');
     return <Navigate to="/" replace />;
   }
   

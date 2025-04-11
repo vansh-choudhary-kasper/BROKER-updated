@@ -1,8 +1,23 @@
 const winston = require('winston');
 const path = require('path');
 
+// Custom format to filter sensitive information
+const sensitiveDataFilter = winston.format((info) => {
+    // Remove sensitive headers and information
+    if (info.message && typeof info.message === 'string') {
+        // Remove authorization headers
+        info.message = info.message.replace(/Authorization: Bearer [^\s]+/g, 'Authorization: [REDACTED]');
+        // Remove cookie information
+        info.message = info.message.replace(/Cookie: [^\s]+/g, 'Cookie: [REDACTED]');
+        // Remove query parameters that might contain sensitive data
+        info.message = info.message.replace(/\?[^\s]+/g, '?[REDACTED]');
+    }
+    return info;
+});
+
 // Define log format
 const logFormat = winston.format.combine(
+    sensitiveDataFilter(),
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),
     winston.format.json()
@@ -31,10 +46,5 @@ const logger = winston.createLogger({
         })
     ]
 });
-
-// Create a stream object for Morgan
-logger.stream = {
-    write: (message) => logger.info(message.trim())
-};
 
 module.exports = logger; 

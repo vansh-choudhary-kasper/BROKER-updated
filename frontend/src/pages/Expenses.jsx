@@ -172,7 +172,7 @@ const Expenses = () => {
         </button>
       </div>
 
-      {error && (
+      {error && error.message && (
         <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4" role="alert">
           <p className="text-red-700">{typeof error === 'string' ? error : 'An error occurred'}</p>
         </div>

@@ -47,7 +47,6 @@ exports.getBrokers = async (req, res) => {
     
     // Execute query with pagination
     const brokers = await Broker.find(query)
-      .populate('referrals.company', 'name')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit)
@@ -64,6 +63,7 @@ exports.getBrokers = async (req, res) => {
       totalPages: Math.ceil(total / limit)
     });
   } catch (error) {
+    console.error("error in get brokers", error);
     res.status(500).json({
       success: false,
       message: error.message

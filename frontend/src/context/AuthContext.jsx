@@ -36,10 +36,10 @@ axios.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       // Token expired or invalid
       setStoredToken(null);
-      console.log('Authentication error detected. Token may be expired or invalid.');
+      console.error('Authentication error detected. Token may be expired or invalid.');
     } else if (error.response && error.response.status === 403) {
       // Admin access required
-      console.log('Admin access required. You do not have sufficient permissions.');
+      console.error('Admin access required. You do not have sufficient permissions.');
     }
     return Promise.reject(error);
   }
@@ -65,7 +65,6 @@ export const AuthProvider = ({ children }) => {
         setLoading(true);
         try {
           const response = await axios.get(`${backendUrl}/api/auth/me`);
-          console.log("response.data", response.data);
           setUser(response.data);
           setToken(storedToken);
           setIsAuthenticated(true);
@@ -74,7 +73,6 @@ export const AuthProvider = ({ children }) => {
           // If the endpoint doesn't exist (404), we'll still consider the user authenticated
           // as long as they have a valid token
           if (error.response && error.response.status === 404) {
-            console.log('Auth endpoint not found, but token exists. Considering user authenticated.');
             setUser({ id: 'user-from-token' });
             setToken(storedToken);
             setIsAuthenticated(true);

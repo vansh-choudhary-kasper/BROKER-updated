@@ -45,7 +45,6 @@ class TaskController {
 
     async createTask(req, res) {
         try {
-            console.log(req.body);
             const {
                 title,
                 description,
@@ -169,6 +168,7 @@ class TaskController {
 
     async getTasks(req, res) {
         try {
+            console.error("get task is called");
             const { page = 1, limit = 10, status, priority, company, clientCompany, providerCompany, search } = req.query;
             const query = {};
 
@@ -196,15 +196,13 @@ class TaskController {
             }
 
             const tasks = await Task.find(query)
-                .populate('assignedTo', 'name email')
-                .populate('clientCompany', 'name')
                 .populate('providerCompany', 'name')
                 .limit(limit * 1)
                 .skip((page - 1) * limit)
                 .exec();
 
             const count = await Task.countDocuments(query);
-
+            console.error("response is sent successfully");
             return res.status(200).json(
                 ApiResponse.success('Tasks retrieved successfully', {
                     tasks,

@@ -36,11 +36,6 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/broker-ma
 .catch(err => console.error('MongoDB connection error:', err));
 
 // Routes
-app.use("/", (req, res) => {
-  console.log(req.body);
-  res.send("Hello buddy")
-})
-
 app.use('/api/auth', authRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/tasks', taskRoutes);

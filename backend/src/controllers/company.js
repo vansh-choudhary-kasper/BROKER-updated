@@ -7,7 +7,6 @@ const { validateCompanyData } = require('../utils/validation');
 class CompanyController {
     async createCompany(req, res) {
         try {
-            console.log("createCompany called");
             const companyData = JSON.parse(JSON.stringify(req.body));
             
             // Handle file uploads
@@ -35,7 +34,6 @@ class CompanyController {
             // Validate company data
             const validationResult = validateCompanyData(companyData);
             if (!validationResult.isValid) {
-                console.log("validationResult", validationResult);
                 return res.status(400).json({ message: validationResult.errors });
             }
 
@@ -53,8 +51,6 @@ class CompanyController {
 
     async getCompanies(req, res) {
         try {
-            console.log("getCompanies called");
-            console.log("req.query", req.query);
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 10;
             const search = req.query.search || '';
@@ -76,7 +72,6 @@ class CompanyController {
                 .skip((page - 1) * limit)
                 .limit(limit);
 
-            console.log("companies", companies);
             return res.status(200).json(
                 ApiResponse.success('Companies retrieved successfully', {
                     companies,

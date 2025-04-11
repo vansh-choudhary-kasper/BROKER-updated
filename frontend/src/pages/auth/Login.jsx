@@ -14,7 +14,6 @@ const Login = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      console.log('Already authenticated, redirecting to dashboard');
       navigate('/', { replace: true });
     }
   }, [isAuthenticated, navigate]);
@@ -32,9 +31,7 @@ const Login = () => {
     setError('');
 
     try {
-      console.log('Submitting login form with:', formData);
       await login(formData);
-      console.log('Login successful');
       navigate('/', { replace: true });
     } catch (err) {
       console.error('Login error:', err);

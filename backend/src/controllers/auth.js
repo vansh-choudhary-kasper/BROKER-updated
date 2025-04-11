@@ -34,7 +34,7 @@ exports.login = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).json({ message: 'Server error' });
     }
 };
@@ -60,7 +60,6 @@ exports.register = async (req, res) => {
         });
         
         await user.save();
-        console.log(user);
 
         // Generate JWT token
         const token = jwt.sign(
@@ -79,7 +78,7 @@ exports.register = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).json({ message: 'Server error' });
     }
 };
@@ -180,7 +179,7 @@ exports.getCurrentUser = async (req, res) => {
         }
         res.json(user);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         res.status(500).json({ message: 'Server error' });
     }
 }; 

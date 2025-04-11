@@ -34,26 +34,29 @@ const taskSchema = new mongoose.Schema({
     // Company that will execute the task
   },
   
-  // Broker relationship
-  broker: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Broker',
-    required: false
-    // Broker who facilitated this task
-  },
-  brokerCommissionRate: {
-    type: Number,
-    required: false,
-    min: 0,
-    max: 100
-    // Commission rate for this specific task (percentage)
-  },
-
-  assignedTo: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-    // User that is assigned to the task
+  // Broker relationships
+  // Admin broker is directly from User model, no need for reference
+  // Helper broker is optional and there's at most one per task
+  helperBroker: {
+    broker: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Broker'
+      // Optional helper broker
+    },
+    commission: {
+      type: Number,
+      min: 0,
+      max: 100
+      // Commission percentage for the helper broker
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'paid'],
+      default: 'pending'
+      // Payment status for the helper broker
+    },
+    paymentDate: Date
+    // When the helper broker was paid
   },
 
   // Task status tracking
@@ -92,11 +95,12 @@ const taskSchema = new mongoose.Schema({
         status: { type: String, enum: ['pending', 'paid', 'overdue'] } // Payment status
       }]
     },
-    brokerCommission: {
+    adminCommission: {
       amount: { type: Number, required: true }, // Base commission amount
       gst: { type: Number, required: true }, // GST on commission
       totalAmount: { type: Number, required: true }, // Total commission including GST
-      currency: { type: String, default: 'INR' } // Currency of transaction
+      currency: { type: String, default: 'INR' }, // Currency of transaction
+      status: { type: String, enum: ['pending', 'paid'], default: 'pending' } // Payment status
     }
   },
 
@@ -106,13 +110,6 @@ const taskSchema = new mongoose.Schema({
     endDate: { type: Date, required: true }, // When task should end
     actualStartDate: Date, // When task actually started
     actualEndDate: Date, // When task actually ended
-    milestones: [{ // Task progress tracking
-      title: String, // Milestone name
-      description: String, // What needs to be done
-      dueDate: Date, // When it should be completed
-      completedDate: Date, // When it was completed
-      status: { type: String, enum: ['pending', 'completed', 'delayed'] } // Current status
-    }]
   },
 
   // Document management
@@ -122,9 +119,6 @@ const taskSchema = new mongoose.Schema({
     url: String, // Where document is stored
     uploadDate: Date, // When document was uploaded
     uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Who uploaded it
-    verificationStatus: { type: String, enum: ['pending', 'verified', 'rejected'] }, // Document verification status
-    verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Who verified it
-    verificationDate: Date // When it was verified
   }],
 
   // Legal agreements
@@ -136,22 +130,6 @@ const taskSchema = new mongoose.Schema({
       designation: String, // Their role
       signature: { type: String, url: String }, // Their signature
       date: Date // When they signed
-    },
-    witnesses: [{ // Legal witnesses
-      name: String,
-      idProof: {
-        type: { type: String },
-        number: String,
-        document: { type: String, url: String }
-      },
-      signature: { type: String, url: String },
-      date: Date
-    }],
-    notary: { // Notary details
-      name: String,
-      registrationNumber: String,
-      date: Date,
-      document: { type: String, url: String }
     }
   }],
 
@@ -159,7 +137,7 @@ const taskSchema = new mongoose.Schema({
   payments: [{
     type: {
       type: String,
-      enum: ['client', 'provider'],
+      enum: ['client', 'provider', 'helper_broker'],
       required: true
       // Who made the payment
     },
@@ -196,8 +174,7 @@ const taskSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
       // When note was created
-    },
-    attachments: [{ type: String, url: String }] // Supporting documents
+    }
   }],
 
   // Dispute management
@@ -211,16 +188,6 @@ const taskSchema = new mongoose.Schema({
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Who reported the dispute
     resolvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Who resolved it
     resolutionDate: Date // When it was resolved
-  }],
-
-  // Audit trail
-  auditTrail: [{
-    action: String, // What was done
-    description: String, // Details of the action
-    performedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Who did it
-    timestamp: { type: Date, default: Date.now }, // When it was done
-    ipAddress: String, // From where it was done
-    userAgent: String // What was used to do it
   }],
 
   // Timestamps
