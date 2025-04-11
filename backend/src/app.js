@@ -16,6 +16,7 @@ const companyRoutes = require('./routes/company');
 const taskRoutes = require('./routes/task');
 const bankRoutes = require('./routes/bank');
 const expenseRoutes = require('./routes/expense');
+const brokerRoutes = require('./routes/broker');
 
 // Create Express app
 const app = express();
@@ -40,6 +41,7 @@ app.use('/api/companies', companyRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/banks', bankRoutes);
 app.use('/api/expenses', expenseRoutes);
+app.use('/api/brokers', brokerRoutes);
 
 // Error handling
 app.use(errorHandler);

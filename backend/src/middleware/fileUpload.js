@@ -17,7 +17,17 @@ const storage = multer.diskStorage({
 
 // File filter function
 const fileFilter = (req, file, cb) => {
-    if (FILE_UPLOAD.ALLOWED_TYPES.includes(file.mimetype)) {
+    // For bank statements, allow CSV and XML
+    if (req.path.includes('/statements/upload')) {
+        const allowedTypes = ['text/csv', 'application/xml', 'text/xml'];
+        if (allowedTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid file type. Only CSV and XML files are allowed.'), false);
+        }
+    } 
+    // For other uploads, use the default allowed types
+    else if (FILE_UPLOAD.ALLOWED_TYPES.includes(file.mimetype)) {
         cb(null, true);
     } else {
         cb(new Error('Invalid file type. Only PDF and image files are allowed.'), false);

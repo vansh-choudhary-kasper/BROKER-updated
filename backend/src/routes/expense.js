@@ -4,7 +4,7 @@ const router = express.Router();
 
 const expenseController = require('../controllers/expense');
 const validateRequest = require('../middleware/validator');
-const authMiddleware = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 const { upload } = require('../middleware/fileUpload');
 
 // Validation middleware
@@ -28,7 +28,7 @@ const expenseValidation = [
 ];
 
 // Routes
-router.use(authMiddleware); // Protect all expense routes
+router.use(protect); // Protect all expense routes
 
 router.post('/',
     expenseValidation,

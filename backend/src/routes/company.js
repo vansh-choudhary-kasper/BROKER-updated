@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const companyController = require('../controllers/company');
-const authMiddleware = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 const { upload } = require('../utils/fileUpload');
 
 // Protect all company routes
-router.use(authMiddleware);
+router.use(protect);
 
 // Create a new company
 router.post('/',

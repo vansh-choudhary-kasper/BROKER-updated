@@ -3,8 +3,9 @@ const { body } = require('express-validator');
 const router = express.Router();
 
 const bankController = require('../controllers/bank');
+const bankStatementController = require('../controllers/bankStatement');
 const validateRequest = require('../middleware/validator');
-const authMiddleware = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 const { upload } = require('../middleware/fileUpload');
 
 // Validation middleware
@@ -22,7 +23,7 @@ const bankValidation = [
 ];
 
 // Routes
-router.use(authMiddleware); // Protect all bank routes
+router.use(protect); // Protect all bank routes
 
 router.post('/',
     bankValidation,
@@ -64,5 +65,19 @@ router.get('/:id/transactions', bankController.getTransactions);
 
 // Toggle bank status
 router.patch('/:id/toggle-status', bankController.toggleBankStatus);
+
+// Bank Statement routes
+router.post('/statements/upload',
+    upload.single('statement'),
+    bankStatementController.uploadStatement
+);
+
+router.get('/:bankId/statements',
+    bankStatementController.getBankStatements
+);
+
+router.get('/statements/:statementId/download',
+    bankStatementController.downloadStatement
+);
 
 module.exports = router; 

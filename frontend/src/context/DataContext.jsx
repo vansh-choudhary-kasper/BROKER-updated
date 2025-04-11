@@ -12,27 +12,32 @@ export const DataProvider = ({ children }) => {
   const [tasks, setTasks] = useState([]);
   const [banks, setBanks] = useState([]);
   const [expenses, setExpenses] = useState([]);
+  const [brokers, setBrokers] = useState([]);
   const [totalCompanies, setTotalCompanies] = useState(0);
   const [totalTasks, setTotalTasks] = useState(0);
   const [totalBanks, setTotalBanks] = useState(0);
   const [totalExpenses, setTotalExpenses] = useState(0);
+  const [totalBrokers, setTotalBrokers] = useState(0);
   const [loading, setLoading] = useState({
     companies: false,
     tasks: false,
     banks: false,
     expenses: false,
+    brokers: false,
   });
   const [error, setError] = useState({
     companies: null,
     tasks: null,
     banks: null,
     expenses: null,
+    brokers: null,
   });
   const [lastFetchTime, setLastFetchTime] = useState({
     companies: 0,
     tasks: 0,
     banks: 0,
     expenses: 0,
+    brokers: 0,
   });
 
   // Debounce time in milliseconds (5 seconds)
@@ -233,6 +238,55 @@ export const DataProvider = ({ children }) => {
       setLoading(prev => ({ ...prev, expenses: false }));
     }
   }, [token, lastFetchTime.expenses]);
+
+  // Fetch brokers with debounce
+  const fetchBrokers = useCallback(async (filters = {}) => {
+    if (!token) return;
+    
+    // Check if we've fetched recently
+    const now = Date.now();
+    if (now - lastFetchTime.brokers < DEBOUNCE_TIME) {
+      console.log('Skipping brokers fetch - too soon since last fetch');
+      return;
+    }
+    
+    setLoading(prev => ({ ...prev, brokers: true }));
+    setError(prev => ({ ...prev, brokers: null }));
+    
+    try {
+      // Convert filters object to query parameters
+      const queryParams = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          queryParams.append(key, value);
+        }
+      });
+
+      const response = await axios.get(`${backendUrl}/api/brokers?${queryParams.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data && response.data.success) {
+        setBrokers(response.data.data || []);
+        setTotalBrokers(response.data.total || 0);
+      } else {
+        setBrokers([]);
+        setTotalBrokers(0);
+      }
+      
+      setLastFetchTime(prev => ({ ...prev, brokers: now }));
+    } catch (err) {
+      setError(prev => ({ 
+        ...prev, 
+        brokers: err.response?.data?.message || 'Failed to fetch brokers' 
+      }));
+      // Set empty array on error to prevent undefined errors
+      setBrokers([]);
+      setTotalBrokers(0);
+    } finally {
+      setLoading(prev => ({ ...prev, brokers: false }));
+    }
+  }, [token, lastFetchTime.brokers]);
 
   // Add company
   const addCompany = async (companyData) => {
@@ -469,8 +523,245 @@ export const DataProvider = ({ children }) => {
       fetchTasks();
       fetchBanks();
       fetchExpenses();
+      fetchBrokers();
     }
-  }, [token, fetchCompanies, fetchTasks, fetchBanks, fetchExpenses]);
+  }, [token, fetchCompanies, fetchTasks, fetchBanks, fetchExpenses, fetchBrokers]);
+
+  // Add broker
+  const addBroker = async (brokerData) => {
+    if (!token) return;
+    
+    setLoading(prev => ({ ...prev, brokers: true }));
+    setError(prev => ({ ...prev, brokers: null }));
+    
+    try {
+      const response = await axios.post(`${backendUrl}/api/brokers`, brokerData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data && response.data.success) {
+        // Refresh brokers list
+        fetchBrokers();
+        return { success: true, data: response.data.data };
+      } else {
+        setError(prev => ({ 
+          ...prev, 
+          brokers: response.data.message || 'Failed to add broker' 
+        }));
+        return { success: false, message: response.data.message || 'Failed to add broker' };
+      }
+    } catch (err) {
+      setError(prev => ({ 
+        ...prev, 
+        brokers: err.response?.data?.message || 'Failed to add broker' 
+      }));
+      return { success: false, message: err.response?.data?.message || 'Failed to add broker' };
+    } finally {
+      setLoading(prev => ({ ...prev, brokers: false }));
+    }
+  };
+
+  // Update broker
+  const updateBroker = async (id, brokerData) => {
+    if (!token) return;
+    
+    setLoading(prev => ({ ...prev, brokers: true }));
+    setError(prev => ({ ...prev, brokers: null }));
+    
+    try {
+      const response = await axios.put(`${backendUrl}/api/brokers/${id}`, brokerData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data && response.data.success) {
+        // Refresh brokers list
+        fetchBrokers();
+        return { success: true, data: response.data.data };
+      } else {
+        setError(prev => ({ 
+          ...prev, 
+          brokers: response.data.message || 'Failed to update broker' 
+        }));
+        return { success: false, message: response.data.message || 'Failed to update broker' };
+      }
+    } catch (err) {
+      setError(prev => ({ 
+        ...prev, 
+        brokers: err.response?.data?.message || 'Failed to update broker' 
+      }));
+      return { success: false, message: err.response?.data?.message || 'Failed to update broker' };
+    } finally {
+      setLoading(prev => ({ ...prev, brokers: false }));
+    }
+  };
+
+  // Delete broker
+  const deleteBroker = async (id) => {
+    if (!token) return;
+    
+    setLoading(prev => ({ ...prev, brokers: true }));
+    setError(prev => ({ ...prev, brokers: null }));
+    
+    try {
+      const response = await axios.delete(`${backendUrl}/api/brokers/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data && response.data.success) {
+        // Refresh brokers list
+        fetchBrokers();
+        return { success: true };
+      } else {
+        setError(prev => ({ 
+          ...prev, 
+          brokers: response.data.message || 'Failed to delete broker' 
+        }));
+        return { success: false, message: response.data.message || 'Failed to delete broker' };
+      }
+    } catch (err) {
+      setError(prev => ({ 
+        ...prev, 
+        brokers: err.response?.data?.message || 'Failed to delete broker' 
+      }));
+      return { success: false, message: err.response?.data?.message || 'Failed to delete broker' };
+    } finally {
+      setLoading(prev => ({ ...prev, brokers: false }));
+    }
+  };
+
+  // Get broker by ID
+  const getBrokerById = async (id) => {
+    if (!token) return;
+    
+    setLoading(prev => ({ ...prev, brokers: true }));
+    setError(prev => ({ ...prev, brokers: null }));
+    
+    try {
+      const response = await axios.get(`${backendUrl}/api/brokers/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data && response.data.success) {
+        return { success: true, data: response.data.data };
+      } else {
+        setError(prev => ({ 
+          ...prev, 
+          brokers: response.data.message || 'Failed to get broker' 
+        }));
+        return { success: false, message: response.data.message || 'Failed to get broker' };
+      }
+    } catch (err) {
+      setError(prev => ({ 
+        ...prev, 
+        brokers: err.response?.data?.message || 'Failed to get broker' 
+      }));
+      return { success: false, message: err.response?.data?.message || 'Failed to get broker' };
+    } finally {
+      setLoading(prev => ({ ...prev, brokers: false }));
+    }
+  };
+
+  // Add referral to broker
+  const addReferral = async (brokerId, referralData) => {
+    if (!token) return;
+    
+    setLoading(prev => ({ ...prev, brokers: true }));
+    setError(prev => ({ ...prev, brokers: null }));
+    
+    try {
+      const response = await axios.post(`${backendUrl}/api/brokers/${brokerId}/referrals`, referralData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data && response.data.success) {
+        // Refresh brokers list
+        fetchBrokers();
+        return { success: true, data: response.data.data };
+      } else {
+        setError(prev => ({ 
+          ...prev, 
+          brokers: response.data.message || 'Failed to add referral' 
+        }));
+        return { success: false, message: response.data.message || 'Failed to add referral' };
+      }
+    } catch (err) {
+      setError(prev => ({ 
+        ...prev, 
+        brokers: err.response?.data?.message || 'Failed to add referral' 
+      }));
+      return { success: false, message: err.response?.data?.message || 'Failed to add referral' };
+    } finally {
+      setLoading(prev => ({ ...prev, brokers: false }));
+    }
+  };
+
+  // Update referral
+  const updateReferral = async (brokerId, referralId, referralData) => {
+    if (!token) return;
+    
+    setLoading(prev => ({ ...prev, brokers: true }));
+    setError(prev => ({ ...prev, brokers: null }));
+    
+    try {
+      const response = await axios.put(`${backendUrl}/api/brokers/${brokerId}/referrals/${referralId}`, referralData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data && response.data.success) {
+        // Refresh brokers list
+        fetchBrokers();
+        return { success: true, data: response.data.data };
+      } else {
+        setError(prev => ({ 
+          ...prev, 
+          brokers: response.data.message || 'Failed to update referral' 
+        }));
+        return { success: false, message: response.data.message || 'Failed to update referral' };
+      }
+    } catch (err) {
+      setError(prev => ({ 
+        ...prev, 
+        brokers: err.response?.data?.message || 'Failed to update referral' 
+      }));
+      return { success: false, message: err.response?.data?.message || 'Failed to update referral' };
+    } finally {
+      setLoading(prev => ({ ...prev, brokers: false }));
+    }
+  };
+
+  // Delete referral
+  const deleteReferral = async (brokerId, referralId) => {
+    if (!token) return;
+    
+    setLoading(prev => ({ ...prev, brokers: true }));
+    setError(prev => ({ ...prev, brokers: null }));
+    
+    try {
+      const response = await axios.delete(`${backendUrl}/api/brokers/${brokerId}/referrals/${referralId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (response.data && response.data.success) {
+        // Refresh brokers list
+        fetchBrokers();
+        return { success: true };
+      } else {
+        setError(prev => ({ 
+          ...prev, 
+          brokers: response.data.message || 'Failed to delete referral' 
+        }));
+        return { success: false, message: response.data.message || 'Failed to delete referral' };
+      }
+    } catch (err) {
+      setError(prev => ({ 
+        ...prev, 
+        brokers: err.response?.data?.message || 'Failed to delete referral' 
+      }));
+      return { success: false, message: err.response?.data?.message || 'Failed to delete referral' };
+    } finally {
+      setLoading(prev => ({ ...prev, brokers: false }));
+    }
+  };
 
   return (
     <DataContext.Provider
@@ -480,10 +771,12 @@ export const DataProvider = ({ children }) => {
         tasks,
         banks,
         expenses,
+        brokers,
         totalCompanies,
         totalTasks,
         totalBanks,
         totalExpenses,
+        totalBrokers,
         loading,
         error,
         
@@ -492,6 +785,7 @@ export const DataProvider = ({ children }) => {
         fetchTasks,
         fetchBanks,
         fetchExpenses,
+        fetchBrokers,
         addCompany,
         addTask,
         addBank,
@@ -505,6 +799,13 @@ export const DataProvider = ({ children }) => {
         deleteBank,
         deleteExpense,
         clearError,
+        addBroker,
+        updateBroker,
+        deleteBroker,
+        getBrokerById,
+        addReferral,
+        updateReferral,
+        deleteReferral,
       }}
     >
       {children}

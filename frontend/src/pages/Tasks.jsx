@@ -7,6 +7,7 @@ const Tasks = () => {
   const {
     tasks,
     companies,
+    brokers,
     loading,
     error,
     fetchTasks,
@@ -14,6 +15,7 @@ const Tasks = () => {
     updateTask,
     deleteTask,
     fetchCompanies,
+    fetchBrokers,
     totalTasks
   } = useData();
   
@@ -27,8 +29,9 @@ const Tasks = () => {
     dueDate: '',
     clientCompany: '',
     providerCompany: '',
-    taskNumber: '',
     assignedTo: '',
+    broker: '',
+    brokerCommissionRate: 0,
     timeline: {
       startDate: '',
       endDate: '',
@@ -88,7 +91,8 @@ const Tasks = () => {
       limit: filters.limit
     });
     fetchCompanies();
-  }, [fetchTasks, fetchCompanies, filters]);
+    fetchBrokers();
+  }, [fetchTasks, fetchCompanies, fetchBrokers, filters]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -203,8 +207,9 @@ const Tasks = () => {
       dueDate: task.dueDate || '',
       clientCompany: task.clientCompany || task.company || '',
       providerCompany: task.providerCompany || '',
-      taskNumber: task.taskNumber || '',
       assignedTo: task.assignedTo._id || '',
+      broker: task.broker || '',
+      brokerCommissionRate: task.brokerCommissionRate || 0,
       timeline: {
         startDate: task.timeline?.startDate || '',
         endDate: task.timeline?.endDate || '',
@@ -272,6 +277,7 @@ const Tasks = () => {
 
   const tasksList = Array.isArray(tasks) ? tasks : [];
   const companiesList = Array.isArray(companies) ? companies : [];
+  const brokersList = Array.isArray(brokers) ? brokers : [];
 
   return (
     <div className="space-y-6">
@@ -386,21 +392,6 @@ const Tasks = () => {
                     />
                   </div>
 
-                  <div>
-                    <label htmlFor="taskNumber" className="block text-sm font-medium text-gray-700">
-                      Task Number *
-                    </label>
-                    <input
-                      type="text"
-                      id="taskNumber"
-                      name="taskNumber"
-                      value={formData.taskNumber}
-                      onChange={handleChange}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      required
-                    />
-                  </div>
-
                   <div className="md:col-span-2">
                     <label htmlFor="description" className="block text-sm font-medium text-gray-700">
                       Description *
@@ -462,6 +453,43 @@ const Tasks = () => {
                         </option>
                       ))}
                     </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="broker" className="block text-sm font-medium text-gray-700">
+                      Broker
+                    </label>
+                    <select
+                      id="broker"
+                      name="broker"
+                      value={formData.broker}
+                      onChange={handleChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    >
+                      <option value="">Select a broker</option>
+                      {brokersList.map((broker) => (
+                        <option key={broker._id} value={broker._id}>
+                          {broker.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="brokerCommissionRate" className="block text-sm font-medium text-gray-700">
+                      Broker Commission Rate (%)
+                    </label>
+                    <input
+                      type="number"
+                      id="brokerCommissionRate"
+                      name="brokerCommissionRate"
+                      value={formData.brokerCommissionRate}
+                      onChange={handleChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                    />
                   </div>
                 </div>
               </div>
@@ -790,6 +818,12 @@ const Tasks = () => {
                   Provider Company
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Broker
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Commission Rate
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -822,10 +856,16 @@ const Tasks = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {companiesList.find(c => c._id === task.providerCompany)?.name || 'Unknown'}
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {brokersList.find(b => b._id === task.broker)?.name || '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {task.brokerCommissionRate ? `${task.brokerCommissionRate}%` : '-'}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
                       onClick={() => handleEdit(task)}
-                      className="text-indigo-600 hover:text-indigo-900 mr-4"
+                      className="text-indigo-600 hover:text-indigo-900 mr-3"
                     >
                       Edit
                     </button>

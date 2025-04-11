@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useData } from '../context/DataContext';
 import { debounce } from 'lodash';
+import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 const Banks = () => {
   const {
@@ -13,6 +15,8 @@ const Banks = () => {
     deleteBank,
     totalBanks
   } = useData();
+
+  const { token } = useAuth();
 
   const initialFormState = {
     accountName: '',
@@ -40,6 +44,12 @@ const Banks = () => {
   });
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // New state for bank statements
+  const [selectedBank, setSelectedBank] = useState(null);
+  const [statements, setStatements] = useState([]);
+  const [statementLoading, setStatementLoading] = useState(false);
+  const [showStatementsModal, setShowStatementsModal] = useState(false);
 
   // Debounced search function
   const debouncedSearch = useCallback(
@@ -135,6 +145,91 @@ const Banks = () => {
   };
 
   const bankAccountsList = Array.isArray(banks) ? banks : [];
+
+  // New handlers for bank statements
+  const handleViewStatements = async (bank) => {
+    setSelectedBank(bank);
+    await fetchStatements(bank._id);
+    setShowStatementsModal(true);
+  };
+
+  const fetchStatements = async (bankId) => {
+    try {
+      setStatementLoading(true);
+      const response = await axios.get(`/api/banks/${bankId}/statements`, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json'
+        }
+      });
+      console.error("response", response);
+      
+      if (response.data && response.data.data) {
+        setStatements(response.data.data);
+      } else {
+        setStatements([]);
+        console.error('Invalid response format:', response);
+      }
+    } catch (err) {
+      console.error('Failed to fetch statements:', err.response?.data || err.message);
+      setStatements([]);
+    } finally {
+      setStatementLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('statement', file);
+    formData.append('bankId', selectedBank._id);
+
+    try {
+      setStatementLoading(true);
+      const response = await axios.post('/api/banks/statements/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json'
+        }
+      });
+
+      if (response.data && response.data.success) {
+        await fetchStatements(selectedBank._id);
+      } else {
+        console.error('Failed to upload statement:', response.data);
+      }
+    } catch (err) {
+      console.error('Failed to upload statement:', err.response?.data || err.message);
+    } finally {
+      setStatementLoading(false);
+    }
+  };
+
+  const downloadStatement = async (statementId) => {
+    try {
+      const response = await axios.get(`/api/banks/statements/${statementId}/download`, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/octet-stream'
+        },
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `statement-${statementId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Failed to download statement:', err.response?.data || err.message);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -509,8 +604,14 @@ const Banks = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
+                      onClick={() => handleViewStatements(account)}
+                      className="text-blue-600 hover:text-blue-900 mr-3"
+                    >
+                      View Statements
+                    </button>
+                    <button
                       onClick={() => handleEdit(account)}
-                      className="text-indigo-600 hover:text-indigo-900 mr-4"
+                      className="text-indigo-600 hover:text-indigo-900 mr-3"
                     >
                       Edit
                     </button>
@@ -550,6 +651,98 @@ const Banks = () => {
           </div>
         </div>
       </div>
+
+      {/* Add Statements Modal */}
+      {showStatementsModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-4/5 shadow-lg rounded-md bg-white">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">
+                Bank Statements - {selectedBank?.bankName} ({selectedBank?.accountNumber})
+              </h2>
+              <button
+                onClick={() => setShowStatementsModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <label className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-600">
+                Upload Statement
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".csv,.xml"
+                  onChange={handleFileUpload}
+                />
+              </label>
+            </div>
+
+            {statementLoading ? (
+              <div>Loading statements...</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Name</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {statements.map((statement) => (
+                      <tr key={statement._id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {new Date(statement.uploadDate).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {statement.fileType.toUpperCase()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {statement.fileName}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            statement.status === 'processed' 
+                              ? 'bg-green-100 text-green-800'
+                              : statement.status === 'failed'
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {statement.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <button
+                            onClick={() => downloadStatement(statement._id)}
+                            className="text-blue-600 hover:text-blue-900"
+                          >
+                            Download
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {statements.length === 0 && (
+                      <tr>
+                        <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                          No statements found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

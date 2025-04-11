@@ -370,7 +370,7 @@ const Dashboard = () => {
         </div>
         <div className="space-y-4">
           {recentActivities.map((activity) => (
-            <div key={`${activity.type}-${activity.id}`} className="activity-item">
+            <div key={`${activity.type}-${activity._id || activity.id}`} className="activity-item">
               <div className="activity-content">
                 <div className="activity-title">
                   {activity.type === 'task' ? activity.title : 'Expense'}

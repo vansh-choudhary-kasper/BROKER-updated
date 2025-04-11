@@ -4,7 +4,7 @@ const router = express.Router();
 
 const taskController = require('../controllers/task');
 const validateRequest = require('../middleware/validator');
-const authMiddleware = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 const { upload } = require('../middleware/fileUpload');
 
 // Validation middleware
@@ -19,7 +19,7 @@ const taskValidation = [
 ];
 
 // Routes
-router.use(authMiddleware); // Protect all task routes
+router.use(protect); // Protect all task routes
 
 router.post('/',
     taskValidation,

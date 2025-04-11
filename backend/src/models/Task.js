@@ -33,6 +33,21 @@ const taskSchema = new mongoose.Schema({
     required: true
     // Company that will execute the task
   },
+  
+  // Broker relationship
+  broker: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Broker',
+    required: false
+    // Broker who facilitated this task
+  },
+  brokerCommissionRate: {
+    type: Number,
+    required: false,
+    min: 0,
+    max: 100
+    // Commission rate for this specific task (percentage)
+  },
 
   assignedTo: {
     type: mongoose.Schema.Types.ObjectId,

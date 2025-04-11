@@ -7,6 +7,7 @@ import Companies from './pages/Companies';
 import Tasks from './pages/Tasks';
 import Banks from './pages/Banks';
 import Expenses from './pages/Expenses';
+import Broker from './pages/Broker';
 import { useAuth } from './context/AuthContext';
 
 // Protected Route component
@@ -24,31 +25,6 @@ const ProtectedRoute = ({ children }) => {
   if (!isAuthenticated) {
     console.log('Not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
-  }
-  
-  return children;
-};
-
-// Admin Route component
-const AdminRoute = ({ children }) => {
-  const { isAuthenticated, isAdmin, loading } = useAuth();
-  
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-  
-  if (!isAuthenticated) {
-    console.log('Not authenticated, redirecting to login');
-    return <Navigate to="/login" replace />;
-  }
-  
-  if (!isAdmin) {
-    console.log('Not an admin, redirecting to dashboard');
-    return <Navigate to="/" replace />;
   }
   
   return children;
@@ -120,6 +96,7 @@ function App() {
             <Route path="companies" element={<Companies />} />
             <Route path="tasks" element={<Tasks />} />
             <Route path="banks" element={<Banks />} />
+            <Route path="brokers" element={<Broker />} />
             <Route path="expenses" element={<Expenses />} />
           </Route>
         </Routes>

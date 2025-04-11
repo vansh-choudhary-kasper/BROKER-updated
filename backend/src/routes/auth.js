@@ -4,7 +4,7 @@ const router = express.Router();
 
 const authController = require('../controllers/auth');
 const validateRequest = require('../middleware/validator');
-const authMiddleware = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 
 // Validation middleware
 const loginValidation = [
@@ -26,7 +26,7 @@ const registerValidation = [
 // Routes
 router.post('/login', loginValidation, validateRequest, authController.login);
 router.post('/register', registerValidation, validateRequest, authController.register);
-router.post('/logout', authMiddleware, authController.logout);
+router.post('/logout', protect, authController.logout);
 router.post('/refresh-token', authController.refreshToken);
 router.post('/forgot-password', 
     body('email').isEmail().withMessage('Please enter a valid email'),
@@ -47,6 +47,6 @@ router.post('/reset-password',
 );
 
 // Get current user route
-router.get('/me', authMiddleware, authController.getCurrentUser);
+router.get('/me', protect, authController.getCurrentUser);
 
 module.exports = router; 
