@@ -19,8 +19,21 @@ const brokerValidation = [
   body('name').notEmpty().withMessage('Name is required'),
   body('email').isEmail().withMessage('Please enter a valid email'),
   body('phone').matches(/^[6-9]\d{9}$/).withMessage('Please enter a valid 10-digit phone number'),
-  body('address').notEmpty().withMessage('Address is required'),
-  body('isActive').optional().isBoolean().withMessage('isActive must be a boolean')
+  body('address.street').optional(),
+  body('address.city').optional(),
+  body('address.state').optional(),
+  body('address.country').optional(),
+  body('address.pincode').optional(),
+  body('gstNumber').optional(),
+  body('panNumber').optional().matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/).withMessage('Please enter a valid PAN number'),
+  body('bankDetails.accountNumber').optional(),
+  body('bankDetails.ifscCode').optional(),
+  body('bankDetails.bankName').optional(),
+  body('bankDetails.branchName').optional(),
+  body('financialSummary.totalTasks').optional().isInt({ min: 0 }).withMessage('Total tasks must be a non-negative integer'),
+  body('financialSummary.totalCommission').optional().isFloat({ min: 0 }).withMessage('Total commission must be a non-negative number'),
+  body('financialSummary.pendingCommission').optional().isFloat({ min: 0 }).withMessage('Pending commission must be a non-negative number'),
+  body('status').optional().isIn(['active', 'inactive', 'suspended']).withMessage('Status must be active, inactive, or suspended')
 ];
 
 // Routes

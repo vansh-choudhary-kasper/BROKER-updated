@@ -19,7 +19,27 @@ const Broker = () => {
     name: '',
     email: '',
     phone: '',
-    address: '',
+    address: {
+      street: '',
+      city: '',
+      state: '',
+      country: '',
+      pincode: ''
+    },
+    gstNumber: '',
+    panNumber: '',
+    bankDetails: {
+      accountNumber: '',
+      ifscCode: '',
+      bankName: '',
+      branchName: ''
+    },
+    financialSummary: {
+      totalTasks: 0,
+      totalCommission: 0,
+      pendingCommission: 0,
+      lastUpdated: new Date()
+    },
     status: 'inactive',
     referrals: []
   };
@@ -35,6 +55,8 @@ const Broker = () => {
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedBroker, setSelectedBroker] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   // Debounced search function
   const debouncedSearch = useCallback(
@@ -64,10 +86,23 @@ const Broker = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    // Handle nested objects (address, bankDetails)
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.');
+      setFormData(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -76,6 +111,7 @@ const Broker = () => {
     try {
       if (editingBroker) {
         const result = await updateBroker(editingBroker._id, formData);
+        console.log("result", result);
         if (result.success) {
           toast.success('Broker updated successfully');
           setFormData(initialFormState);
@@ -105,7 +141,27 @@ const Broker = () => {
       name: broker.name,
       email: broker.email,
       phone: broker.phone,
-      address: broker.address,
+      address: broker.address || {
+        street: '',
+        city: '',
+        state: '',
+        country: '',
+        pincode: ''
+      },
+      gstNumber: broker.gstNumber || '',
+      panNumber: broker.panNumber || '',
+      bankDetails: broker.bankDetails || {
+        accountNumber: '',
+        ifscCode: '',
+        bankName: '',
+        branchName: ''
+      },
+      financialSummary: broker.financialSummary || {
+        totalTasks: 0,
+        totalCommission: 0,
+        pendingCommission: 0,
+        lastUpdated: new Date()
+      },
       status: broker.status
     });
     setEditingBroker(broker);
@@ -131,6 +187,11 @@ const Broker = () => {
     if (newPage >= 1 && newPage <= totalPages) {
       setFilters(prev => ({ ...prev, page: newPage }));
     }
+  };
+
+  const handleViewDetails = (broker) => {
+    setSelectedBroker(broker);
+    setShowDetailsModal(true);
   };
 
   return (
@@ -242,15 +303,108 @@ const Broker = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Address</label>
-                  <textarea
-                    name="address"
-                    value={formData.address}
+                  <label className="block text-sm font-medium text-gray-700">GST Number</label>
+                  <input
+                    type="text"
+                    name="gstNumber"
+                    value={formData.gstNumber}
                     onChange={handleChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    required
-                    rows={3}
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">PAN Number</label>
+                  <input
+                    type="text"
+                    name="panNumber"
+                    value={formData.panNumber}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}"
+                    title="Please enter a valid PAN number (e.g., ABCDE1234F)"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700">Address</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
+                    <input
+                      type="text"
+                      name="address.street"
+                      value={formData.address.street}
+                      onChange={handleChange}
+                      placeholder="Street"
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                    <input
+                      type="text"
+                      name="address.city"
+                      value={formData.address.city}
+                      onChange={handleChange}
+                      placeholder="City"
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                    <input
+                      type="text"
+                      name="address.state"
+                      value={formData.address.state}
+                      onChange={handleChange}
+                      placeholder="State"
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                    <input
+                      type="text"
+                      name="address.country"
+                      value={formData.address.country}
+                      onChange={handleChange}
+                      placeholder="Country"
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                    <input
+                      type="text"
+                      name="address.pincode"
+                      value={formData.address.pincode}
+                      onChange={handleChange}
+                      placeholder="Pincode"
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                  </div>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700">Bank Details</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
+                    <input
+                      type="text"
+                      name="bankDetails.accountNumber"
+                      value={formData.bankDetails.accountNumber}
+                      onChange={handleChange}
+                      placeholder="Account Number"
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                    <input
+                      type="text"
+                      name="bankDetails.ifscCode"
+                      value={formData.bankDetails.ifscCode}
+                      onChange={handleChange}
+                      placeholder="IFSC Code"
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                    <input
+                      type="text"
+                      name="bankDetails.bankName"
+                      value={formData.bankDetails.bankName}
+                      onChange={handleChange}
+                      placeholder="Bank Name"
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                    <input
+                      type="text"
+                      name="bankDetails.branchName"
+                      value={formData.bankDetails.branchName}
+                      onChange={handleChange}
+                      placeholder="Branch Name"
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                  </div>
                 </div>
                 <div className="md:col-span-2">
                   <div className="flex items-center">
@@ -293,6 +447,138 @@ const Broker = () => {
         </div>
       )}
 
+      {/* Broker Details Modal */}
+      {showDetailsModal && selectedBroker && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-semibold text-gray-900">Broker Details</h2>
+              <button
+                onClick={() => {
+                  setShowDetailsModal(false);
+                  setSelectedBroker(null);
+                }}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Basic Information */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">Name</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.name}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">Email</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.email}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">Phone</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.phone}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">Status</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.status}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">GST Number</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.gstNumber || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">PAN Number</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.panNumber || 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Address Information */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Address</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">Street</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.address?.street || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">City</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.address?.city || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">State</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.address?.state || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">Country</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.address?.country || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">Pincode</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.address?.pincode || 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bank Details */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Bank Details</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">Account Number</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.bankDetails?.accountNumber || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">IFSC Code</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.bankDetails?.ifscCode || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">Bank Name</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.bankDetails?.bankName || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">Branch Name</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.bankDetails?.branchName || 'N/A'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Financial Summary */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Financial Summary</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">Total Tasks</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.financialSummary?.totalTasks || 0}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">Total Commission</label>
+                    <p className="mt-1 text-sm text-gray-900">₹{selectedBroker.financialSummary?.totalCommission || 0}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">Pending Commission</label>
+                    <p className="mt-1 text-sm text-gray-900">₹{selectedBroker.financialSummary?.pendingCommission || 0}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500">Last Updated</label>
+                    <p className="mt-1 text-sm text-gray-900">
+                      {selectedBroker.financialSummary?.lastUpdated ? 
+                        new Date(selectedBroker.financialSummary.lastUpdated).toLocaleDateString() : 
+                        'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Broker List */}
       <div className="bg-white shadow rounded-lg overflow-hidden">
         <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
@@ -313,33 +599,48 @@ const Broker = () => {
           ) : (
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
-                <tr>
+                <tr className="bg-gray-100">
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Financial Summary</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200">
                 {brokers.map((broker) => (
                   <tr key={broker._id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{broker.name}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{broker.email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{broker.phone}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        onClick={() => handleViewDetails(broker)}
+                        className="text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        {broker.name}
+                      </button>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">{broker.email}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{broker.phone}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm">
+                        <div>Tasks: {broker.financialSummary?.totalTasks || 0}</div>
+                        <div>Commission: ₹{broker.financialSummary?.totalCommission || 0}</div>
+                        <div>Pending: ₹{broker.financialSummary?.pendingCommission || 0}</div>
+                      </div>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        broker.status === 'active'
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
+                        broker.status === 'active' ? 'bg-green-100 text-green-800' :
+                        broker.status === 'inactive' ? 'bg-red-100 text-red-800' :
+                        'bg-yellow-100 text-yellow-800'
                       }`}>
-                        {broker.status === 'active' ? 'Active' : 'Inactive'}
+                        {broker.status}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button
                         onClick={() => handleEdit(broker)}
-                        className="text-indigo-600 hover:text-indigo-900 mr-3"
+                        className="text-indigo-600 hover:text-indigo-900 mr-4"
                       >
                         Edit
                       </button>

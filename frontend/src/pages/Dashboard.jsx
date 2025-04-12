@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useData } from '../context/DataContext';
-import { 
+import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
@@ -19,9 +19,9 @@ const Dashboard = () => {
     fetchBanks,
     fetchExpenses,
   } = useData();
-  
+
   const { token } = useAuth();
-  
+
   // New state for profit and loss data
   const [profitLossData, setProfitLossData] = useState({
     monthly: [],
@@ -36,13 +36,13 @@ const Dashboard = () => {
 
   // Check if any data is still loading
   const isLoading = loading.companies || loading.banks || loading.expenses || profitLossData.loading;
-  
+
   // Check if there are any errors
   const hasError = error.companies || error.banks || error.expenses || profitLossData.error;
 
   // Calculate statistics with null checks
-  const totalExpenses = Array.isArray(expenses) 
-    ? expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0) 
+  const totalExpenses = Array.isArray(expenses)
+    ? expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0)
     : 0;
 
   // Fetch profit and loss data
@@ -50,11 +50,11 @@ const Dashboard = () => {
     const fetchProfitLossData = async () => {
       try {
         setProfitLossData(prev => ({ ...prev, loading: true, error: null }));
-        
+
         const response = await axios.get(`${backendUrl}/api/dashboard/profit-loss`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        
+
         if (response.data && response.data.success) {
           setProfitLossData({
             monthly: response.data.monthly || [],
@@ -78,24 +78,24 @@ const Dashboard = () => {
         }));
       }
     };
-    
+
     fetchProfitLossData();
   }, [token]);
 
   // Calculate profit growth percentages
-  const monthlyGrowth = profitLossData.lastMonth > 0 
-    ? ((profitLossData.currentMonth - profitLossData.lastMonth) / profitLossData.lastMonth) * 100 
-    : 0;
-    
-  const yearlyGrowth = profitLossData.lastYear > 0 
-    ? ((profitLossData.currentYear - profitLossData.lastYear) / profitLossData.lastYear) * 100 
+  const monthlyGrowth = profitLossData.lastMonth > 0
+    ? ((profitLossData.currentMonth - profitLossData.lastMonth) / profitLossData.lastMonth) * 100
     : 0;
 
-  const expenseCategories = Array.isArray(expenses) 
+  const yearlyGrowth = profitLossData.lastYear > 0
+    ? ((profitLossData.currentYear - profitLossData.lastYear) / profitLossData.lastYear) * 100
+    : 0;
+
+  const expenseCategories = Array.isArray(expenses)
     ? expenses.reduce((acc, expense) => {
-        acc[expense.category] = (acc[expense.category] || 0) + (expense.amount || 0);
-        return acc;
-      }, {})
+      acc[expense.category] = (acc[expense.category] || 0) + (expense.amount || 0);
+      return acc;
+    }, {})
     : {};
 
   const expenseCategoryData = Object.entries(expenseCategories).map(([name, value]) => ({
@@ -103,12 +103,23 @@ const Dashboard = () => {
     value
   }));
 
-  const companyTypes = Array.isArray(companies) 
+  let unorderedCompanyTypes = Array.isArray(companies)
     ? companies.reduce((acc, company) => {
-        acc[company.type] = (acc[company.type] || 0) + 1;
-        return acc;
-      }, {})
+      acc[company.type] = (acc[company.type] || 0) + 1;
+      return acc;
+    }, {})
     : {};
+
+  // Desired order
+  const typeOrder = ['provider', 'client', 'both'];
+
+  // Reordering companyTypes based on the specified typeOrder
+  const companyTypes = {};
+  typeOrder.forEach((type) => {
+    if (unorderedCompanyTypes[type]) {
+      companyTypes[type] = unorderedCompanyTypes[type];
+    }
+  });
 
   const companyTypeData = Object.entries(companyTypes).map(([name, value]) => ({
     name: name.charAt(0).toUpperCase() + name.slice(1),
@@ -116,32 +127,32 @@ const Dashboard = () => {
   }));
 
   // Get recent bank transactions
-  const recentTransactions = Array.isArray(banks) 
+  const recentTransactions = Array.isArray(banks)
     ? banks
-        .flatMap(bank => {
-          // Check if bank has transactions property
-          if (!bank.transactions) return [];
-          
-          return bank.transactions.map(transaction => ({
-            ...transaction,
-            bankName: bank.bankName,
-            accountName: bank.accountName
-          }));
-        })
-        .sort((a, b) => new Date(b.date) - new Date(a.date))
-        .slice(0, 5)
+      .flatMap(bank => {
+        // Check if bank has transactions property
+        if (!bank.transactions) return [];
+
+        return bank.transactions.map(transaction => ({
+          ...transaction,
+          bankName: bank.bankName,
+          accountName: bank.accountName
+        }));
+      })
+      .sort((a, b) => new Date(b.date) - new Date(a.date))
+      .slice(0, 5)
     : [];
 
   // Get recent activities (only expenses)
-  const recentActivities = Array.isArray(expenses) 
+  const recentActivities = Array.isArray(expenses)
     ? expenses
-        .map((expense) => ({
-          ...expense,
-          type: 'expense',
-          date: new Date(expense.date || expense.createdAt || expense.created_at || new Date()),
-        }))
-        .sort((a, b) => b.date - a.date)
-        .slice(0, 5)
+      .map((expense) => ({
+        ...expense,
+        type: 'expense',
+        date: new Date(expense.date || expense.createdAt || expense.created_at || new Date()),
+      }))
+      .sort((a, b) => b.date - a.date)
+      .slice(0, 5)
     : [];
 
   // Colors for charts
@@ -184,7 +195,7 @@ const Dashboard = () => {
             {error.expenses && <div>Expenses: {error.expenses}</div>}
             {profitLossData.error && <div>Profit & Loss: {profitLossData.error}</div>}
           </p>
-          <button 
+          <button
             className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
             onClick={() => {
               fetchCompanies();
@@ -224,7 +235,7 @@ const Dashboard = () => {
           </div>
           <p className="text-xs text-gray-500 mt-1">vs. Last Month: ₹{profitLossData.lastMonth.toLocaleString()}</p>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
           <h3 className="text-sm font-medium text-gray-500">Current Year Profit</h3>
           <div className="flex items-center justify-between mt-2">
@@ -244,7 +255,7 @@ const Dashboard = () => {
           </div>
           <p className="text-xs text-gray-500 mt-1">vs. Last Year: ₹{profitLossData.lastYear.toLocaleString()}</p>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
           <h3 className="text-sm font-medium text-gray-500">Total Companies</h3>
           <p className="text-2xl font-bold text-gray-900 mt-2">{Array.isArray(companies) ? companies.length : 0}</p>
@@ -267,18 +278,18 @@ const Dashboard = () => {
                 <YAxis />
                 <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
                 <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="profit" 
-                  name="Profit" 
-                  stroke={PROFIT_COLOR} 
-                  activeDot={{ r: 8 }} 
+                <Line
+                  type="monotone"
+                  dataKey="profit"
+                  name="Profit"
+                  stroke={PROFIT_COLOR}
+                  activeDot={{ r: 8 }}
                 />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
-        
+
         {/* Yearly Profit Chart */}
         <div className="bg-white rounded-lg shadow p-4">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Yearly Profit Comparison</h3>
@@ -328,7 +339,7 @@ const Dashboard = () => {
             </ResponsiveContainer>
           </div>
         </div>
-        
+
         {/* Company Types Chart */}
         <div className="bg-white rounded-lg shadow p-4">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Company Types</h3>
@@ -379,7 +390,7 @@ const Dashboard = () => {
             <p className="text-gray-500 text-center py-4">No recent expenses</p>
           )}
         </div>
-        
+
         {/* Recent Bank Transactions */}
         <div className="bg-white rounded-lg shadow p-4">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Bank Transactions</h3>

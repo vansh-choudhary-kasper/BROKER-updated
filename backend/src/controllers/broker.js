@@ -10,17 +10,7 @@ exports.createBroker = async (req, res) => {
       data: broker
     });
   } catch (error) {
-    console.log("error", error);
-    if (error.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email already exists'
-      });
-    }
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(400).json({ message: error.message });
   }
 };
 
@@ -75,25 +65,13 @@ exports.getBrokers = async (req, res) => {
 // Get broker by ID
 exports.getBrokerById = async (req, res) => {
   try {
-    const broker = await Broker.findById(req.params.id)
-      .populate('referrals.company', 'name');
-    
+    const broker = await Broker.findById(req.params.id);
     if (!broker) {
-      return res.status(404).json({
-        success: false,
-        message: 'Broker not found'
-      });
+      return res.status(404).json({ message: 'Broker not found' });
     }
-    
-    res.json({
-      success: true,
-      data: broker
-    });
+    res.json(broker);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -120,17 +98,7 @@ exports.updateBroker = async (req, res) => {
       data: broker
     });
   } catch (error) {
-    console.log("error", error);
-    if (error.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email already exists'
-      });
-    }
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
+    res.status(400).json({ message: error.message });
   }
 };
 
