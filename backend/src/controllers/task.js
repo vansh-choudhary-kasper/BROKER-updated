@@ -56,6 +56,7 @@ class TaskController {
 
             // Generate task number if not provided
             const finalTaskNumber = taskNumber || await this.generateTaskNumber();
+            console.log("finalTaskNumber", finalTaskNumber);
 
             // Verify client company exists
             const clientCompanyExists = await Company.findById(clientCompany);
@@ -108,6 +109,7 @@ class TaskController {
                 ApiResponse.success('Task created successfully', task)
             );
         } catch (error) {
+            console.log("error", error);
             logger.error('Create Task Error:', error);
             return res.status(500).json(
                 ApiResponse.error('Failed to create task', error.message)
@@ -276,14 +278,12 @@ class TaskController {
         try {
             const { id } = req.params;
             
-            const task = await Task.findById(id);
+            const task = await Task.findByIdAndDelete(id);
             if (!task) {
                 return res.status(404).json(
                     ApiResponse.notFound('Task not found')
                 );
             }
-            
-            await task.remove();
             
             return res.status(200).json(
                 ApiResponse.success('Task deleted successfully')

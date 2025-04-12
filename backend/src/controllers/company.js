@@ -60,7 +60,9 @@ class CompanyController {
                     { name: { $regex: search, $options: 'i' } },
                     { 'businessDetails.gstNumber': { $regex: search, $options: 'i' } },
                     { 'businessDetails.panNumber': { $regex: search, $options: 'i' } },
-                    { 'contactPerson.email': { $regex: search, $options: 'i' } }
+                    { 'contactPerson.email': { $regex: search, $options: 'i' } },
+                    { 'bankDetails.accountNumber': { $regex: search, $options: 'i' } },
+                    { 'bankDetails.ifscCode': { $regex: search, $options: 'i' } }
                 ]
             } : {};
 

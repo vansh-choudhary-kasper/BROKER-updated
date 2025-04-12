@@ -153,44 +153,6 @@ const BankDetailsForm = ({ bankDetails, onChange, onFileChange, onAdd, onRemove 
                 required
               />
             </div>
-
-            <div>
-              <label htmlFor={`bankDetails.${index}.bankStatement`} className="block text-sm font-medium text-gray-700">
-                Bank Statement
-              </label>
-              <input
-                type="file"
-                id={`bankDetails.${index}.bankStatement`}
-                name={`bankDetails.${index}.bankStatement`}
-                onChange={(e) => onFileChange(index, 'bankStatement', e.target.files[0])}
-                className="mt-1 block w-full text-sm text-gray-500
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-md file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-indigo-50 file:text-indigo-700
-                  hover:file:bg-indigo-100"
-                accept=".pdf,.jpg,.jpeg,.png"
-              />
-            </div>
-
-            <div>
-              <label htmlFor={`bankDetails.${index}.cancelledCheque`} className="block text-sm font-medium text-gray-700">
-                Cancelled Cheque
-              </label>
-              <input
-                type="file"
-                id={`bankDetails.${index}.cancelledCheque`}
-                name={`bankDetails.${index}.cancelledCheque`}
-                onChange={(e) => onFileChange(index, 'cancelledCheque', e.target.files[0])}
-                className="mt-1 block w-full text-sm text-gray-500
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-md file:border-0
-                  file:text-sm file:font-semibold
-                  file:bg-indigo-50 file:text-indigo-700
-                  hover:file:bg-indigo-100"
-                accept=".pdf,.jpg,.jpeg,.png"
-              />
-            </div>
           </div>
         </div>
       ))}

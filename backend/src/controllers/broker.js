@@ -10,6 +10,7 @@ exports.createBroker = async (req, res) => {
       data: broker
     });
   } catch (error) {
+    console.log("error", error);
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
@@ -42,7 +43,7 @@ exports.getBrokers = async (req, res) => {
     
     // Add status filter
     if (status) {
-      query.isActive = status === 'active';
+      query.status = status;
     }
     
     // Execute query with pagination
@@ -99,11 +100,13 @@ exports.getBrokerById = async (req, res) => {
 // Update broker
 exports.updateBroker = async (req, res) => {
   try {
+    console.log("req.body", req.body);
     const broker = await Broker.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     );
+    console.log("broker", broker);
     
     if (!broker) {
       return res.status(404).json({
@@ -117,6 +120,7 @@ exports.updateBroker = async (req, res) => {
       data: broker
     });
   } catch (error) {
+    console.log("error", error);
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,

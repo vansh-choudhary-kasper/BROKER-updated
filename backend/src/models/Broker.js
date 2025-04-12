@@ -9,14 +9,12 @@ const brokerSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: true,
     unique: true,
     trim: true,
     lowercase: true
   },
   phone: {
     type: String,
-    required: true,
     trim: true
   },
   address: {
@@ -27,21 +25,13 @@ const brokerSchema = new mongoose.Schema({
     pincode: String
   },
 
-  // Business details
-  companyName: {
-    type: String,
-    required: true,
-    trim: true
-  },
   gstNumber: {
     type: String,
-    required: true,
-    unique: true,
     trim: true
   },
+
   panNumber: {
     type: String,
-    required: true,
     unique: true,
     trim: true
   },
@@ -50,86 +40,15 @@ const brokerSchema = new mongoose.Schema({
   bankDetails: {
     accountNumber: {
       type: String,
-      required: true
     },
     ifscCode: {
       type: String,
-      required: true
     },
     bankName: {
       type: String,
-      required: true
     },
     branchName: String
   },
-
-  // Commission structure
-  commissionStructure: {
-    defaultRate: {
-      type: Number,
-      required: true,
-      min: 0,
-      max: 100,
-      default: 10
-    },
-    minimumCommission: {
-      type: Number,
-      required: true,
-      min: 0,
-      default: 1000
-    }
-  },
-
-  // Broker relationships
-  helperBrokers: [{
-    broker: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Broker',
-      required: true
-    },
-    commissionShare: {
-      type: Number,
-      required: true,
-      min: 0,
-      max: 100
-    },
-    status: {
-      type: String,
-      enum: ['active', 'inactive'],
-      default: 'active'
-    },
-    startDate: {
-      type: Date,
-      default: Date.now
-    },
-    endDate: Date
-  }],
-
-  // Task tracking
-  tasks: [{
-    task: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Task',
-      required: true
-    },
-    role: {
-      type: String,
-      enum: ['admin', 'helper'],
-      required: true
-    },
-    commission: {
-      type: Number,
-      required: true,
-      min: 0,
-      max: 100
-    },
-    status: {
-      type: String,
-      enum: ['pending', 'paid'],
-      default: 'pending'
-    },
-    paymentDate: Date
-  }],
 
   // Financial summary
   financialSummary: {

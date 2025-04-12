@@ -271,6 +271,8 @@ export const DataProvider = ({ children }) => {
         }
       });
 
+      console.log('Fetching brokers with params:', queryParams.toString());
+      
       const response = await axios.get(`${backendUrl}/api/brokers?${queryParams.toString()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -285,6 +287,7 @@ export const DataProvider = ({ children }) => {
       
       setLastFetchTime(prev => ({ ...prev, brokers: now }));
     } catch (err) {
+      console.error('Error fetching brokers:', err);
       setError(prev => ({ 
         ...prev, 
         brokers: err.response?.data?.message || 'Failed to fetch brokers' 

@@ -20,7 +20,7 @@ const Broker = () => {
     email: '',
     phone: '',
     address: '',
-    isActive: true,
+    status: 'inactive',
     referrals: []
   };
 
@@ -55,6 +55,13 @@ const Broker = () => {
     fetchBrokers(filters);
   }, [fetchBrokers, filters]);
 
+  // Add a new useEffect to update totalPages when totalBrokers changes
+  useEffect(() => {
+    if (totalBrokers > 0) {
+      setTotalPages(Math.ceil(totalBrokers / filters.limit));
+    }
+  }, [totalBrokers, filters.limit]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -65,6 +72,7 @@ const Broker = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("formData", formData);
     try {
       if (editingBroker) {
         const result = await updateBroker(editingBroker._id, formData);
@@ -98,7 +106,7 @@ const Broker = () => {
       email: broker.email,
       phone: broker.phone,
       address: broker.address,
-      isActive: broker.isActive
+      status: broker.status
     });
     setEditingBroker(broker);
     setShowForm(true);
@@ -248,13 +256,13 @@ const Broker = () => {
                   <div className="flex items-center">
                     <input
                       type="checkbox"
-                      id="isActive"
-                      name="isActive"
-                      checked={formData.isActive}
-                      onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                      id="status"
+                      name="status"
+                      checked={formData.status === 'active'}
+                      onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.checked ? 'active' : 'inactive' }))}
                       className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                     />
-                    <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
+                    <label htmlFor="status" className="ml-2 block text-sm text-gray-900">
                       Active Broker
                     </label>
                   </div>
@@ -321,11 +329,11 @@ const Broker = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{broker.phone}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        broker.isActive 
+                        broker.status === 'active'
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {broker.isActive ? 'Active' : 'Inactive'}
+                        {broker.status === 'active' ? 'Active' : 'Inactive'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
