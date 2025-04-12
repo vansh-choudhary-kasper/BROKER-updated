@@ -1,6 +1,25 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+const slabSchema = new mongoose.Schema({
+  minAmount: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  maxAmount: {
+    type: Number,
+    required: true,
+    min: 0
+  },
+  commission: {
+    type: Number,
+    required: true,
+    min: 0,
+    max: 100
+  },
+});
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -32,6 +51,8 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  clientSlabs: [slabSchema],
+  providerSlabs: [slabSchema],
   lastLogin: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
@@ -45,6 +66,46 @@ const userSchema = new mongoose.Schema({
   }
 }, {
   timestamps: true
+});
+
+// Validate slabs before saving
+userSchema.pre('save', async function(next) {
+  // Skip validation if slabs are not modified
+  if (!this.isModified('clientSlabs') && !this.isModified('providerSlabs')) {
+    return next();
+  }
+
+  try {
+    // Validate client slabs
+    if (this.clientSlabs.length > 0) {
+      // Sort slabs by minAmount
+      this.clientSlabs.sort((a, b) => a.minAmount - b.minAmount);
+      
+      // Check for gaps and overlaps
+      for (let i = 0; i < this.clientSlabs.length - 1; i++) {
+        if (this.clientSlabs[i].maxAmount + 1 !== this.clientSlabs[i + 1].minAmount) {
+          throw new Error('Client slabs must be continuous without gaps or overlaps');
+        }
+      }
+    }
+
+    // Validate provider slabs
+    if (this.providerSlabs.length > 0) {
+      // Sort slabs by minAmount
+      this.providerSlabs.sort((a, b) => a.minAmount - b.minAmount);
+      
+      // Check for gaps and overlaps
+      for (let i = 0; i < this.providerSlabs.length - 1; i++) {
+        if (this.providerSlabs[i].maxAmount + 1 !== this.providerSlabs[i + 1].minAmount) {
+          throw new Error('Provider slabs must be continuous without gaps or overlaps');
+        }
+      }
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 // Hash password before saving

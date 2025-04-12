@@ -8,6 +8,7 @@ import Tasks from './pages/Tasks';
 import Banks from './pages/Banks';
 import Expenses from './pages/Expenses';
 import Broker from './pages/Broker';
+import Slabs from './pages/Slabs';
 import { useAuth } from './context/AuthContext';
 
 // Protected Route component
@@ -97,6 +98,7 @@ function App() {
             <Route path="banks" element={<Banks />} />
             <Route path="brokers" element={<Broker />} />
             <Route path="expenses" element={<Expenses />} />
+            <Route path="slabs" element={<Slabs />} />
           </Route>
         </Routes>
       </AuthChecker>

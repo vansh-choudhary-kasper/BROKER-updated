@@ -82,6 +82,7 @@ export const AuthProvider = ({ children }) => {
             console.error('Auth check failed:', error);
             setStoredToken(null);
             setUser(null);
+            logout();
             setToken(null);
             setIsAuthenticated(false);
             setIsAdmin(false);
