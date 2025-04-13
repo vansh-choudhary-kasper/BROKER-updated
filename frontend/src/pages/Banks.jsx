@@ -16,7 +16,8 @@ const Banks = () => {
     addBank,
     updateBank,
     deleteBank,
-    totalBanks
+    totalBanks,
+    companies,
   } = useData();
 
   const { token } = useAuth();
@@ -50,9 +51,6 @@ const Banks = () => {
 
   // New state for bank statements
   const [selectedBank, setSelectedBank] = useState(null);
-  const [statements, setStatements] = useState([]);
-  const [statementLoading, setStatementLoading] = useState(false);
-  const [showStatementsModal, setShowStatementsModal] = useState(false);
 
   // New state for bank history upload
   const [uploadHistory, setUploadHistory] = useState({
@@ -61,6 +59,18 @@ const Banks = () => {
     error: null,
     success: false,
     preview: []
+  });
+
+  // New state for transactions
+  const [showTransactionsModal, setShowTransactionsModal] = useState(false);
+  const [transactions, setTransactions] = useState([]);
+  const [transactionLoading, setTransactionLoading] = useState(false);
+  const [transactionFilters, setTransactionFilters] = useState({
+    startDate: '',
+    endDate: '',
+    type: '',
+    page: 1,
+    limit: 10
   });
 
   // Debounced search function
@@ -157,91 +167,6 @@ const Banks = () => {
   };
 
   const bankAccountsList = Array.isArray(banks) ? banks : [];
-
-  // New handlers for bank statements
-  const handleViewStatements = async (bank) => {
-    setSelectedBank(bank);
-    await fetchStatements(bank._id);
-    setShowStatementsModal(true);
-  };
-
-  const fetchStatements = async (bankId) => {
-    try {
-      setStatementLoading(true);
-      const response = await axios.get(`${backendUrl}/api/banks/${bankId}/statements`, {
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json'
-        }
-      });
-      console.error("response", response);
-      
-      if (response.data && response.data.data) {
-        setStatements(response.data.data);
-      } else {
-        setStatements([]);
-        console.error('Invalid response format:', response);
-      }
-    } catch (err) {
-      console.error('Failed to fetch statements:', err.response?.data || err.message);
-      setStatements([]);
-    } finally {
-      setStatementLoading(false);
-    }
-  };
-
-  const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const formData = new FormData();
-    formData.append('statement', file);
-    formData.append('bankId', selectedBank._id);
-
-    try {
-      setStatementLoading(true);
-      const response = await axios.post(`${backendUrl}/api/banks/statements/upload`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json'
-        }
-      });
-
-      if (response.data && response.data.success) {
-        await fetchStatements(selectedBank._id);
-      } else {
-        console.error('Failed to upload statement:', response.data);
-      }
-    } catch (err) {
-      console.error('Failed to upload statement:', err.response?.data || err.message);
-    } finally {
-      setStatementLoading(false);
-    }
-  };
-
-  const downloadStatement = async (statementId) => {
-    try {
-      const response = await axios.get(`${backendUrl}/api/banks/statements/${statementId}/download`, {
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/octet-stream'
-        },
-        responseType: 'blob'
-      });
-      
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `statement-${statementId}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Failed to download statement:', err.response?.data || err.message);
-    }
-  };
 
   // New function to handle bank history file upload
   const handleBankHistoryUpload = async (event) => {
@@ -355,6 +280,59 @@ const Banks = () => {
       console.log("error", error);
       throw new Error(error.response?.data?.message || 'Failed to upload bank history');
     }
+  };
+
+  // New handlers for bank transactions
+  const handleViewTransactions = async (bank) => {
+    setSelectedBank(bank);
+    await fetchTransactions(bank._id);
+    setShowTransactionsModal(true);
+  };
+
+  const fetchTransactions = async (bankId) => {
+    try {
+      setTransactionLoading(true);
+      const queryParams = new URLSearchParams({
+        ...transactionFilters
+      }).toString();
+      
+      const response = await axios.get(
+        `${backendUrl}/api/banks/${bankId}/transactions?${queryParams}`,
+        {
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json'
+          }
+        }
+      );
+      
+      if (response.data && response.data.data) {
+        setTransactions(response.data.data.transactions);
+      } else {
+        setTransactions([]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch transactions:', err.response?.data || err.message);
+      setTransactions([]);
+    } finally {
+      setTransactionLoading(false);
+    }
+  };
+
+  const handleTransactionFilterChange = (e) => {
+    const { name, value } = e.target;
+    setTransactionFilters(prev => ({
+      ...prev,
+      [name]: value,
+      page: 1 // Reset page when filters change
+    }));
+  };
+
+  // Add function to get company name by ID
+  const getCompanyNameById = (companyId) => {
+    if (!companyId) return 'Other';
+    const company = companies?.find(c => c._id === companyId);
+    return company ? company.name : 'Other';
   };
 
   return (
@@ -724,7 +702,7 @@ const Banks = () => {
           
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
             <p className="text-sm text-blue-800">
-              <span className="font-medium">Note:</span> The system will automatically create or update bank accounts and companies based on the uploaded data.
+              <span className="font-medium">Note:</span> Transactions with incorrect bank names or account numbers will be rejected, as the system doesn't create new accounts or companies.
             </p>
           </div>
         </div>
@@ -858,10 +836,10 @@ const Banks = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
-                      onClick={() => handleViewStatements(account)}
-                      className="text-blue-600 hover:text-blue-900 mr-3"
+                      onClick={() => handleViewTransactions(account)}
+                      className="text-indigo-600 hover:text-indigo-900 mr-3"
                     >
-                      View Statements
+                      Transactions
                     </button>
                     <button
                       onClick={() => handleEdit(account)}
@@ -906,16 +884,16 @@ const Banks = () => {
         </div>
       </div>
 
-      {/* Add Statements Modal */}
-      {showStatementsModal && (
+      {/* Transactions Modal */}
+      {showTransactionsModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-4/5 shadow-lg rounded-md bg-white">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">
-                Bank Statements - {selectedBank?.bankName} ({selectedBank?.accountNumber})
+                Bank Transactions - {selectedBank?.bankName} ({selectedBank?.accountNumber})
               </h2>
               <button
-                onClick={() => setShowStatementsModal(false)}
+                onClick={() => setShowTransactionsModal(false)}
                 className="text-gray-500 hover:text-gray-700"
               >
                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -924,20 +902,56 @@ const Banks = () => {
               </button>
             </div>
 
-            <div className="mb-4">
-              <label className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer hover:bg-blue-600">
-                Upload Statement
+            {/* Transaction Filters */}
+            <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
                 <input
-                  type="file"
-                  className="hidden"
-                  accept=".csv,.xml"
-                  onChange={handleFileUpload}
+                  type="date"
+                  name="startDate"
+                  value={transactionFilters.startDate}
+                  onChange={handleTransactionFilterChange}
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                 />
-              </label>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={transactionFilters.endDate}
+                  onChange={handleTransactionFilterChange}
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                <select
+                  name="type"
+                  value={transactionFilters.type}
+                  onChange={handleTransactionFilterChange}
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                >
+                  <option value="">All</option>
+                  <option value="credit">Credit</option>
+                  <option value="debit">Debit</option>
+                </select>
+              </div>
+              <div className="flex items-end">
+                <button
+                  onClick={() => fetchTransactions(selectedBank._id)}
+                  className="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200"
+                >
+                  Apply Filters
+                </button>
+              </div>
             </div>
 
-            {statementLoading ? (
-              <div>Loading statements...</div>
+            {/* Transactions Table */}
+            {transactionLoading ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+              </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -945,48 +959,37 @@ const Banks = () => {
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company Name</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {statements.map((statement) => (
-                      <tr key={statement._id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {new Date(statement.uploadDate).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {statement.fileType.toUpperCase()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {statement.fileName}
+                    {transactions.map((transaction, index) => (
+                      <tr key={index}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {new Date(transaction.date).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            statement.status === 'processed' 
+                            transaction.type === 'credit' 
                               ? 'bg-green-100 text-green-800'
-                              : statement.status === 'failed'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-yellow-100 text-yellow-800'
+                              : 'bg-red-100 text-red-800'
                           }`}>
-                            {statement.status}
+                            {transaction.type}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <button
-                            onClick={() => downloadStatement(statement._id)}
-                            className="text-blue-600 hover:text-blue-900"
-                          >
-                            Download
-                          </button>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          ₹{transaction.amount.toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {getCompanyNameById(transaction.companyName)}
                         </td>
                       </tr>
                     ))}
-                    {statements.length === 0 && (
+                    {transactions.length === 0 && (
                       <tr>
-                        <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
-                          No statements found
+                        <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
+                          No transactions found
                         </td>
                       </tr>
                     )}

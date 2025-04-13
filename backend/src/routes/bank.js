@@ -71,12 +71,4 @@ router.post('/statements/upload',
     bankStatementController.uploadStatement
 );
 
-router.get('/:bankId/statements',
-    bankStatementController.getBankStatements
-);
-
-router.get('/statements/:statementId/download',
-    bankStatementController.downloadStatement
-);
-
 module.exports = router; 

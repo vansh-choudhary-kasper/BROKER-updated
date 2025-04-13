@@ -126,23 +126,6 @@ const Dashboard = () => {
     value
   }));
 
-  // Get recent bank transactions
-  const recentTransactions = Array.isArray(banks)
-    ? banks
-      .flatMap(bank => {
-        // Check if bank has transactions property
-        if (!bank.transactions) return [];
-
-        return bank.transactions.map(transaction => ({
-          ...transaction,
-          bankName: bank.bankName,
-          accountName: bank.accountName
-        }));
-      })
-      .sort((a, b) => new Date(b.date) - new Date(a.date))
-      .slice(0, 5)
-    : [];
-
   // Get recent activities (only expenses)
   const recentActivities = Array.isArray(expenses)
     ? expenses
@@ -361,8 +344,8 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Recent Activities and Bank Transactions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Recent Activities Section */}
+      <div className="mt-6">
         {/* Recent Expenses */}
         <div className="bg-white rounded-lg shadow p-4">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Expenses</h3>
@@ -388,34 +371,6 @@ const Dashboard = () => {
             </div>
           ) : (
             <p className="text-gray-500 text-center py-4">No recent expenses</p>
-          )}
-        </div>
-
-        {/* Recent Bank Transactions */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Bank Transactions</h3>
-          {recentTransactions.length > 0 ? (
-            <div className="space-y-4">
-              {recentTransactions.map((transaction, index) => (
-                <div key={index} className="flex items-start">
-                  <div className="flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center bg-blue-100 text-blue-600">
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-900">
-                      {transaction.bankName} - {transaction.accountName}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {`₹${transaction.amount.toLocaleString()}`} • {new Date(transaction.date).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-center py-4">No recent transactions</p>
           )}
         </div>
       </div>

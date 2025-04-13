@@ -12,7 +12,6 @@ const companyRoutes = require('./src/routes/companies');
 const taskRoutes = require('./src/routes/tasks');
 const expenseRoutes = require('./src/routes/expenses');
 const bankRoutes = require('./src/routes/banks');
-const bankStatementRoutes = require('./src/routes/bankStatement');
 const brokerRoutes = require('./src/routes/broker');
 
 const app = express();
@@ -41,7 +40,6 @@ app.use('/api/companies', companyRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/banks', bankRoutes);
-app.use('/api/bank-statements', bankStatementRoutes);
 app.use('/api/brokers', brokerRoutes);
 
 // Error handling middleware
