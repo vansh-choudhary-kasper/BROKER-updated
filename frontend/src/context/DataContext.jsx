@@ -63,7 +63,6 @@ export const DataProvider = ({ children }) => {
     // Check if we've fetched recently
     const now = Date.now();
     if (now - lastFetchTime.companies < DEBOUNCE_TIME) {
-      console.log('Skipping companies fetch - too soon since last fetch');
       return;
     }
     
@@ -114,7 +113,6 @@ export const DataProvider = ({ children }) => {
     // Check if we've fetched recently
     const now = Date.now();
     if (now - lastFetchTime.tasks < DEBOUNCE_TIME) {
-      console.log('Skipping tasks fetch - too soon since last fetch');
       return;
     }
     
@@ -161,7 +159,6 @@ export const DataProvider = ({ children }) => {
     // Check if we've fetched recently
     const now = Date.now();
     if (now - lastFetchTime.banks < DEBOUNCE_TIME) {
-      console.log('Skipping banks fetch - too soon since last fetch');
       return;
     }
     
@@ -208,7 +205,6 @@ export const DataProvider = ({ children }) => {
     // Check if we've fetched recently
     const now = Date.now();
     if (now - lastFetchTime.expenses < DEBOUNCE_TIME) {
-      console.log('Skipping expenses fetch - too soon since last fetch');
       return;
     }
     
@@ -255,7 +251,6 @@ export const DataProvider = ({ children }) => {
     // Check if we've fetched recently
     const now = Date.now();
     if (now - lastFetchTime.brokers < DEBOUNCE_TIME) {
-      console.log('Skipping brokers fetch - too soon since last fetch');
       return;
     }
     
@@ -270,8 +265,6 @@ export const DataProvider = ({ children }) => {
           queryParams.append(key, value);
         }
       });
-
-      console.log('Fetching brokers with params:', queryParams.toString());
       
       const response = await axios.get(`${backendUrl}/api/brokers?${queryParams.toString()}`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -307,7 +300,6 @@ export const DataProvider = ({ children }) => {
     // Check if we've fetched recently
     const now = Date.now();
     if (now - lastFetchTime.profitLoss < DEBOUNCE_TIME) {
-      console.log('Skipping profit-loss fetch - too soon since last fetch');
       return;
     }
     

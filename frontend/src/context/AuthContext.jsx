@@ -60,7 +60,6 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
       console.error("isAuthenticated", isAuthenticated);
       const storedToken = getStoredToken();
-      console.warn("storedToken", storedToken);
       if (storedToken && !isAuthenticated) {
         setLoading(true);
         try {

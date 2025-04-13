@@ -5,6 +5,8 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import PapaParse from 'papaparse';
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 const Banks = () => {
   const {
     banks,
@@ -166,7 +168,7 @@ const Banks = () => {
   const fetchStatements = async (bankId) => {
     try {
       setStatementLoading(true);
-      const response = await axios.get(`/api/banks/${bankId}/statements`, {
+      const response = await axios.get(`${backendUrl}/api/banks/${bankId}/statements`, {
         headers: { 
           Authorization: `Bearer ${token}`,
           Accept: 'application/json'
@@ -198,7 +200,7 @@ const Banks = () => {
 
     try {
       setStatementLoading(true);
-      const response = await axios.post('/api/banks/statements/upload', formData, {
+      const response = await axios.post(`${backendUrl}/api/banks/statements/upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
@@ -220,7 +222,7 @@ const Banks = () => {
 
   const downloadStatement = async (statementId) => {
     try {
-      const response = await axios.get(`/api/banks/statements/${statementId}/download`, {
+      const response = await axios.get(`${backendUrl}/api/banks/statements/${statementId}/download`, {
         headers: { 
           Authorization: `Bearer ${token}`,
           Accept: 'application/octet-stream'
@@ -259,17 +261,29 @@ const Banks = () => {
         // Handle CSV file
         PapaParse.parse(file, {
           complete: async (results) => {
-            const headers = results.data[0];
-            const data = results.data.slice(1);
+            let headers = results.data[0];
+            headers = headers.map(header => header.toLowerCase().replace(/ /g, '_').trim());
+            const data = results.data.slice(1).map(row => ({
+              date: row[headers.indexOf('date')],
+              companyName: row[headers.indexOf('companyname')], 
+              bankName: row[headers.indexOf('bankname')],
+              accountNo: row[headers.indexOf('accountno')],
+              amount: row[headers.indexOf('amount')],
+              creditDebit: row[headers.indexOf('credit/debit')]
+            }));
             
-            // Validate headers
-            const requiredHeaders = ['date', 'companyName', 'bankName', 'accountNo', 'credit/debit'];
-            const hasValidHeaders = requiredHeaders.every(header => 
-              headers.includes(header.toLowerCase())
+            // Validate headersk
+            const requiredHeaders = ['date', 'companyname', 'bankname', 'accountno', 'amount', 'credit/debit'];
+            const hasValidHeaders = requiredHeaders.every(header => {
+              if(!headers.includes(header.toLowerCase())){
+                return false;
+              }
+              return true;
+            }
             );
 
             if (!hasValidHeaders) {
-              throw new Error('Invalid file format. Required columns: date, companyName, bankName, accountNo, credit/debit');
+              throw new Error('Invalid file format. Required columns: date, companyName, bankName, accountNo, amount, credit/debit');
             }
 
             // Process and upload the data
@@ -293,7 +307,8 @@ const Banks = () => {
               companyName: transaction.getElementsByTagName('companyName')[0]?.textContent,
               bankName: transaction.getElementsByTagName('bankName')[0]?.textContent,
               accountNo: transaction.getElementsByTagName('accountNo')[0]?.textContent,
-              'credit/debit': transaction.getElementsByTagName('type')[0]?.textContent
+              amount: transaction.getElementsByTagName('amount')[0]?.textContent,
+              creditDebit: transaction.getElementsByTagName('creditDebit')[0]?.textContent
             }));
 
             await uploadBankHistory(data);
@@ -317,7 +332,7 @@ const Banks = () => {
 
   const uploadBankHistory = async (data, headers = null) => {
     try {
-      const response = await axios.post('/api/banks/history/upload', 
+          const response = await axios.post(`${backendUrl}/api/banks/statements/upload`, 
         { transactions: data },
         {
           headers: {
@@ -337,6 +352,7 @@ const Banks = () => {
       // Refresh the banks list
       fetchBanks(filters);
     } catch (error) {
+      console.log("error", error);
       throw new Error(error.response?.data?.message || 'Failed to upload bank history');
     }
   };
@@ -663,14 +679,14 @@ const Banks = () => {
               <h4 className="text-md font-medium text-gray-800 mb-2">CSV Format</h4>
               <div className="bg-gray-100 p-3 rounded border border-gray-300 overflow-x-auto">
                 <pre className="text-sm text-gray-700 whitespace-pre">
-{`date,companyName,bankName,accountNo,credit/debit
-2024-03-20,Company A,HDFC Bank,1234567890,credit
-2024-03-21,Company B,ICICI Bank,0987654321,debit
-2024-03-22,Company A,SBI Bank,1122334455,credit`}
+{`date,companyName,bankName,accountNo,amount,credit/debit
+2024-03-20,Company A,HDFC Bank,1234567890,5000.00,credit
+2024-03-21,Company B,ICICI Bank,0987654321,2500.00,debit
+2024-03-22,Company A,SBI Bank,1122334455,7500.00,credit`}
                 </pre>
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                Required columns: date, companyName, bankName, accountNo, credit/debit
+                Required columns: date, companyName, bankName, accountNo, amount, credit/debit
               </p>
             </div>
             
@@ -686,20 +702,22 @@ const Banks = () => {
     <companyName>Company A</companyName>
     <bankName>HDFC Bank</bankName>
     <accountNo>1234567890</accountNo>
-    <type>credit</type>
+    <amount>5000.00</amount>
+    <creditDebit>credit</creditDebit>
   </transaction>
   <transaction>
     <date>2024-03-21</date>
     <companyName>Company B</companyName>
     <bankName>ICICI Bank</bankName>
     <accountNo>0987654321</accountNo>
-    <type>debit</type>
+    <amount>2500.00</amount>
+    <creditDebit>debit</creditDebit>
   </transaction>
 </transactions>`}
                 </pre>
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                Required tags: date, companyName, bankName, accountNo, type (credit/debit)
+                Required tags: date, companyName, bankName, accountNo, amount, creditDebit (credit/debit)
               </p>
             </div>
           </div>

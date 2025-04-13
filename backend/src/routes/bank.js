@@ -68,7 +68,6 @@ router.patch('/:id/toggle-status', bankController.toggleBankStatus);
 
 // Bank Statement routes
 router.post('/statements/upload',
-    upload.single('statement'),
     bankStatementController.uploadStatement
 );
 

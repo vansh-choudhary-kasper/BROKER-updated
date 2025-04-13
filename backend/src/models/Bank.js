@@ -54,17 +54,12 @@ const bankSchema = new mongoose.Schema({
     },
     date: {
       type: Date,
-      required: true
+      required: true,
+      default: Date.now
     },
-    description: String,
-    reference: String,
-    relatedTask: {
+    companyName: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Task'
-    },
-    relatedExpense: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Expense'
+      ref: 'Company'
     }
   }],
   createdAt: {
