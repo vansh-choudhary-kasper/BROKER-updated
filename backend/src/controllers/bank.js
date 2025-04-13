@@ -19,13 +19,20 @@ class BankController {
 
     async getBanks(req, res) {
         try {
-            const { page = 1, limit = 10, isActive, search } = req.query;
+            const { page = 1, limit = 10, isActive, accountType, search } = req.query;
             const query = {};
 
-            if (isActive !== undefined) {
+            // Handle isActive filter
+            if (isActive !== undefined && isActive !== '') {
                 query.isActive = isActive === 'true';
             }
 
+            // Handle accountType filter
+            if (accountType && accountType !== '') {
+                query.accountType = accountType;
+            }
+
+            // Handle search
             if (search) {
                 query.$or = [
                     { accountName: { $regex: search, $options: 'i' } },
@@ -33,6 +40,8 @@ class BankController {
                     { bankName: { $regex: search, $options: 'i' } }
                 ];
             }
+
+            console.log('Bank query:', query); // Debug log
 
             const banks = await Bank.find(query)
                 .limit(limit * 1)
@@ -45,7 +54,8 @@ class BankController {
                 ApiResponse.success('Banks retrieved successfully', {
                     banks,
                     totalPages: Math.ceil(count / limit),
-                    currentPage: page
+                    currentPage: page,
+                    total: count
                 })
             );
         } catch (error) {

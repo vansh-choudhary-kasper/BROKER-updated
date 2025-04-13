@@ -24,7 +24,7 @@ class TaskController {
         try {
             // Get the latest task
             const latestTask = await Task.findOne().sort({ taskNumber: -1 });
-            
+
             if (!latestTask || !latestTask.taskNumber) {
                 // If no tasks exist, start with TASK-0001
                 return 'TASK-0001';
@@ -33,7 +33,7 @@ class TaskController {
             // Extract the number part and increment it
             const currentNumber = parseInt(latestTask.taskNumber.split('-')[1]);
             const nextNumber = currentNumber + 1;
-            
+
             // Format the new task number with leading zeros
             return `TASK-${nextNumber.toString().padStart(4, '0')}`;
         } catch (error) {
@@ -53,6 +53,7 @@ class TaskController {
                 helperBroker,
                 payment
             } = req.body;
+            console.log(req.body);
 
             // Generate task number if not provided
             const finalTaskNumber = taskNumber || await this.generateTaskNumber();
@@ -74,7 +75,32 @@ class TaskController {
                 );
             }
 
-            // Verify helper broker exists if provided
+            let task;
+
+            if (helperBroker && helperBroker.broker && helperBroker.broker !== "") {
+                task = new Task({
+                    title,
+                    description,
+                    taskNumber: finalTaskNumber,
+                    clientCompany,
+                    providerCompany,
+                    helperBroker,
+                    payment
+                });
+            } else {
+                task = new Task({
+                    title,
+                    description,
+                    taskNumber: finalTaskNumber,
+                    clientCompany,
+                    providerCompany,
+                    payment
+                });
+            }
+
+            await task.save();
+
+            // Verify helper broker exists if provided and update broker's task payments
             if (helperBroker && helperBroker.broker) {
                 const brokerDoc = await Broker.findById(helperBroker.broker);
                 if (!brokerDoc) {
@@ -82,20 +108,26 @@ class TaskController {
                         ApiResponse.notFound('Helper broker not found')
                     );
                 }
+
+                // Add task payment record with the actual task ID
+                let commission = payment.amount * (helperBroker.commission / 100);
+                brokerDoc.taskPayments.push({
+                    taskId: task._id,
+                    taskNumber: finalTaskNumber,
+                    commission: helperBroker.commission,
+                    amount: commission,
+                    status: helperBroker.status || 'pending'
+                });
+
+                // Update financial summary
+                brokerDoc.financialSummary.totalTasks++;
+                if (helperBroker.status === 'paid') {
+                    brokerDoc.financialSummary.totalCommission += commission;
+                } else {
+                    brokerDoc.financialSummary.pendingCommission += commission;
+                }
+                await brokerDoc.save();
             }
-
-            // Create the task
-            const task = new Task({
-                title,
-                description,
-                taskNumber: finalTaskNumber,
-                clientCompany,
-                providerCompany,
-                helperBroker,
-                payment
-            });
-
-            await task.save();
 
             // Send email notifications
             try {
@@ -124,7 +156,7 @@ class TaskController {
 
             if (status) query.status = status;
             if (priority) query.priority = priority;
-            
+
             // Handle both old and new company fields in query
             if (clientCompany) {
                 query.clientCompany = clientCompany;
@@ -138,15 +170,21 @@ class TaskController {
             // Add search functionality
             if (search) {
                 console.error("search", search);
+                // First, find brokers whose names match the search term
+                const brokers = await Broker.find({
+                    name: { $regex: search, $options: 'i' }
+                }).select('_id');
+
+                const brokerIds = brokers.map(broker => broker._id);
+
                 query.$or = [
                     { title: { $regex: search, $options: 'i' } },
-                    { description: { $regex: search, $options: 'i' } },
-                    { taskNumber: { $regex: search, $options: 'i' } }
+                    { taskNumber: { $regex: search, $options: 'i' } },
+                    { 'helperBroker.broker': { $in: brokerIds } }
                 ];
             }
 
             const tasks = await Task.find(query)
-                .populate('providerCompany', 'name')
                 .limit(limit * 1)
                 .skip((page - 1) * limit)
                 .exec();
@@ -242,6 +280,87 @@ class TaskController {
                         ApiResponse.notFound('Helper broker not found')
                     );
                 }
+
+                // Check if task payment already exists
+                const existingTaskPayment = brokerDoc.taskPayments.find(
+                    tp => tp.taskId.toString() === id
+                );
+
+                // If task payment exists and is already paid, prevent changing status back to pending
+                if (existingTaskPayment && existingTaskPayment.status === 'paid' &&
+                    helperBroker.status === 'pending') {
+                    return res.status(400).json(
+                        ApiResponse.error('Cannot change payment status from paid to pending')
+                    );
+                }
+
+                // If task payment exists and is already paid, prevent changing amount, commission, and payment date
+                if (existingTaskPayment && existingTaskPayment.status === 'paid') {
+                    // Check if amount or commission is being changed
+                    if ((payment && payment.amount !== task.payment.amount) ||
+                        (helperBroker.commission !== task.helperBroker.commission)) {
+                        return res.status(400).json(
+                            ApiResponse.error('Cannot change amount or commission when payment status is paid')
+                        );
+                    }
+
+                    // Check if payment date is being changed
+                    if (helperBroker.paymentDate &&
+                        task.helperBroker.paymentDate &&
+                        new Date(helperBroker.paymentDate).getTime() !== new Date(task.helperBroker.paymentDate).getTime()) {
+                        return res.status(400).json(
+                            ApiResponse.error('Cannot change payment date when payment status is paid')
+                        );
+                    }
+                }
+
+                // If task payment exists and status is changing to paid, update it
+                if (existingTaskPayment && existingTaskPayment.status === 'pending' &&
+                    helperBroker.status === 'paid') {
+                    // Update existing task payment
+                    existingTaskPayment.status = 'paid';
+                    existingTaskPayment.paymentDate = new Date();
+
+                    // Update financial summary
+                    let commission = payment.amount * (helperBroker.commission / 100);
+                    brokerDoc.financialSummary.totalCommission += commission;
+                    brokerDoc.financialSummary.pendingCommission -= commission;
+                }
+                // If task payment doesn't exist and status is paid, add it
+                else if (!existingTaskPayment && helperBroker.status === 'paid') {
+                    // Add new task payment
+                    let commission = payment.amount * (helperBroker.commission / 100);
+                    brokerDoc.taskPayments.push({
+                        taskId: id,
+                        taskNumber: task.taskNumber,
+                        commission: helperBroker.commission,
+                        amount: commission,
+                        status: 'paid',
+                        paymentDate: new Date()
+                    });
+
+                    // Update financial summary
+                    brokerDoc.financialSummary.totalCommission += commission;
+                    brokerDoc.financialSummary.totalTasks++;
+                }
+                // If task payment doesn't exist and status is pending, add it
+                else if (!existingTaskPayment && helperBroker.status === 'pending') {
+                    // Add new task payment
+                    let commission = payment.amount * (helperBroker.commission / 100);
+                    brokerDoc.taskPayments.push({
+                        taskId: id,
+                        taskNumber: task.taskNumber,
+                        commission: helperBroker.commission,
+                        amount: commission,
+                        status: 'pending'
+                    });
+
+                    // Update financial summary
+                    brokerDoc.financialSummary.pendingCommission += commission;
+                    brokerDoc.financialSummary.totalTasks++;
+                }
+
+                await brokerDoc.save();
             }
 
             // Update task fields
@@ -277,14 +396,14 @@ class TaskController {
     async deleteTask(req, res) {
         try {
             const { id } = req.params;
-            
+
             const task = await Task.findByIdAndDelete(id);
             if (!task) {
                 return res.status(404).json(
                     ApiResponse.notFound('Task not found')
                 );
             }
-            
+
             return res.status(200).json(
                 ApiResponse.success('Task deleted successfully')
             );

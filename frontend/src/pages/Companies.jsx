@@ -114,6 +114,7 @@ const Companies = () => {
   };
 
   useEffect(() => {
+    console.log('Filters changed:', filters); // Debug log
     fetchCompanies({
       status: filters.status,
       type: filters.type,
@@ -172,8 +173,24 @@ const Companies = () => {
     try {
       if (editingCompany) {
         await updateCompany(editingCompany._id, formData);
+        // Refresh the companies list with current filters after update
+        await fetchCompanies({
+          status: filters.status,
+          type: filters.type,
+          search: filters.search,
+          page: filters.page,
+          limit: filters.limit
+        });
       } else {
         await addCompany(formData);
+        // Refresh the companies list with current filters after adding
+        await fetchCompanies({
+          status: filters.status,
+          type: filters.type,
+          search: filters.search,
+          page: filters.page,
+          limit: filters.limit
+        });
       }
       setFormData(initialFormState);
       setEditingCompany(null);
@@ -184,7 +201,17 @@ const Companies = () => {
   };
 
   const handleEdit = (company) => {
-    setFormData(company);
+    // Format the registration date to YYYY-MM-DD format for the date input
+    const formattedCompany = {
+      ...company,
+      businessDetails: {
+        ...company.businessDetails,
+        registrationDate: company.businessDetails?.registrationDate 
+          ? new Date(company.businessDetails.registrationDate).toISOString().split('T')[0]
+          : ''
+      }
+    };
+    setFormData(formattedCompany);
     setEditingCompany(company);
     setShowForm(true);
   };
@@ -247,10 +274,14 @@ const Companies = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
               <select
                 value={filters.status}
-                onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value, page: 1 }))}
+                onChange={(e) => {
+                  console.log('Status changed to:', e.target.value); // Debug log
+                  setFilters(prev => ({ ...prev, status: e.target.value, page: 1 }));
+                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               >
                 <option value="">All Status</option>
+                <option value="pending_verification">Pending Verification</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
                 <option value="blacklisted">Blacklisted</option>
@@ -260,7 +291,10 @@ const Companies = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
               <select
                 value={filters.type}
-                onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value, page: 1 }))}
+                onChange={(e) => {
+                  console.log('Type changed to:', e.target.value); // Debug log
+                  setFilters(prev => ({ ...prev, type: e.target.value, page: 1 }));
+                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               >
                 <option value="">All Types</option>
@@ -328,6 +362,25 @@ const Companies = () => {
                         <option value="client">Client</option>
                         <option value="provider">Provider</option>
                         <option value="both">Both</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                        Status *
+                      </label>
+                      <select
+                        id="status"
+                        name="status"
+                        value={formData.status}
+                        onChange={handleChange}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        required
+                      >
+                        <option value="pending_verification">Pending Verification</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="blacklisted">Blacklisted</option>
                       </select>
                     </div>
                   </div>

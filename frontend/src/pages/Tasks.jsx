@@ -76,6 +76,11 @@ const Tasks = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     
+    // Prevent changing payment status from paid to pending
+    if (name === 'helperBroker.status' && formData.helperBroker.status === 'paid' && value === 'pending') {
+      return; // Don't allow the change
+    }
+    
     // Handle nested objects
     if (name.includes('.')) {
       const [parent, child, grandChild] = name.split('.');
@@ -152,6 +157,11 @@ const Tasks = () => {
   };
 
   const handleEdit = (task) => {
+    // Format the payment date to YYYY-MM-DD if it exists
+    const formattedPaymentDate = task.helperBroker?.paymentDate 
+      ? new Date(task.helperBroker.paymentDate).toISOString().split('T')[0]
+      : '';
+
     setFormData({
       title: task.title || '',
       description: task.description || '',
@@ -161,7 +171,7 @@ const Tasks = () => {
         broker: task.helperBroker?.broker || '',
         commission: task.helperBroker?.commission || 0,
         status: task.helperBroker?.status || 'pending',
-        paymentDate: task.helperBroker?.paymentDate || ''
+        paymentDate: formattedPaymentDate
       },
       payment: {
         amount: task.payment?.amount || 0,
@@ -215,7 +225,7 @@ const Tasks = () => {
                 type="text"
                 value={searchTerm}
                 onChange={handleSearchChange}
-                placeholder="Search by title, description, task number..."
+                placeholder="Search by title, task number, or helper broker..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-md pl-10"
               />
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -225,7 +235,7 @@ const Tasks = () => {
               </div>
             </div>
             <p className="mt-1 text-sm text-gray-500">
-              Search by task title, description, or task number
+              Search by task title, task number, or helper broker name
             </p>
           </div>
         </div>
@@ -374,6 +384,7 @@ const Tasks = () => {
                       min="0"
                       max="100"
                       step="0.01"
+                      disabled={formData.helperBroker.status === 'paid'}
                     />
                   </div>
 
@@ -387,6 +398,7 @@ const Tasks = () => {
                       value={formData.helperBroker.status}
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      disabled={formData.helperBroker.status === 'paid'}
                     >
                       <option value="pending">Pending</option>
                       <option value="paid">Paid</option>
@@ -404,6 +416,7 @@ const Tasks = () => {
                       value={formData.helperBroker.paymentDate}
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      disabled={formData.helperBroker.status === 'paid'}
                     />
                   </div>
                 </div>
@@ -427,6 +440,7 @@ const Tasks = () => {
                       required
                       min="0"
                       step="0.01"
+                      disabled={formData.helperBroker.status === 'paid'}
                     />
                   </div>
                   <div>
@@ -498,6 +512,9 @@ const Tasks = () => {
                   Helper Commission
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Task Date
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Payment Amount
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -507,7 +524,14 @@ const Tasks = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {tasksList.map((task) => (
-                <tr key={task._id}>
+                <tr 
+                  key={task._id}
+                  className={`${
+                    task.helperBroker?.status === 'paid' 
+                      ? 'bg-green-50' 
+                      : 'bg-red-50'
+                  }`}
+                >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {task.taskNumber}
                   </td>
@@ -525,6 +549,9 @@ const Tasks = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {task.helperBroker?.commission ? `${task.helperBroker.commission}%` : '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {task.payment?.amount ? 

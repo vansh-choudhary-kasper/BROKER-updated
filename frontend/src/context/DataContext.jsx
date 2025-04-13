@@ -78,6 +78,9 @@ export const DataProvider = ({ children }) => {
         }
       });
 
+      console.log('API request with filters:', filters); // Debug log
+      console.log('Query params:', queryParams.toString()); // Debug log
+
       const response = await axios.get(`${backendUrl}/api/companies?${queryParams.toString()}`);
       // Handle both array response and paginated response
       if (response.data && typeof response.data === 'object') {

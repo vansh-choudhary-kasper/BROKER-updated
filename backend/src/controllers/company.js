@@ -54,25 +54,51 @@ class CompanyController {
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 10;
             const search = req.query.search || '';
+            const status = req.query.status || '';
+            const type = req.query.type || '';
 
-            const searchQuery = search ? {
-                $or: [
+            console.log('Received filters:', { page, limit, search, status, type }); // Debug log
+
+            // Build the query object
+            const searchQuery = {};
+            
+            // Add search conditions if search term exists
+            if (search) {
+                searchQuery.$or = [
                     { name: { $regex: search, $options: 'i' } },
                     { 'businessDetails.gstNumber': { $regex: search, $options: 'i' } },
                     { 'businessDetails.panNumber': { $regex: search, $options: 'i' } },
                     { 'contactPerson.email': { $regex: search, $options: 'i' } },
                     { 'bankDetails.accountNumber': { $regex: search, $options: 'i' } },
                     { 'bankDetails.ifscCode': { $regex: search, $options: 'i' } }
-                ]
-            } : {};
+                ];
+            }
+            
+            // Add status filter if provided
+            if (status) {
+                searchQuery.status = status;
+            }
+            
+            // Add type filter if provided
+            if (type) {
+                searchQuery.type = type;
+            }
+
+            console.log('Search query:', JSON.stringify(searchQuery)); // Debug log
 
             const totalCompanies = await Company.countDocuments(searchQuery);
+            console.log('Total companies found:', totalCompanies); // Debug log
+            
             const totalPages = Math.ceil(totalCompanies / limit);
 
-            const companies = await Company.find(searchQuery)
+            let companies = await Company.find(searchQuery)
                 .sort({ createdAt: -1 })
                 .skip((page - 1) * limit)
                 .limit(limit);
+
+            console.log('Companies returned:', companies.length); // Debug log
+            
+            companies = companies.filter(company => company.name !== 'other');
 
             return res.status(200).json(
                 ApiResponse.success('Companies retrieved successfully', {

@@ -1,4 +1,3 @@
-const BankStatement = require('../models/BankStatement');
 const Bank = require('../models/Bank');
 const Company = require('../models/Company');
 const csv = require('csv-parser');
@@ -59,7 +58,10 @@ exports.uploadStatement = async (req, res) => {
         transaction.date = date;
       }
 
-      console.log(transaction);
+      function calculateCommission(amount) {
+        return amount * 0.01;
+      }
+      
       // Create bank statement record
       bank.transactions.push({
         date: transaction.date,

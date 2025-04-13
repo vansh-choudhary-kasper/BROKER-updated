@@ -88,7 +88,18 @@ const Banks = () => {
     debouncedSearch(value);
   };
 
+  // Handle filter changes
+  const handleFilterChange = (filterName, value) => {
+    console.log(`Changing ${filterName} to:`, value); // Debug log
+    setFilters(prev => ({
+      ...prev,
+      [filterName]: value,
+      page: 1 // Reset to first page when filters change
+    }));
+  };
+
   useEffect(() => {
+    console.log('Current filters:', filters); // Debug log
     fetchBanks(filters);
   }, [fetchBanks, filters]);
 
@@ -352,57 +363,6 @@ const Banks = () => {
           <p className="text-red-700">{typeof error === 'string' ? error : 'An error occurred'}</p>
         </div>
       )}
-
-      {/* Filters */}
-      <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
-            <div className="relative">
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                placeholder="Search by account name, number, bank name..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md pl-10"
-              />
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-                </svg>
-              </div>
-            </div>
-            <p className="mt-1 text-sm text-gray-500">
-              Search by account name, number, or bank name
-            </p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Account Type</label>
-            <select
-              value={filters.accountType}
-              onChange={(e) => setFilters(prev => ({ ...prev, accountType: e.target.value, page: 1 }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            >
-              <option value="">All Types</option>
-              <option value="savings">Savings</option>
-              <option value="current">Current</option>
-              <option value="fixed_deposit">Fixed Deposit</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <select
-              value={filters.isActive}
-              onChange={(e) => setFilters(prev => ({ ...prev, isActive: e.target.value, page: 1 }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            >
-              <option value="">All Status</option>
-              <option value="true">Active</option>
-              <option value="false">Inactive</option>
-            </select>
-          </div>
-        </div>
-      </div>
 
       {/* Bank Account Form Modal */}
       {showForm && (
@@ -768,6 +728,57 @@ const Banks = () => {
               )}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white p-4 rounded-lg shadow mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <div className="relative">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                placeholder="Search by account name, number, bank name..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md pl-10"
+              />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+            <p className="mt-1 text-sm text-gray-500">
+              Search by account name, number, or bank name
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Account Type</label>
+            <select
+              value={filters.accountType}
+              onChange={(e) => handleFilterChange('accountType', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="">All Types</option>
+              <option value="savings">Savings</option>
+              <option value="current">Current</option>
+              <option value="fixed_deposit">Fixed Deposit</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select
+              value={filters.isActive}
+              onChange={(e) => handleFilterChange('isActive', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="">All Status</option>
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+          </div>
         </div>
       </div>
 

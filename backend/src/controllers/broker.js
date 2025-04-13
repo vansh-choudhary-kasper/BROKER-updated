@@ -33,7 +33,7 @@ exports.getBrokers = async (req, res) => {
     
     // Add status filter
     if (status) {
-      query.status = status;
+      query.status = status.toLowerCase();
     }
     
     // Execute query with pagination

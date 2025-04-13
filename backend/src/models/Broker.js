@@ -70,6 +70,42 @@ const brokerSchema = new mongoose.Schema({
     }
   },
 
+  // Task payments tracking
+  taskPayments: [{
+    taskId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Task',
+      required: true
+    },
+    taskNumber: {
+      type: String,
+      required: true
+    },
+    commission: {
+      type: Number,
+      required: true,
+      min: 0,
+      max: 100
+    },
+    amount: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'paid'],
+      default: 'pending'
+    },
+    paymentDate: {
+      type: Date
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+
   // Status
   status: {
     type: String,
@@ -96,6 +132,8 @@ brokerSchema.index({ gstNumber: 1 });
 brokerSchema.index({ panNumber: 1 });
 brokerSchema.index({ status: 1 });
 brokerSchema.index({ 'financialSummary.totalCommission': 1 });
+brokerSchema.index({ 'taskPayments.taskId': 1 });
+brokerSchema.index({ 'taskPayments.status': 1 });
 
 const Broker = mongoose.model('Broker', brokerSchema);
 

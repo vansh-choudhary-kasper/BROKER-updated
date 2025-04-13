@@ -39,7 +39,8 @@ const taskSchema = new mongoose.Schema({
   helperBroker: {
     broker: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Broker'
+      ref: 'Broker',
+      default: null
       // Optional helper broker
     },
     commission: {
@@ -90,6 +91,7 @@ taskSchema.index({ status: 1 });
 taskSchema.index({ 'timeline.startDate': 1, 'timeline.endDate': 1 });
 taskSchema.index({ 'financialDetails.clientAmount.totalAmount': 1 });
 taskSchema.index({ 'financialDetails.providerAmount.totalAmount': 1 });
+taskSchema.index({ createdAt: 1 });
 
 const Task = mongoose.model('Task', taskSchema);
 

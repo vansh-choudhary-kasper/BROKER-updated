@@ -14,10 +14,18 @@ const taskValidation = [
     body('taskNumber').optional(),
     body('clientCompany').isMongoId().withMessage('Invalid client company ID'),
     body('providerCompany').isMongoId().withMessage('Invalid provider company ID'),
-    body('helperBroker.broker').optional().isMongoId().withMessage('Invalid helper broker ID'),
-    body('helperBroker.commission').optional().isFloat({ min: 0, max: 100 }).withMessage('Commission must be between 0 and 100'),
-    body('helperBroker.status').optional().isIn(['pending', 'paid']).withMessage('Invalid helper broker status'),
-    body('helperBroker.paymentDate').optional().isISO8601().withMessage('Invalid payment date format'),
+    body('helperBroker.broker')
+        .if(body('helperBroker.broker').notEmpty())
+        .isMongoId()
+        .withMessage('Invalid helper broker ID'),
+    body('helperBroker.commission')
+        .if(body('helperBroker.broker').notEmpty())
+        .isFloat({ min: 0, max: 100 })
+        .withMessage('Commission must be between 0 and 100'),
+    body('helperBroker.status')
+        .if(body('helperBroker.broker').notEmpty())
+        .isIn(['pending', 'paid'])
+        .withMessage('Invalid helper broker status'),
     body('payment.amount').isFloat({ min: 0 }).withMessage('Payment amount must be positive'),
     body('payment.currency').optional().isString().withMessage('Currency must be a string')
 ];
