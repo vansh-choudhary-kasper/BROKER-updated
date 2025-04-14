@@ -1,6 +1,8 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
+const cloudinary = require('../config/cloudinary');
+const logger = require('./logger');
 
 // Configure multer for file upload
 const storage = multer.diskStorage({
@@ -38,23 +40,35 @@ const upload = multer({
   }
 });
 
-// Function to upload file to storage and return URL
+// Function to upload file to Cloudinary and return URL
 const uploadToStorage = async (file) => {
   try {
-    // In a production environment, you would upload to a cloud storage service
-    // For now, we'll just return the local path
-    const relativePath = path.relative(path.join(__dirname, '../../'), file.path);
-    const url = `/uploads/${path.basename(file.path)}`;
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(file.path, {
+      folder: 'broker-management',
+      resource_type: 'auto',
+      use_filename: true,
+      unique_filename: true
+    });
+    console.log('File uploaded to Cloudinary:', result);
+    
+    // Delete the local file after uploading to Cloudinary
+    // try {
+    //   await fs.unlink(file.path);
+    // } catch (error) {
+    //   logger.warn(`Failed to delete local file ${file.path}:`, error);
+    // }
     
     return {
-      url,
+      url: result.secure_url,
       originalName: file.originalname,
       filename: file.filename,
       mimetype: file.mimetype,
-      size: file.size
+      size: file.size,
+      publicId: result.public_id
     };
   } catch (error) {
-    console.error('Error uploading file:', error);
+    logger.error('Error uploading file to Cloudinary:', error);
     throw new Error('File upload failed');
   }
 };

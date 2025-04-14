@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const companyController = require('../controllers/company');
 const { protect } = require('../middleware/auth');
-const { upload } = require('../utils/fileUpload');
+const { upload, handleUploadError } = require('../middleware/fileUpload');
 
 // Protect all company routes
 router.use(protect);
@@ -17,8 +17,15 @@ router.post('/',
     { name: 'bankDetails[1].bankStatement', maxCount: 1 },
     { name: 'bankDetails[1].cancelledCheque', maxCount: 1 },
     { name: 'bankDetails[2].bankStatement', maxCount: 1 },
-    { name: 'bankDetails[2].cancelledCheque', maxCount: 1 }
+    { name: 'bankDetails[2].cancelledCheque', maxCount: 1 },
+    { name: 'documents.incorporationCertificate', maxCount: 1 },
+    { name: 'documents.memorandumOfAssociation', maxCount: 1 },
+    { name: 'documents.articlesOfAssociation', maxCount: 1 },
+    { name: 'documents.boardResolution', maxCount: 1 },
+    { name: 'documents.taxRegistration', maxCount: 1 },
+    { name: 'documents.otherDocuments', maxCount: 5 }
   ]),
+  handleUploadError,
   companyController.createCompany
 );
 
@@ -38,8 +45,15 @@ router.put('/:id',
     { name: 'bankDetails[1].bankStatement', maxCount: 1 },
     { name: 'bankDetails[1].cancelledCheque', maxCount: 1 },
     { name: 'bankDetails[2].bankStatement', maxCount: 1 },
-    { name: 'bankDetails[2].cancelledCheque', maxCount: 1 }
+    { name: 'bankDetails[2].cancelledCheque', maxCount: 1 },
+    { name: 'documents.incorporationCertificate', maxCount: 1 },
+    { name: 'documents.memorandumOfAssociation', maxCount: 1 },
+    { name: 'documents.articlesOfAssociation', maxCount: 1 },
+    { name: 'documents.boardResolution', maxCount: 1 },
+    { name: 'documents.taxRegistration', maxCount: 1 },
+    { name: 'documents.otherDocuments', maxCount: 5 }
   ]),
+  handleUploadError,
   companyController.updateCompany
 );
 
@@ -49,6 +63,7 @@ router.delete('/:id', companyController.deleteCompany);
 // Add documents to a company
 router.post('/:id/documents',
   upload.array('documents', 5),
+  handleUploadError,
   companyController.addDocuments
 );
 

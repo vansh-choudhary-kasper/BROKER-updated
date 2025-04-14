@@ -69,6 +69,19 @@ A comprehensive broker management system for handling tasks, companies, and fina
    mkdir -p uploads logs
    ```
 
+## Cloudinary Setup
+
+This application uses Cloudinary for file storage. To set up Cloudinary:
+
+1. Create a Cloudinary account at [https://cloudinary.com/](https://cloudinary.com/)
+2. Get your Cloudinary credentials from your dashboard
+3. Update the `.env` file with your Cloudinary credentials:
+   ```
+   CLOUDINARY_CLOUD_NAME=your_cloud_name
+   CLOUDINARY_API_KEY=your_api_key
+   CLOUDINARY_API_SECRET=your_api_secret
+   ```
+
 ## Running the Application
 
 ### Development Mode

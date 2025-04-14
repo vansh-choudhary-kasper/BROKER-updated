@@ -410,7 +410,81 @@ export const DataProvider = ({ children }) => {
     setError(prev => ({ ...prev, companies: null }));
     
     try {
-      const response = await axios.put(`${backendUrl}/api/companies/${id}`, companyData);
+      // Create FormData object
+      const formData = new FormData();
+      
+      // Add all non-file fields to FormData
+      Object.keys(companyData).forEach(key => {
+        if (key === 'documents') {
+          // Handle documents as nested objects
+          Object.keys(companyData[key]).forEach(docKey => {
+            if (docKey === 'otherDocuments' && Array.isArray(companyData[key][docKey])) {
+              // Handle otherDocuments as an array of files
+              companyData[key][docKey].forEach((file) => {
+                if (file instanceof File) {
+                  formData.append('documents.otherDocuments', file);
+                }
+              });
+            } else if (companyData[key][docKey] instanceof File) {
+              formData.append(`documents.${docKey}`, companyData[key][docKey]);
+            } else if (typeof companyData[key][docKey] === 'object' && companyData[key][docKey] !== null) {
+              // Handle document objects with file property
+              if (companyData[key][docKey].file instanceof File) {
+                formData.append(`documents.${docKey}`, companyData[key][docKey].file);
+              }
+              // Add other document properties
+              Object.keys(companyData[key][docKey]).forEach(propKey => {
+                if (propKey !== 'file') {
+                  formData.append(`documents.${docKey}.${propKey}`, companyData[key][docKey][propKey]);
+                }
+              });
+            }
+          });
+        } else if (key === 'bankDetails') {
+          // Handle bank details as JSON
+          formData.append(key, JSON.stringify(companyData[key]));
+        } else if (typeof companyData[key] === 'object' && companyData[key] !== null) {
+          // Handle nested objects like contactPerson, businessDetails, etc.
+          Object.keys(companyData[key]).forEach(subKey => {
+            if (typeof companyData[key][subKey] === 'object' && companyData[key][subKey] !== null) {
+              // Handle deeply nested objects like idProof
+              Object.keys(companyData[key][subKey]).forEach(deepKey => {
+                if (companyData[key][subKey][deepKey] instanceof File) {
+                  formData.append(`${key}.${subKey}.${deepKey}`, companyData[key][subKey][deepKey]);
+                } else if (typeof companyData[key][subKey][deepKey] === 'object' && companyData[key][subKey][deepKey] !== null) {
+                  // Handle nested file objects
+                  if (companyData[key][subKey][deepKey].file instanceof File) {
+                    formData.append(`${key}.${subKey}.${deepKey}`, companyData[key][subKey][deepKey].file);
+                  }
+                  // Add other properties
+                  Object.keys(companyData[key][subKey][deepKey]).forEach(propKey => {
+                    if (propKey !== 'file') {
+                      formData.append(`${key}.${subKey}.${deepKey}.${propKey}`, companyData[key][subKey][deepKey][propKey]);
+                    }
+                  });
+                } else {
+                  formData.append(`${key}.${subKey}.${deepKey}`, companyData[key][subKey][deepKey]);
+                }
+              });
+            } else if (companyData[key][subKey] instanceof File) {
+              formData.append(`${key}.${subKey}`, companyData[key][subKey]);
+            } else {
+              formData.append(`${key}.${subKey}`, companyData[key][subKey]);
+            }
+          });
+        } else if (companyData[key] instanceof File) {
+          formData.append(key, companyData[key]);
+        } else {
+          formData.append(key, companyData[key]);
+        }
+      });
+
+      const response = await axios.put(`${backendUrl}/api/companies/${id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
       setCompanies(prev => 
         prev.map(company => company._id === id ? response.data : company)
       );

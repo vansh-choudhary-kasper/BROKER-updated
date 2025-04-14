@@ -3,51 +3,76 @@ const ApiResponse = require('../utils/apiResponse');
 const logger = require('../utils/logger');
 const { uploadToStorage } = require('../utils/fileUpload');
 const { validateCompanyData } = require('../utils/validation');
+const { buildNestedObject } = require('../utils/helpers');
+const cloudinary = require('../config/cloudinary');
 
 class CompanyController {
     async createCompany(req, res) {
         try {
-            const companyData = JSON.parse(JSON.stringify(req.body));
-            
+            const companyData = buildNestedObject(req.body); // Flattened form parsing
+            console.log('Company data:', companyData);
+            console.log('Files:', req.files);
+    
             // Handle file uploads
-            if (req.files && req.files.length > 0) {
-                for (const file of req.files) {
-                    const uploadResult = await uploadToStorage(file);
-                    const fieldPath = file.fieldname.split('[');
-                    let target = companyData;
-                    
-                    // Navigate through nested object structure
-                    for (let i = 0; i < fieldPath.length - 1; i++) {
-                        const key = fieldPath[i].replace(/\]/g, '');
-                        if (!target[key]) {
-                            target[key] = fieldPath[i + 1].includes(']') ? {} : [];
+            if (req.files && Object.keys(req.files).length > 0) {
+                for (const fieldName in req.files) {
+                    const files = req.files[fieldName];
+    
+                    for (const file of files) {
+                        const uploadResult = await uploadToStorage(file);
+                        console.log('uploadResult', uploadResult);
+    
+                        const isDocument = file.fieldname.startsWith('documents.');
+                        const docKey = file.fieldname.split('.')[1];
+    
+                        const docData = {
+                            fieldPath: file.fieldname,
+                            url: uploadResult.url,
+                            publicId: uploadResult.publicId,
+                            originalName: uploadResult.originalName,
+                            mimetype: uploadResult.mimetype,
+                            size: uploadResult.size,
+                            uploadDate: new Date(),
+                            verificationStatus: 'pending'
+                        };
+    
+                        // Ensure documents object exists
+                        if (!companyData.documents) companyData.documents = {};
+    
+                        if (isDocument) {
+                            if (docKey === 'otherDocuments') {
+                                if (!companyData.documents.otherDocuments) {
+                                    companyData.documents.otherDocuments = [];
+                                }
+                                companyData.documents.otherDocuments.push(docData);
+                            } else {
+                                companyData.documents[docKey] = docData;
+                            }
+                        } else {
+                            // Set flat or nested non-document file field
+                            const flatKey = file.fieldname;
+                            companyData[flatKey] = uploadResult.url;
                         }
-                        target = target[key];
                     }
-                    
-                    // Set the file URL in the appropriate field
-                    const lastKey = fieldPath[fieldPath.length - 1].replace(/\]/g, '');
-                    target[lastKey] = uploadResult.url;
                 }
             }
-
+    
             // Validate company data
             const validationResult = validateCompanyData(companyData);
             if (!validationResult.isValid) {
                 return res.status(400).json({ message: validationResult.errors });
             }
-
-            const company = new Company(companyData);
-            await company.save();
-
-            return res.status(201).json(company);
+    
+            // Create and save new company
+            const newCompany = new Company(companyData);
+            await newCompany.save();
+    
+            return res.status(201).json(ApiResponse.success('Company created successfully', newCompany));
         } catch (error) {
             logger.error('Create Company Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError()
-            );
+            return res.status(500).json(ApiResponse.serverError());
         }
-    }
+    }    
 
     async getCompanies(req, res) {
         try {
@@ -138,56 +163,74 @@ class CompanyController {
 
     async updateCompany(req, res) {
         try {
-            const companyData = JSON.parse(JSON.stringify(req.body));
-            
-            // Handle file uploads
-            if (req.files && req.files.length > 0) {
-                for (const file of req.files) {
-                    const uploadResult = await uploadToStorage(file);
-                    const fieldPath = file.fieldname.split('[');
-                    let target = companyData;
-                    
-                    // Navigate through nested object structure
-                    for (let i = 0; i < fieldPath.length - 1; i++) {
-                        const key = fieldPath[i].replace(/\]/g, '');
-                        if (!target[key]) {
-                            target[key] = fieldPath[i + 1].includes(']') ? {} : [];
+            const companyData = buildNestedObject(req.body);
+            console.log('companyData', companyData);
+    
+            const company = await Company.findById(req.params.id);
+            if (!company) {
+                return res.status(404).json({ message: 'Company not found' });
+            }
+    
+            if (req.files && Object.keys(req.files).length > 0) {
+                console.log('Files:', req.files);
+    
+                for (const fieldName in req.files) {
+                    const files = req.files[fieldName];
+    
+                    for (const file of files) {
+                        const uploadResult = await uploadToStorage(file);
+                        console.log('uploadResult', uploadResult);
+    
+                        const isDocument = file.fieldname.startsWith('documents.');
+                        const docKey = file.fieldname.split('.')[1];
+    
+                        const docData = {
+                            fieldPath: file.fieldname,
+                            url: uploadResult.url,
+                            publicId: uploadResult.publicId,
+                            originalName: uploadResult.originalName,
+                            mimetype: uploadResult.mimetype,
+                            size: uploadResult.size,
+                            uploadDate: new Date(),
+                            verificationStatus: 'pending'
+                        };
+    
+                        if (!companyData.documents) companyData.documents = {};
+    
+                        if (isDocument) {
+                            if (docKey === 'otherDocuments') {
+                                if (!companyData.documents.otherDocuments) {
+                                    companyData.documents.otherDocuments = [];
+                                }
+                                companyData.documents.otherDocuments.push(docData);
+                            } else {
+                                companyData.documents[docKey] = docData;
+                            }
+                        } else {
+                            companyData[file.fieldname] = uploadResult.url;
                         }
-                        target = target[key];
                     }
-                    
-                    // Set the file URL in the appropriate field
-                    const lastKey = fieldPath[fieldPath.length - 1].replace(/\]/g, '');
-                    target[lastKey] = uploadResult.url;
                 }
             }
-
-            // Validate company data
+    
             const validationResult = validateCompanyData(companyData);
             if (!validationResult.isValid) {
                 return res.status(400).json({ message: validationResult.errors });
             }
-
-            const company = await Company.findByIdAndUpdate(
-                req.params.id,
-                { $set: companyData },
-                { new: true, runValidators: true }
-            );
-
-            if (!company) {
-                return res.status(404).json({ message: 'Company not found' });
-            }
-
+    
+            Object.assign(company, companyData);
+            const updatedCompany = await company.save();
+            console.log(companyData);
+    
             return res.status(200).json(
-                ApiResponse.success('Company updated successfully', company)
+                ApiResponse.success('Company updated successfully', updatedCompany)
             );
         } catch (error) {
             logger.error('Update Company Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError()
-            );
+            return res.status(500).json(ApiResponse.serverError());
         }
     }
+       
 
     async deleteCompany(req, res) {
         try {
@@ -337,11 +380,24 @@ class CompanyController {
                     name: file.originalname,
                     type: file.mimetype,
                     url: uploadResult.url,
+                    publicId: uploadResult.publicId,
                     uploadDate: new Date()
                 });
             }
 
-            company.documents = [...(company.documents || []), ...uploadedDocs];
+            // Initialize documents array if it doesn't exist
+            if (!company.documents) {
+                company.documents = {};
+            }
+            
+            // Initialize otherDocuments array if it doesn't exist
+            if (!company.documents.otherDocuments) {
+                company.documents.otherDocuments = [];
+            }
+            
+            // Add the new documents to the otherDocuments array
+            company.documents.otherDocuments = [...company.documents.otherDocuments, ...uploadedDocs];
+            
             await company.save();
 
             return res.status(200).json(
@@ -364,11 +420,36 @@ class CompanyController {
                 );
             }
 
-            company.documents = company.documents.filter(
-                doc => doc._id.toString() !== req.params.documentId
+            const documentId = req.params.documentId;
+            
+            // Check if the document exists in otherDocuments array
+            const documentIndex = company.documents.otherDocuments.findIndex(
+                doc => doc._id.toString() === documentId
             );
+            
+            if (documentIndex === -1) {
+                return res.status(404).json(
+                    ApiResponse.notFound('Document not found')
+                );
+            }
+            
+            // Get the document to delete
+            const documentToDelete = company.documents.otherDocuments[documentIndex];
+            
+            // Delete from Cloudinary if publicId exists
+            if (documentToDelete.publicId) {
+                try {
+                    await cloudinary.uploader.destroy(documentToDelete.publicId);
+                } catch (error) {
+                    logger.error('Error deleting document from Cloudinary:', error);
+                    // Continue with the deletion even if Cloudinary deletion fails
+                }
+            }
+            
+            // Remove the document from the array
+            company.documents.otherDocuments.splice(documentIndex, 1);
             await company.save();
-
+            
             return res.status(200).json(
                 ApiResponse.success('Document deleted successfully')
             );

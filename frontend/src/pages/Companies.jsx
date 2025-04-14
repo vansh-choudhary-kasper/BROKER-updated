@@ -148,24 +148,54 @@ const Companies = () => {
 
   const handleFileChange = (e) => {
     const { name, files } = e.target;
+    
     if (name.includes('.')) {
       const [section, field, subfield] = name.split('.');
-      setFormData(prev => ({
-        ...prev,
-        [section]: {
-          ...prev[section],
-          [field]: subfield ? {
-            ...prev[section][field],
-            [subfield]: files[0]
-          } : files[0]
-        }
-      }));
+      
+      // Special handling for otherDocuments which can have multiple files
+      if (field === 'otherDocuments') {
+        // Convert FileList to Array and append to existing files
+        const newFiles = Array.from(files);
+        setFormData(prev => {
+          const existingFiles = prev[section][field] || [];
+          return {
+            ...prev,
+            [section]: {
+              ...prev[section],
+              [field]: [...existingFiles, ...newFiles]
+            }
+          };
+        });
+      } else {
+        // Handle single file uploads
+        setFormData(prev => ({
+          ...prev,
+          [section]: {
+            ...prev[section],
+            [field]: subfield ? {
+              ...prev[section][field],
+              [subfield]: files[0]
+            } : files[0]
+          }
+        }));
+      }
     } else {
       setFormData(prev => ({
         ...prev,
         [name]: files[0]
       }));
     }
+  };
+
+  // Add function to remove a file from otherDocuments
+  const removeFile = (fileIndex) => {
+    setFormData(prev => ({
+      ...prev,
+      documents: {
+        ...prev.documents,
+        otherDocuments: prev.documents.otherDocuments.filter((_, index) => index !== fileIndex)
+      }
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -925,6 +955,34 @@ const Companies = () => {
                           hover:file:bg-indigo-100"
                       />
                       <p className="mt-1 text-xs text-gray-500">You can select multiple files</p>
+                      
+                      {/* Display selected files with remove button */}
+                      {formData.documents.otherDocuments && formData.documents.otherDocuments.length > 0 && (
+                        <div className="mt-2">
+                          <p className="text-xs font-medium text-gray-700">Selected files:</p>
+                          <ul className="mt-1 text-xs text-gray-600">
+                            {formData.documents.otherDocuments.map((file, index) => (
+                              <li key={index} className="flex items-center justify-between py-1">
+                                <div className="flex items-center">
+                                  <svg className="h-4 w-4 mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                  {file.name}
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => removeFile(index)}
+                                  className="ml-2 text-red-500 hover:text-red-700"
+                                >
+                                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

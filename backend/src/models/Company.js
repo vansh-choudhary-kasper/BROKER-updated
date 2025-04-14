@@ -1,5 +1,15 @@
 const mongoose = require('mongoose');
 
+const documentSchema = new mongoose.Schema({
+  fieldPath: String,
+  url: String,
+  publicId: String,
+  originalName: String,
+  mimetype: String,
+  size: Number,
+  uploadDate: { type: Date, default: Date.now },
+});
+
 const companySchema = new mongoose.Schema({
   // Basic company identification
   name: {
@@ -104,16 +114,14 @@ const companySchema = new mongoose.Schema({
     cancelledCheque: { type: String, url: String } // For bank verification
   }],
 
-//   // Document management
-//   documents: [{
-//     name: String,
-//     type: String,
-//     url: String,
-//     uploadDate: Date,
-//     verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Who verified the document
-//     verificationDate: Date,
-//     verificationStatus: { type: String, enum: ['pending', 'verified', 'rejected'] } // Document verification status
-//   }],
+  documents: {
+    incorporationCertificate: documentSchema,
+    memorandumOfAssociation: documentSchema,
+    articlesOfAssociation: documentSchema,
+    boardResolution: documentSchema,
+    taxRegistration: documentSchema,
+    otherDocuments: [documentSchema]
+  },
 
   // Verification tracking
 //   verificationStatus: {
