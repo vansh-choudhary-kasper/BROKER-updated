@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { useData } from '../context/DataContext';
 import BankDetailsForm from '../components/BankDetailsForm';
 import { debounce } from 'lodash';
+import { useSearchParams } from 'react-router-dom';
 
 const Companies = () => {
+  const [searchParams] = useSearchParams();
   const {
     companies,
     loading,
@@ -113,15 +115,29 @@ const Companies = () => {
     debouncedSearch(value);
   };
 
+  // Initialize filters with URL parameters
   useEffect(() => {
-    console.log('Filters changed:', filters); // Debug log
-    fetchCompanies({
-      status: filters.status,
-      type: filters.type,
-      search: filters.search,
-      page: filters.page,
-      limit: filters.limit
-    });
+    const type = searchParams.get('type');
+    console.log('type', type);
+    const status = searchParams.get('status');
+    const search = searchParams.get('search');
+    const page = searchParams.get('page');
+    
+    setTimeout(() => {
+      setFilters(prev => ({
+        ...prev,
+        type: type || '',
+        status: status || '',
+        search: search || '',
+        page: page ? parseInt(page) : 1
+      }));
+    }, 1000);
+  }, [searchParams]);
+
+  // Fetch companies when filters change
+  useEffect(() => {
+    console.log('Fetching companies with filters:', filters);
+    fetchCompanies(filters);
   }, [fetchCompanies, filters]);
 
   const handleChange = (e) => {
@@ -204,23 +220,11 @@ const Companies = () => {
       if (editingCompany) {
         await updateCompany(editingCompany._id, formData);
         // Refresh the companies list with current filters after update
-        await fetchCompanies({
-          status: filters.status,
-          type: filters.type,
-          search: filters.search,
-          page: filters.page,
-          limit: filters.limit
-        });
+        await fetchCompanies(filters);
       } else {
         await addCompany(formData);
         // Refresh the companies list with current filters after adding
-        await fetchCompanies({
-          status: filters.status,
-          type: filters.type,
-          search: filters.search,
-          page: filters.page,
-          limit: filters.limit
-        });
+        await fetchCompanies(filters);
       }
       setFormData(initialFormState);
       setEditingCompany(null);

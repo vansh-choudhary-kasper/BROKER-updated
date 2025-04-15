@@ -22,6 +22,9 @@ const Dashboard = () => {
 
   const { token } = useAuth();
 
+    // Add view type state
+  const [viewType, setViewType] = useState('monthly');
+
   // New state for profit and loss data
   const [profitLossData, setProfitLossData] = useState({
     monthly: [],
@@ -47,6 +50,9 @@ const Dashboard = () => {
 
   // Fetch profit and loss data
   useEffect(() => {
+    fetchCompanies();
+    fetchBanks();
+    fetchExpenses();
     const fetchProfitLossData = async () => {
       try {
         setProfitLossData(prev => ({ ...prev, loading: true, error: null }));
@@ -111,7 +117,7 @@ const Dashboard = () => {
     : {};
 
   // Desired order
-  const typeOrder = ['provider', 'client', 'both'];
+  const typeOrder = ['provider', 'client', 'both', 'blacklisted'];
 
   // Reordering companyTypes based on the specified typeOrder
   const companyTypes = {};
@@ -200,43 +206,48 @@ const Dashboard = () => {
       {/* Profit & Loss Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
-          <h3 className="text-sm font-medium text-gray-500">Current Month Profit</h3>
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-sm font-medium text-gray-500">
+              {viewType === 'monthly' ? 'Current Month Profit' : 'Current Year Profit'}
+            </h3>
+            <select
+              value={viewType}
+              onChange={(e) => setViewType(e.target.value)}
+              className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </div>
           <div className="flex items-center justify-between mt-2">
-            <p className="text-2xl font-bold text-gray-900">₹{profitLossData.currentMonth.toLocaleString()}</p>
-            <div className={`flex items-center ${monthlyGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+            <p className="text-2xl font-bold text-gray-900">
+              ₹{viewType === 'monthly' ? profitLossData.currentMonth.toLocaleString() : profitLossData.currentYear.toLocaleString()}
+            </p>
+            <div className={`flex items-center ${viewType === 'monthly' ? (monthlyGrowth >= 0 ? 'text-green-500' : 'text-red-500') : (yearlyGrowth >= 0 ? 'text-green-500' : 'text-red-500')}`}>
               <span className="text-sm font-medium">
-                {monthlyGrowth >= 0 ? '+' : ''}{monthlyGrowth.toFixed(1)}%
+                {viewType === 'monthly' ? (monthlyGrowth >= 0 ? '+' : '') : (yearlyGrowth >= 0 ? '+' : '')}
+                {viewType === 'monthly' ? monthlyGrowth.toFixed(1) : yearlyGrowth.toFixed(1)}%
               </span>
               <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                {monthlyGrowth >= 0 ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                {viewType === 'monthly' ? (
+                  monthlyGrowth >= 0 ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  )
                 ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  yearlyGrowth >= 0 ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  )
                 )}
               </svg>
             </div>
           </div>
-          <p className="text-xs text-gray-500 mt-1">vs. Last Month: ₹{profitLossData.lastMonth.toLocaleString()}</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
-          <h3 className="text-sm font-medium text-gray-500">Current Year Profit</h3>
-          <div className="flex items-center justify-between mt-2">
-            <p className="text-2xl font-bold text-gray-900">₹{profitLossData.currentYear.toLocaleString()}</p>
-            <div className={`flex items-center ${yearlyGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-              <span className="text-sm font-medium">
-                {yearlyGrowth >= 0 ? '+' : ''}{yearlyGrowth.toFixed(1)}%
-              </span>
-              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                {yearlyGrowth >= 0 ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                )}
-              </svg>
-            </div>
-          </div>
-          <p className="text-xs text-gray-500 mt-1">vs. Last Year: ₹{profitLossData.lastYear.toLocaleString()}</p>
+          <p className="text-xs text-gray-500 mt-1">
+            vs. {viewType === 'monthly' ? 'Last Month' : 'Last Year'}: ₹{viewType === 'monthly' ? profitLossData.lastMonth.toLocaleString() : profitLossData.lastYear.toLocaleString()}
+          </p>
         </div>
 
         <div className="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
@@ -247,56 +258,50 @@ const Dashboard = () => {
 
       {/* Profit & Loss Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        {/* Monthly Profit Chart */}
+        {/* Profit Chart */}
         <div className="bg-white rounded-lg shadow p-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Monthly Profit Trend</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">
+            {viewType === 'monthly' ? 'Monthly Profit Trend' : 'Yearly Profit Comparison'}
+          </h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={profitLossData.monthly}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="profit"
-                  name="Profit"
-                  stroke={PROFIT_COLOR}
-                  activeDot={{ r: 8 }}
-                />
-              </LineChart>
+              {viewType === 'monthly' ? (
+                <LineChart
+                  data={profitLossData.monthly}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="profit"
+                    name="Profit"
+                    stroke={PROFIT_COLOR}
+                    activeDot={{ r: 8 }}
+                  />
+                </LineChart>
+              ) : (
+                <BarChart
+                  data={profitLossData.yearly}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="year" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
+                  <Legend />
+                  <Bar dataKey="currentYear" name="Current Year" fill={PROFIT_COLOR} />
+                  <Bar dataKey="lastYear" name="Last Year" fill="#93C5FD" />
+                </BarChart>
+              )}
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Yearly Profit Chart */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Yearly Profit Comparison</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={profitLossData.yearly}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="year" />
-                <YAxis />
-                <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
-                <Legend />
-                <Bar dataKey="currentYear" name="Current Year" fill={PROFIT_COLOR} />
-                <Bar dataKey="lastYear" name="Last Year" fill="#93C5FD" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
-      {/* Expense Categories Chart */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* Expense Categories Chart */}
         <div className="bg-white rounded-lg shadow p-4">
           <h3 className="text-lg font-medium text-gray-900 mb-4">Expense Categories</h3>
           <div className="h-64">
@@ -322,26 +327,43 @@ const Dashboard = () => {
             </ResponsiveContainer>
           </div>
         </div>
+      </div>
 
-        {/* Company Types Chart */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Company Types</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={companyTypeData}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="value" name="Companies" fill="#8884d8" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+      {/* Company Types Section */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        {typeOrder.map((type) => {
+          const count = companyTypes[type] || 0;
+          const typeName = type.charAt(0).toUpperCase() + type.slice(1);
+          const bgColor = {
+            provider: 'bg-blue-50',
+            client: 'bg-green-50',
+            both: 'bg-purple-50',
+            blacklisted: 'bg-red-50'
+          }[type];
+          const textColor = {
+            provider: 'text-blue-600',
+            client: 'text-green-600',
+            both: 'text-purple-600',
+            blacklisted: 'text-red-600'
+          }[type];
+          const borderColor = {
+            provider: 'border-blue-500',
+            client: 'border-green-500',
+            both: 'border-purple-500',
+            blacklisted: 'border-red-500'
+          }[type];
+
+          return (
+            <div
+              key={type}
+              className={`bg-white rounded-lg shadow p-4 border-l-4 ${borderColor} cursor-pointer hover:shadow-md transition-shadow duration-200`}
+              onClick={() => window.location.href = `/companies?type=${type}`}
+            >
+              <h3 className="text-sm font-medium text-gray-500">{typeName} Companies</h3>
+              <p className="text-2xl font-bold mt-2">{count}</p>
+            </div>
+          );
+        })}
       </div>
 
       {/* Recent Activities Section */}

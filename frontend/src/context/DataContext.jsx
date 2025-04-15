@@ -54,7 +54,7 @@ export const DataProvider = ({ children }) => {
   });
 
   // Debounce time in milliseconds (5 seconds)
-  const DEBOUNCE_TIME = 5000;
+  const DEBOUNCE_TIME = 1000;
 
   // Fetch companies with debounce
   const fetchCompanies = useCallback(async (filters = {}) => {

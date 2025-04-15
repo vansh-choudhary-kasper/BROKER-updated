@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
       console.error("isAuthenticated", isAuthenticated);
       const storedToken = getStoredToken();
-      if (storedToken && !isAuthenticated) {
+      if (storedToken) {
         setLoading(true);
         try {
           const response = await axios.get(`${backendUrl}/api/auth/me`);

@@ -45,6 +45,13 @@ const MainLayout = () => {
           d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
         />
       ),
+      dropdown: [
+        { name: 'All Companies', path: '/companies' },
+        { name: 'Clients', path: '/companies?type=client' },
+        { name: 'Providers', path: '/companies?type=provider' },
+        { name: 'Both', path: '/companies?type=both' },
+        { name: 'Blacklisted', path: '/companies?type=blacklisted' }
+      ]
     },
     {
       path: '/tasks',
@@ -142,22 +149,72 @@ const MainLayout = () => {
           <ul className="space-y-2">
             {navItems.map((item) => (
               <li key={item.path}>
-                <Link
-                  to={item.path}
-                  className={`nav-link ${
-                    isActive(item.path) ? 'active' : ''
-                  }`}
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                {item.dropdown ? (
+                  <div className="relative group">
+                    <Link
+                      to={item.path}
+                      className={`nav-link ${
+                        isActive(item.path) ? 'active' : ''
+                      }`}
+                    >
+                      <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        {item.icon}
+                      </svg>
+                      {isSidebarOpen && (
+                        <div className="flex items-center justify-between w-full">
+                          <span>{item.name}</span>
+                          <svg
+                            className="w-4 h-4 ml-2 transition-transform group-hover:rotate-180"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </Link>
+                    <div className={`absolute ${isSidebarOpen ? 'left-full' : 'left-full'} top-0 ml-1 w-56 bg-white rounded-md shadow-lg py-1 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border-l-4 border-blue-500`}>
+                      <div className="absolute -left-1 top-1/2 w-1 h-0.5 bg-blue-500 transform -translate-y-1/2"></div>
+                      {item.dropdown.map((dropdownItem) => (
+                        <Link
+                          key={dropdownItem.path}
+                          to={dropdownItem.path}
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150 border-l-4 border-transparent hover:border-blue-200"
+                        >
+                          {dropdownItem.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <Link
+                    to={item.path}
+                    className={`nav-link ${
+                      isActive(item.path) ? 'active' : ''
+                    }`}
                   >
-                    {item.icon}
-                  </svg>
-                  {isSidebarOpen && <span className="ml-3">{item.name}</span>}
-                </Link>
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      {item.icon}
+                    </svg>
+                    {isSidebarOpen && <span>{item.name}</span>}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
