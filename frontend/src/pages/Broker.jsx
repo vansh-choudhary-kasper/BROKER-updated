@@ -107,11 +107,9 @@ const Broker = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("formData", formData);
     try {
       if (editingBroker) {
         const result = await updateBroker(editingBroker._id, formData);
-        console.log("result", result);
         if (result.success) {
           toast.success('Broker updated successfully');
           setFormData(initialFormState);

@@ -78,8 +78,6 @@ export const DataProvider = ({ children }) => {
         }
       });
 
-      console.log('API request with filters:', filters); // Debug log
-      console.log('Query params:', queryParams.toString()); // Debug log
 
       const response = await axios.get(`${backendUrl}/api/companies?${queryParams.toString()}`);
       // Handle both array response and paginated response
@@ -641,7 +639,31 @@ export const DataProvider = ({ children }) => {
       fetchBrokers();
       fetchProfitLoss();
     }
-  }, [token, fetchCompanies, fetchTasks, fetchBanks, fetchExpenses, fetchBrokers, fetchProfitLoss]);
+  }, [token]);
+
+  useEffect(() => {
+    fetchCompanies();
+  }, [fetchCompanies]);  
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
+
+  useEffect(() => {
+    fetchBanks();
+  }, [fetchBanks]); 
+
+  useEffect(() => {
+    fetchExpenses();
+  }, [fetchExpenses]);
+
+  useEffect(() => { 
+    fetchBrokers();
+  }, [fetchBrokers]);
+
+  useEffect(() => {
+    fetchProfitLoss();
+  }, [fetchProfitLoss]);  
 
   // Add broker
   const addBroker = async (brokerData) => {

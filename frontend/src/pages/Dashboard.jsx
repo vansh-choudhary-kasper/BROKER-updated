@@ -24,6 +24,22 @@ const Dashboard = () => {
 
     // Add view type state
   const [viewType, setViewType] = useState('monthly');
+  const [accountFilter, setAccountFilter] = useState('all');
+  const [expenseViewType, setExpenseViewType] = useState('monthly');
+  const [dashboardStats, setDashboardStats] = useState({
+    totalCompanies: 0,
+    totalAccounts: 0,
+    monthlyExpenses: {
+      total: 0,
+      categories: {}
+    },
+    yearlyExpenses: {
+      total: 0,
+      categories: {}
+    },
+    loading: true,
+    error: null
+  });
 
   // New state for profit and loss data
   const [profitLossData, setProfitLossData] = useState({
@@ -37,56 +53,98 @@ const Dashboard = () => {
     error: null
   });
 
+  // Combined data fetching
+  useEffect(() => {
+    let isMounted = true;
+    const controller = new AbortController();
+
+    const fetchAllData = async () => {
+      try {
+
+        // Fetch dashboard statistics
+        const statsResponse = await axios.get(`${backendUrl}/api/dashboard/stats`, {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal
+        });
+
+        // Fetch profit and loss data
+        const profitLossResponse = await axios.get(`${backendUrl}/api/dashboard/profit-loss`, {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal
+        });
+
+        if (isMounted) {
+          if (statsResponse.data?.success) {
+            setDashboardStats({
+              totalCompanies: statsResponse.data.totalCompanies || 0,
+              totalAccounts: statsResponse.data.totalAccounts || 0,
+              monthlyExpenses: statsResponse.data.monthlyExpenses || { total: 0, categories: {} },
+              yearlyExpenses: statsResponse.data.yearlyExpenses || { total: 0, categories: {} },
+              loading: false,
+              error: null
+            });
+          }
+
+          if (profitLossResponse.data?.success) {
+            setProfitLossData({
+              monthly: profitLossResponse.data.monthly || [],
+              yearly: profitLossResponse.data.yearly || [],
+              currentMonth: profitLossResponse.data.currentMonth || 0,
+              lastMonth: profitLossResponse.data.lastMonth || 0,
+              currentYear: profitLossResponse.data.currentYear || 0,
+              lastYear: profitLossResponse.data.lastYear || 0,
+              loading: false,
+              error: null
+            });
+          }
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.error('Error fetching dashboard data:', err);
+          setDashboardStats(prev => ({
+            ...prev,
+            loading: false,
+            error: err.message || 'Failed to fetch dashboard statistics'
+          }));
+          setProfitLossData(prev => ({
+            ...prev,
+            loading: false,
+            error: err.message || 'Failed to fetch profit and loss data'
+          }));
+        }
+      }
+    };
+
+    fetchAllData();
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
+  }, [token, fetchCompanies, fetchBanks, fetchExpenses]);
+
+  // Calculate account statistics
+  const accountStats = Array.isArray(banks) ? banks.reduce((acc, bank) => {
+    const status = bank.status?.toLowerCase() || 'active';
+    if (!acc[status]) {
+      acc[status] = 0;
+    }
+    acc[status]++;
+    acc.total++;
+    return acc;
+  }, { total: 0, active: 0, inactive: 0, blacklisted: 0 }) : { total: 0, active: 0, inactive: 0, blacklisted: 0 };
+
   // Check if any data is still loading
-  const isLoading = loading.companies || loading.banks || loading.expenses || profitLossData.loading;
+  const isLoading = loading.companies || loading.banks || loading.expenses || profitLossData.loading || dashboardStats.loading;
 
   // Check if there are any errors
-  const hasError = error.companies || error.banks || error.expenses || profitLossData.error;
+  const hasError = error.companies || error.banks || error.expenses || profitLossData.error || dashboardStats.error;
 
   // Calculate statistics with null checks
   const totalExpenses = Array.isArray(expenses)
     ? expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0)
     : 0;
-
-  // Fetch profit and loss data
-  useEffect(() => {
-    fetchCompanies();
-    fetchBanks();
-    fetchExpenses();
-    const fetchProfitLossData = async () => {
-      try {
-        setProfitLossData(prev => ({ ...prev, loading: true, error: null }));
-
-        const response = await axios.get(`${backendUrl}/api/dashboard/profit-loss`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-
-        if (response.data && response.data.success) {
-          setProfitLossData({
-            monthly: response.data.monthly || [],
-            yearly: response.data.yearly || [],
-            currentMonth: response.data.currentMonth || 0,
-            lastMonth: response.data.lastMonth || 0,
-            currentYear: response.data.currentYear || 0,
-            lastYear: response.data.lastYear || 0,
-            loading: false,
-            error: null
-          });
-        } else {
-          throw new Error('Failed to fetch profit and loss data');
-        }
-      } catch (err) {
-        console.error('Error fetching profit and loss data:', err);
-        setProfitLossData(prev => ({
-          ...prev,
-          loading: false,
-          error: err.message || 'Failed to fetch profit and loss data'
-        }));
-      }
-    };
-
-    fetchProfitLossData();
-  }, [token]);
 
   // Calculate profit growth percentages
   const monthlyGrowth = profitLossData.lastMonth > 0
@@ -183,6 +241,7 @@ const Dashboard = () => {
             {error.banks && <div>Banks: {error.banks}</div>}
             {error.expenses && <div>Expenses: {error.expenses}</div>}
             {profitLossData.error && <div>Profit & Loss: {profitLossData.error}</div>}
+            {dashboardStats.error && <div>Dashboard Stats: {dashboardStats.error}</div>}
           </p>
           <button
             className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
@@ -250,9 +309,38 @@ const Dashboard = () => {
           </p>
         </div>
 
+        {/* Accounts Stats */}
+        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="text-sm font-medium text-gray-500">Accounts</h3>
+            <select
+              value={accountFilter}
+              onChange={(e) => setAccountFilter(e.target.value)}
+              className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Accounts</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="blacklisted">Blacklisted</option>
+            </select>
+          </div>
+          <div className="mt-2">
+            <p className="text-2xl font-bold text-gray-900">
+              {accountFilter === 'all' 
+                ? dashboardStats.totalAccounts 
+                : accountStats[accountFilter] || 0}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              {accountFilter === 'all' 
+                ? 'Total Accounts' 
+                : `${accountFilter.charAt(0).toUpperCase() + accountFilter.slice(1)} Accounts`}
+            </p>
+          </div>
+        </div>
+
         <div className="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
           <h3 className="text-sm font-medium text-gray-500">Total Companies</h3>
-          <p className="text-2xl font-bold text-gray-900 mt-2">{Array.isArray(companies) ? companies.length : 0}</p>
+          <p className="text-2xl font-bold text-gray-900 mt-2">{dashboardStats.totalCompanies}</p>
         </div>
       </div>
 
@@ -261,54 +349,67 @@ const Dashboard = () => {
         {/* Profit Chart */}
         <div className="bg-white rounded-lg shadow p-4">
           <h3 className="text-lg font-medium text-gray-900 mb-4">
-            {viewType === 'monthly' ? 'Monthly Profit Trend' : 'Yearly Profit Comparison'}
+            {viewType === 'monthly' ? 'Monthly Profit Trend' : 'Yearly Profit Trend'}
           </h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              {viewType === 'monthly' ? (
-                <LineChart
-                  data={profitLossData.monthly}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="profit"
-                    name="Profit"
-                    stroke={PROFIT_COLOR}
-                    activeDot={{ r: 8 }}
-                  />
-                </LineChart>
-              ) : (
-                <BarChart
-                  data={profitLossData.yearly}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="year" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
-                  <Legend />
-                  <Bar dataKey="currentYear" name="Current Year" fill={PROFIT_COLOR} />
-                  <Bar dataKey="lastYear" name="Last Year" fill="#93C5FD" />
-                </BarChart>
-              )}
+              <LineChart
+                data={viewType === 'monthly' ? profitLossData.monthly : profitLossData.yearly}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey={viewType === 'monthly' ? 'month' : 'year'} 
+                  tickFormatter={(value) => viewType === 'monthly' ? value : `${value}`}
+                />
+                <YAxis />
+                <Tooltip 
+                  formatter={(value) => `₹${value.toLocaleString()}`}
+                  labelFormatter={(label) => viewType === 'monthly' ? `Month: ${label}` : `Year: ${label}`}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="profit"
+                  name="Profit"
+                  stroke={PROFIT_COLOR}
+                  activeDot={{ r: 8 }}
+                />
+              </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Expense Categories Chart */}
         <div className="bg-white rounded-lg shadow p-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Expense Categories</h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-medium text-gray-900">Expense Categories</h3>
+            <div className="flex items-center gap-2">
+              <select
+                value={expenseViewType}
+                onChange={(e) => setExpenseViewType(e.target.value)}
+                className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+              <div className="text-sm font-medium text-gray-600">
+                Total: ₹{expenseViewType === 'monthly' 
+                  ? dashboardStats.monthlyExpenses.total.toLocaleString() 
+                  : dashboardStats.yearlyExpenses.total.toLocaleString()}
+              </div>
+            </div>
+          </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={expenseCategoryData}
+                  data={Object.entries(expenseViewType === 'monthly' 
+                    ? dashboardStats.monthlyExpenses.categories 
+                    : dashboardStats.yearlyExpenses.categories).map(([name, value]) => ({
+                    name: name.charAt(0).toUpperCase() + name.slice(1).replace('_', ' '),
+                    value
+                  }))}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -317,7 +418,9 @@ const Dashboard = () => {
                   dataKey="value"
                   label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                 >
-                  {expenseCategoryData.map((entry, index) => (
+                  {Object.entries(expenseViewType === 'monthly' 
+                    ? dashboardStats.monthlyExpenses.categories 
+                    : dashboardStats.yearlyExpenses.categories).map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

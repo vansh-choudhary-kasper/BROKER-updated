@@ -227,7 +227,6 @@ const Slabs = () => {
     for (let i = 1; i < slabs.length; i++) {
       const prevMax = slabs[i - 1].maxAmount;
       if (slabs[i].minAmount !== prevMax + 1) {
-        console.log(slabs[i].minAmount, prevMax + 1);
         slabs[i].minAmount = prevMax + 1;
       }
     }
@@ -286,7 +285,6 @@ const Slabs = () => {
       }
 
       // updatedSlabs = normalizeSlabs(updatedSlabs);
-      console.log(updatedSlabs);
 
       const response = await axios.patch(
         `${import.meta.env.VITE_BACKEND_URL}/api/users/${userData?._id}`,

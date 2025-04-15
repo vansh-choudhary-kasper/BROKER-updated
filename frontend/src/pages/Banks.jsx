@@ -90,7 +90,6 @@ const Banks = () => {
 
   // Handle filter changes
   const handleFilterChange = (filterName, value) => {
-    console.log(`Changing ${filterName} to:`, value); // Debug log
     setFilters(prev => ({
       ...prev,
       [filterName]: value,
@@ -99,7 +98,6 @@ const Banks = () => {
   };
 
   useEffect(() => {
-    console.log('Current filters:', filters); // Debug log
     fetchBanks(filters);
   }, [fetchBanks, filters]);
 
@@ -288,7 +286,6 @@ const Banks = () => {
       // Refresh the banks list
       fetchBanks(filters);
     } catch (error) {
-      console.log("error", error);
       throw new Error(error.response?.data?.message || 'Failed to upload bank history');
     }
   };

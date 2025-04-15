@@ -41,7 +41,6 @@ class UserController {
                         minAmount: parseInt(slab.minAmount),
                         maxAmount: parseInt(slab.maxAmount)
                     }));
-                    console.log(updates.clientSlabs);
                     updates.clientSlabs.sort((a, b) => a.minAmount - b.minAmount);
                     
                     // Validate client slabs
@@ -61,7 +60,6 @@ class UserController {
                         minAmount: parseInt(slab.minAmount),
                         maxAmount: parseInt(slab.maxAmount)
                     }));
-                    console.log(updates.providerSlabs);
                     updates.providerSlabs.sort((a, b) => a.minAmount - b.minAmount);
                     
                     // Validate provider slabs

@@ -10,8 +10,6 @@ class CompanyController {
     async createCompany(req, res) {
         try {
             const companyData = buildNestedObject(req.body); // Flattened form parsing
-            console.log('Company data:', companyData);
-            console.log('Files:', req.files);
     
             // Handle file uploads
             if (req.files && Object.keys(req.files).length > 0) {
@@ -20,7 +18,6 @@ class CompanyController {
     
                     for (const file of files) {
                         const uploadResult = await uploadToStorage(file);
-                        console.log('uploadResult', uploadResult);
     
                         const isDocument = file.fieldname.startsWith('documents.');
                         const docKey = file.fieldname.split('.')[1];
@@ -82,8 +79,6 @@ class CompanyController {
             const status = req.query.status || '';
             const type = req.query.type || '';
 
-            console.log('Received filters:', { page, limit, search, status, type }); // Debug log
-
             // Build the query object
             const searchQuery = {};
             
@@ -109,10 +104,8 @@ class CompanyController {
                 searchQuery.type = type;
             }
 
-            console.log('Search query:', JSON.stringify(searchQuery)); // Debug log
 
             const totalCompanies = await Company.countDocuments(searchQuery);
-            console.log('Total companies found:', totalCompanies); // Debug log
             
             const totalPages = Math.ceil(totalCompanies / limit);
 
@@ -121,7 +114,6 @@ class CompanyController {
                 .skip((page - 1) * limit)
                 .limit(limit);
 
-            console.log('Companies returned:', companies.length); // Debug log
             
             companies = companies.filter(company => company.name !== 'other');
 
@@ -164,7 +156,6 @@ class CompanyController {
     async updateCompany(req, res) {
         try {
             const companyData = buildNestedObject(req.body);
-            console.log('companyData', companyData);
     
             const company = await Company.findById(req.params.id);
             if (!company) {
@@ -172,14 +163,12 @@ class CompanyController {
             }
     
             if (req.files && Object.keys(req.files).length > 0) {
-                console.log('Files:', req.files);
     
                 for (const fieldName in req.files) {
                     const files = req.files[fieldName];
     
                     for (const file of files) {
                         const uploadResult = await uploadToStorage(file);
-                        console.log('uploadResult', uploadResult);
     
                         const isDocument = file.fieldname.startsWith('documents.');
                         const docKey = file.fieldname.split('.')[1];
@@ -220,7 +209,6 @@ class CompanyController {
     
             Object.assign(company, companyData);
             const updatedCompany = await company.save();
-            console.log(companyData);
     
             return res.status(200).json(
                 ApiResponse.success('Company updated successfully', updatedCompany)

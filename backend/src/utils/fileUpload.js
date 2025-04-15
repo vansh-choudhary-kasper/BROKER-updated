@@ -50,7 +50,6 @@ const uploadToStorage = async (file) => {
       use_filename: true,
       unique_filename: true
     });
-    console.log('File uploaded to Cloudinary:', result);
     
     // Delete the local file after uploading to Cloudinary
     // try {

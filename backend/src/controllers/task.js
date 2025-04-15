@@ -53,11 +53,9 @@ class TaskController {
                 helperBroker,
                 payment
             } = req.body;
-            console.log(req.body);
 
             // Generate task number if not provided
             const finalTaskNumber = taskNumber || await this.generateTaskNumber();
-            console.log("finalTaskNumber", finalTaskNumber);
 
             // Verify client company exists
             const clientCompanyExists = await Company.findById(clientCompany);
@@ -141,7 +139,6 @@ class TaskController {
                 ApiResponse.success('Task created successfully', task)
             );
         } catch (error) {
-            console.log("error", error);
             logger.error('Create Task Error:', error);
             return res.status(500).json(
                 ApiResponse.error('Failed to create task', error.message)

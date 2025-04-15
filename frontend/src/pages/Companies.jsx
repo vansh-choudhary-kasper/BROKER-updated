@@ -118,7 +118,6 @@ const Companies = () => {
   // Initialize filters with URL parameters
   useEffect(() => {
     const type = searchParams.get('type');
-    console.log('type', type);
     const status = searchParams.get('status');
     const search = searchParams.get('search');
     const page = searchParams.get('page');
@@ -136,7 +135,6 @@ const Companies = () => {
 
   // Fetch companies when filters change
   useEffect(() => {
-    console.log('Fetching companies with filters:', filters);
     fetchCompanies(filters);
   }, [fetchCompanies, filters]);
 
@@ -309,7 +307,7 @@ const Companies = () => {
               <select
                 value={filters.status}
                 onChange={(e) => {
-                  console.log('Status changed to:', e.target.value); // Debug log
+                  ('Status changed to:', e.target.value); // Debug log
                   setFilters(prev => ({ ...prev, status: e.target.value, page: 1 }));
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -326,7 +324,6 @@ const Companies = () => {
               <select
                 value={filters.type}
                 onChange={(e) => {
-                  console.log('Type changed to:', e.target.value); // Debug log
                   setFilters(prev => ({ ...prev, type: e.target.value, page: 1 }));
                 }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"

@@ -78,13 +78,11 @@ exports.getBrokerById = async (req, res) => {
 // Update broker
 exports.updateBroker = async (req, res) => {
   try {
-    console.log("req.body", req.body);
     const broker = await Broker.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     );
-    console.log("broker", broker);
     
     if (!broker) {
       return res.status(404).json({

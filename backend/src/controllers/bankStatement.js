@@ -12,11 +12,9 @@ exports.uploadStatement = async (req, res) => {
     const transactions = req.body.transactions;
     for (const transaction of transactions) {
       // Verify bank exists
-      console.log(transaction.accountNo);
       if (transaction.accountNo !== null || transaction.accountNo !== undefined) {
         transaction.accountNo = Number(transaction.accountNo).toLocaleString('fullwide', { useGrouping: false });
       }
-      console.log(transaction.accountNo, transaction.bankName);
       let bank = await Bank.findOne({ accountNumber: transaction.accountNo, bankName: transaction.bankName });
       if (!bank) {
         continue;
@@ -70,11 +68,9 @@ exports.uploadStatement = async (req, res) => {
         type: transaction.creditDebit,
         date: isNaN(new Date(transaction.date)) ? new Date() : new Date(transaction.date)
       });
-      console.log("bank", bank);
       await bank.save();
     };
 
-    console.log("Statements uploaded successfully");
     res.status(201).json({
       success: true,
       message: 'Statements uploaded successfully',

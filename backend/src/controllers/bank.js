@@ -41,8 +41,6 @@ class BankController {
                 ];
             }
 
-            console.log('Bank query:', query); // Debug log
-
             const banks = await Bank.find(query)
                 .limit(limit * 1)
                 .skip((page - 1) * limit)
