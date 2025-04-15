@@ -6,6 +6,7 @@ import {
 } from 'recharts';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import TodoList from '../components/TodoList';
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const Dashboard = () => {
@@ -498,6 +499,11 @@ const Dashboard = () => {
             <p className="text-gray-500 text-center py-4">No recent expenses</p>
           )}
         </div>
+      </div>
+
+      {/* Todo List Section */}
+      <div className="mt-6">
+        <TodoList />
       </div>
     </div>
   );

@@ -20,6 +20,37 @@ const slabSchema = new mongoose.Schema({
   },
 });
 
+const todoSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  description: String,
+  dueDate: Date,
+  priority: {
+    type: String,
+    enum: ['low', 'medium', 'high'],
+    default: 'medium'
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'in_progress', 'completed'],
+    default: 'pending'
+  },
+  tags: [String],
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
+}, {
+  timestamps: true
+});
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -63,7 +94,8 @@ const userSchema = new mongoose.Schema({
   updatedAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  todos: [todoSchema]
 }, {
   timestamps: true
 });

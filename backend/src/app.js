@@ -19,7 +19,7 @@ const expenseRoutes = require('./routes/expense');
 const brokerRoutes = require('./routes/broker');
 const dashboardRoutes = require('./routes/dashboard');
 const userRoutes = require('./routes/user');
-
+const todoRoutes = require('./routes/todo');
 // Create Express app
 const app = express();
 
@@ -53,7 +53,7 @@ app.use('/api/expenses', expenseRoutes);
 app.use('/api/brokers', brokerRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/users', userRoutes);
-
+app.use('/api/todos', todoRoutes);
 // Error handling
 app.use(errorHandler);
 
