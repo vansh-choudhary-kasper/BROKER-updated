@@ -1,4 +1,5 @@
 const Company = require('../models/Company');
+const Bank = require('../models/Bank');
 const ApiResponse = require('../utils/apiResponse');
 const logger = require('../utils/logger');
 const { uploadToStorage } = require('../utils/fileUpload');
@@ -10,17 +11,23 @@ class CompanyController {
     async createCompany(req, res) {
         try {
             const companyData = buildNestedObject(req.body); // Flattened form parsing
+            console.log(req.files);
     
             // Handle file uploads
             if (req.files && Object.keys(req.files).length > 0) {
+                console.log('Files found:', req.files);
                 for (const fieldName in req.files) {
+                    console.log('Processing field:', fieldName);
                     const files = req.files[fieldName];
     
                     for (const file of files) {
+                        console.log('Processing file:', file.originalname);
                         const uploadResult = await uploadToStorage(file);
+                        console.log('Upload result:', uploadResult);
     
                         const isDocument = file.fieldname.startsWith('documents.');
                         const docKey = file.fieldname.split('.')[1];
+                        console.log('Is document:', isDocument, 'Document key:', docKey);
     
                         const docData = {
                             fieldPath: file.fieldname,
@@ -36,31 +43,49 @@ class CompanyController {
                         // Ensure documents object exists
                         if (!companyData.documents) companyData.documents = {};
     
+                        console.log('Document data:', docData);
                         if (isDocument) {
                             if (docKey === 'otherDocuments') {
+                                console.log('Adding to otherDocuments array');
                                 if (!companyData.documents.otherDocuments) {
                                     companyData.documents.otherDocuments = [];
                                 }
                                 companyData.documents.otherDocuments.push(docData);
                             } else {
+                                console.log('Setting document for key:', docKey);
                                 companyData.documents[docKey] = docData;
                             }
                         } else {
                             // Set flat or nested non-document file field
                             const flatKey = file.fieldname;
+                            console.log('Setting non-document field:', flatKey);
                             companyData[flatKey] = uploadResult.url;
                         }
                     }
                 }
+                console.log('Final company data:', companyData);
             }
     
             // Validate company data
             const validationResult = validateCompanyData(companyData);
+            console.log(validationResult);
             if (!validationResult.isValid) {
                 return res.status(400).json({ message: validationResult.errors });
             }
     
             // Create and save new company
+            const bankDetails = [];
+            for (const bank of companyData.bankDetails) {
+                try {
+                    console.log(bank);
+                    const newBank = new Bank(bank);
+                    await newBank.save();
+                    bankDetails.push({_id: newBank._id});
+                } catch (error) {
+                    logger.error('Create Bank Error:', error);
+                }
+            }
+            companyData.bankDetails = bankDetails;
             const newCompany = new Company(companyData);
             await newCompany.save();
     
@@ -78,64 +103,95 @@ class CompanyController {
             const search = req.query.search || '';
             const status = req.query.status || '';
             const type = req.query.type || '';
-
-            // Build the query object
-            const searchQuery = {};
-            
-            // Add search conditions if search term exists
+    
+            const bankCollectionName = Bank.collection.name;
+    
+            const matchStage = {};
+            if (status) matchStage.status = status;
+            if (type) matchStage.type = type;
+    
+            const searchRegex = { $regex: search, $options: 'i' };
+            const searchConditions = [];
+    
             if (search) {
-                searchQuery.$or = [
-                    { name: { $regex: search, $options: 'i' } },
-                    { 'businessDetails.gstNumber': { $regex: search, $options: 'i' } },
-                    { 'businessDetails.panNumber': { $regex: search, $options: 'i' } },
-                    { 'contactPerson.email': { $regex: search, $options: 'i' } },
-                    { 'bankDetails.accountNumber': { $regex: search, $options: 'i' } },
-                    { 'bankDetails.ifscCode': { $regex: search, $options: 'i' } }
-                ];
+                searchConditions.push(
+                    { name: searchRegex },
+                    { 'businessDetails.gstNumber': searchRegex },
+                    { 'businessDetails.panNumber': searchRegex },
+                    { 'contactPerson.email': searchRegex },
+                    {
+                        bankDetails: {
+                            $elemMatch: {
+                                $or: [
+                                    { accountNumber: searchRegex },
+                                    { ifscCode: searchRegex }
+                                ]
+                            }
+                        }
+                    }
+                );
+                matchStage.$or = searchConditions;
             }
-            
-            // Add status filter if provided
-            if (status) {
-                searchQuery.status = status;
-            }
-            
-            // Add type filter if provided
-            if (type) {
-                searchQuery.type = type;
-            }
-
-
-            const totalCompanies = await Company.countDocuments(searchQuery);
-            
-            const totalPages = Math.ceil(totalCompanies / limit);
-
-            let companies = await Company.find(searchQuery)
-                .sort({ createdAt: -1 })
-                .skip((page - 1) * limit)
-                .limit(limit);
-
-            
-            companies = companies.filter(company => company.name !== 'other');
-
+    
+            const aggregatePipeline = [
+                {
+                    $lookup: {
+                        from: bankCollectionName,
+                        localField: 'bankDetails',
+                        foreignField: '_id',
+                        as: 'bankDetails'
+                    }
+                },
+                { $match: matchStage },
+                { $sort: { createdAt: -1 } },
+                {
+                    $facet: {
+                        metadata: [
+                            { $count: 'total' },
+                            {
+                                $addFields: {
+                                    currentPage: page,
+                                    totalPages: {
+                                        $ceil: { $divide: ['$total', limit] }
+                                    }
+                                }
+                            }
+                        ],
+                        data: [
+                            { $match: { name: { $ne: 'other' } } },
+                            { $skip: (page - 1) * limit },
+                            { $limit: limit }
+                        ]
+                    }
+                }
+            ];
+    
+            const result = await Company.aggregate(aggregatePipeline);
+            const companies = result[0]?.data || [];
+            const meta = result[0]?.metadata[0] || {
+                total: 0,
+                currentPage: page,
+                totalPages: 0
+            };
+    
             return res.status(200).json(
                 ApiResponse.success('Companies retrieved successfully', {
                     companies,
-                    currentPage: page,
-                    totalPages,
-                    totalCompanies
+                    currentPage: meta.currentPage,
+                    totalPages: meta.totalPages,
+                    totalCompanies: meta.total
                 })
             );
         } catch (error) {
             logger.error('Get Companies Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError()
-            );
+            return res.status(500).json(ApiResponse.serverError());
         }
     }
+    
 
     async getCompany(req, res) {
         try {
-            const company = await Company.findById(req.params.id);
+            const company = await Company.findById(req.params.id).populate('bankDetails');
             if (!company) {
                 return res.status(404).json(
                     ApiResponse.notFound('Company not found')
@@ -157,7 +213,7 @@ class CompanyController {
         try {
             const companyData = buildNestedObject(req.body);
     
-            const company = await Company.findById(req.params.id);
+            const company = await Company.findById(req.params.id).populate('bankDetails');
             if (!company) {
                 return res.status(404).json({ message: 'Company not found' });
             }
@@ -206,9 +262,27 @@ class CompanyController {
             if (!validationResult.isValid) {
                 return res.status(400).json({ message: validationResult.errors });
             }
-    
+
+            // Update bank details if provided
+            if (companyData.bankDetails) {
+                for (const bankData of companyData.bankDetails) {
+                    if (bankData._id) {
+                        // Update existing bank record
+                        await Bank.findByIdAndUpdate(bankData._id, bankData);
+                    } else {
+                        // Create new bank record and link to company
+                        const newBank = new Bank(bankData);
+                        await newBank.save();
+                        company.bankDetails.push(newBank._id);
+                    }
+                }
+            }
+            
+            // Update other company data
             Object.assign(company, companyData);
+            
             const updatedCompany = await company.save();
+            await updatedCompany.populate('bankDetails');
     
             return res.status(200).json(
                 ApiResponse.success('Company updated successfully', updatedCompany)
@@ -222,13 +296,18 @@ class CompanyController {
 
     async deleteCompany(req, res) {
         try {
-            const company = await Company.findByIdAndDelete(req.params.id);
+            const company = await Company.findById(req.params.id);
             if (!company) {
                 return res.status(404).json(
                     ApiResponse.notFound('Company not found')
                 );
             }
 
+            //delete banks
+            await Bank.deleteMany({ _id: { $in: company.bankDetails.map(bank => bank._id) } });
+
+            //delete company
+            await Company.findByIdAndDelete(req.params.id);
             return res.status(200).json(
                 ApiResponse.success('Company deleted successfully')
             );
@@ -290,62 +369,6 @@ class CompanyController {
             );
         } catch (error) {
             logger.error('Update Risk Assessment Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError()
-            );
-        }
-    }
-
-    async addBankDetails(req, res) {
-        try {
-            const company = await Company.findById(req.params.id);
-            if (!company) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Company not found')
-                );
-            }
-
-            company.bankDetails.push(req.body);
-            await company.save();
-
-            return res.status(200).json(
-                ApiResponse.success('Bank details added successfully', company)
-            );
-        } catch (error) {
-            logger.error('Add Bank Details Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError()
-            );
-        }
-    }
-
-    async removeBankDetails(req, res) {
-        try {
-            const company = await Company.findById(req.params.id);
-            if (!company) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Company not found')
-                );
-            }
-
-            const bankIndex = company.bankDetails.findIndex(
-                bank => bank._id.toString() === req.params.bankId
-            );
-
-            if (bankIndex === -1) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Bank details not found')
-                );
-            }
-
-            company.bankDetails.splice(bankIndex, 1);
-            await company.save();
-
-            return res.status(200).json(
-                ApiResponse.success('Bank details removed successfully')
-            );
-        } catch (error) {
-            logger.error('Remove Bank Details Error:', error);
             return res.status(500).json(
                 ApiResponse.serverError()
             );

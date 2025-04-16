@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const bankSchema = new mongoose.Schema({
-  accountName: {
+  accountHolderName: {
     type: String,
     required: true,
     trim: true
@@ -28,20 +28,10 @@ const bankSchema = new mongoose.Schema({
     enum: ['savings', 'current', 'fixed_deposit'],
     required: true
   },
-  balance: {
-    type: Number,
-    default: 0
-  },
   isActive: {
     type: Boolean,
     default: true
   },
-  documents: [{
-    name: String,
-    type: String,
-    url: String,
-    uploadDate: Date
-  }],
   transactions: [{
     type: {
       type: String,

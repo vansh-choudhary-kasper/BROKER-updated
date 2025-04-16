@@ -59,16 +59,16 @@ export const DataProvider = ({ children }) => {
   // Fetch companies with debounce
   const fetchCompanies = useCallback(async (filters = {}) => {
     if (!token) return;
-    
+
     // Check if we've fetched recently
     const now = Date.now();
     if (now - lastFetchTime.companies < DEBOUNCE_TIME) {
       return;
     }
-    
+
     setLoading(prev => ({ ...prev, companies: true }));
     setError(prev => ({ ...prev, companies: null }));
-    
+
     try {
       // Convert filters object to query parameters
       const queryParams = new URLSearchParams();
@@ -95,9 +95,9 @@ export const DataProvider = ({ children }) => {
       }
       setLastFetchTime(prev => ({ ...prev, companies: now }));
     } catch (err) {
-      setError(prev => ({ 
-        ...prev, 
-        companies: err.response?.data?.message || 'Failed to fetch companies' 
+      setError(prev => ({
+        ...prev,
+        companies: err.response?.data?.message || 'Failed to fetch companies'
       }));
       // Set empty array on error to prevent undefined errors
       setCompanies([]);
@@ -110,16 +110,16 @@ export const DataProvider = ({ children }) => {
   // Fetch tasks with debounce
   const fetchTasks = useCallback(async (filters = {}) => {
     if (!token) return;
-    
+
     // Check if we've fetched recently
     const now = Date.now();
     if (now - lastFetchTime.tasks < DEBOUNCE_TIME) {
       return;
     }
-    
+
     setLoading(prev => ({ ...prev, tasks: true }));
     setError(prev => ({ ...prev, tasks: null }));
-    
+
     try {
       // Convert filters object to query parameters
       const queryParams = new URLSearchParams();
@@ -130,7 +130,7 @@ export const DataProvider = ({ children }) => {
       });
 
       const response = await axios.get(`${backendUrl}/api/tasks?${queryParams.toString()}`);
-      
+
       if (response.data && response.data.data) {
         setTasks(response.data.data.tasks || []);
         setTotalTasks(response.data.data.total || 0);
@@ -138,12 +138,12 @@ export const DataProvider = ({ children }) => {
         setTasks([]);
         setTotalTasks(0);
       }
-      
+
       setLastFetchTime(prev => ({ ...prev, tasks: now }));
     } catch (err) {
-      setError(prev => ({ 
-        ...prev, 
-        tasks: err.response?.data?.message || 'Failed to fetch tasks' 
+      setError(prev => ({
+        ...prev,
+        tasks: err.response?.data?.message || 'Failed to fetch tasks'
       }));
       // Set empty array on error to prevent undefined errors
       setTasks([]);
@@ -156,16 +156,16 @@ export const DataProvider = ({ children }) => {
   // Fetch banks with debounce
   const fetchBanks = useCallback(async (filters = {}) => {
     if (!token) return;
-    
+
     // Check if we've fetched recently
     const now = Date.now();
     if (now - lastFetchTime.banks < DEBOUNCE_TIME) {
       return;
     }
-    
+
     setLoading(prev => ({ ...prev, banks: true }));
     setError(prev => ({ ...prev, banks: null }));
-    
+
     try {
       // Convert filters object to query parameters
       const queryParams = new URLSearchParams();
@@ -176,7 +176,7 @@ export const DataProvider = ({ children }) => {
       });
 
       const response = await axios.get(`${backendUrl}/api/banks?${queryParams.toString()}`);
-      
+
       if (response.data && response.data.data) {
         setBanks(response.data.data.banks || []);
         setTotalBanks(response.data.data.total || response.data.data.banks?.length || 0);
@@ -184,12 +184,12 @@ export const DataProvider = ({ children }) => {
         setBanks([]);
         setTotalBanks(0);
       }
-      
+
       setLastFetchTime(prev => ({ ...prev, banks: now }));
     } catch (err) {
-      setError(prev => ({ 
-        ...prev, 
-        banks: err.response?.data?.message || 'Failed to fetch banks' 
+      setError(prev => ({
+        ...prev,
+        banks: err.response?.data?.message || 'Failed to fetch banks'
       }));
       // Set empty array on error to prevent undefined errors
       setBanks([]);
@@ -202,16 +202,16 @@ export const DataProvider = ({ children }) => {
   // Fetch expenses with debounce
   const fetchExpenses = useCallback(async (filters = {}) => {
     if (!token) return;
-    
+
     // Check if we've fetched recently
     const now = Date.now();
     if (now - lastFetchTime.expenses < DEBOUNCE_TIME) {
       return;
     }
-    
+
     setLoading(prev => ({ ...prev, expenses: true }));
     setError(prev => ({ ...prev, expenses: null }));
-    
+
     try {
       // Convert filters object to query parameters
       const queryParams = new URLSearchParams();
@@ -222,7 +222,7 @@ export const DataProvider = ({ children }) => {
       });
 
       const response = await axios.get(`${backendUrl}/api/expenses?${queryParams.toString()}`);
-      
+
       if (response.data && response.data.data) {
         setExpenses(response.data.data.expenses || []);
         setTotalExpenses(response.data.data.total || response.data.data.expenses?.length || 0);
@@ -230,12 +230,12 @@ export const DataProvider = ({ children }) => {
         setExpenses([]);
         setTotalExpenses(0);
       }
-      
+
       setLastFetchTime(prev => ({ ...prev, expenses: now }));
     } catch (err) {
-      setError(prev => ({ 
-        ...prev, 
-        expenses: err.response?.data?.message || 'Failed to fetch expenses' 
+      setError(prev => ({
+        ...prev,
+        expenses: err.response?.data?.message || 'Failed to fetch expenses'
       }));
       // Set empty array on error to prevent undefined errors
       setExpenses([]);
@@ -248,16 +248,16 @@ export const DataProvider = ({ children }) => {
   // Fetch brokers with debounce
   const fetchBrokers = useCallback(async (filters = {}) => {
     if (!token) return;
-    
+
     // Check if we've fetched recently
     const now = Date.now();
     if (now - lastFetchTime.brokers < DEBOUNCE_TIME) {
       return;
     }
-    
+
     setLoading(prev => ({ ...prev, brokers: true }));
     setError(prev => ({ ...prev, brokers: null }));
-    
+
     try {
       // Convert filters object to query parameters
       const queryParams = new URLSearchParams();
@@ -266,11 +266,11 @@ export const DataProvider = ({ children }) => {
           queryParams.append(key, value);
         }
       });
-      
+
       const response = await axios.get(`${backendUrl}/api/brokers?${queryParams.toString()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (response.data && response.data.success) {
         setBrokers(response.data.data || []);
         setTotalBrokers(response.data.total || 0);
@@ -278,13 +278,13 @@ export const DataProvider = ({ children }) => {
         setBrokers([]);
         setTotalBrokers(0);
       }
-      
+
       setLastFetchTime(prev => ({ ...prev, brokers: now }));
     } catch (err) {
       console.error('Error fetching brokers:', err);
-      setError(prev => ({ 
-        ...prev, 
-        brokers: err.response?.data?.message || 'Failed to fetch brokers' 
+      setError(prev => ({
+        ...prev,
+        brokers: err.response?.data?.message || 'Failed to fetch brokers'
       }));
       // Set empty array on error to prevent undefined errors
       setBrokers([]);
@@ -297,32 +297,32 @@ export const DataProvider = ({ children }) => {
   // Fetch profit and loss data with debounce
   const fetchProfitLoss = useCallback(async () => {
     if (!token) return;
-    
+
     // Check if we've fetched recently
     const now = Date.now();
     if (now - lastFetchTime.profitLoss < DEBOUNCE_TIME) {
       return;
     }
-    
+
     setLoading(prev => ({ ...prev, profitLoss: true }));
     setError(prev => ({ ...prev, profitLoss: null }));
-    
+
     try {
       const response = await axios.get(`${backendUrl}/api/dashboard/profit-loss`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (response.data && response.data.success) {
         setProfitLossData(response.data.data);
       } else {
         throw new Error('Failed to fetch profit and loss data');
       }
-      
+
       setLastFetchTime(prev => ({ ...prev, profitLoss: now }));
     } catch (err) {
-      setError(prev => ({ 
-        ...prev, 
-        profitLoss: err.response?.data?.message || 'Failed to fetch profit and loss data' 
+      setError(prev => ({
+        ...prev,
+        profitLoss: err.response?.data?.message || 'Failed to fetch profit and loss data'
       }));
     } finally {
       setLoading(prev => ({ ...prev, profitLoss: false }));
@@ -333,9 +333,76 @@ export const DataProvider = ({ children }) => {
   const addCompany = async (companyData) => {
     setLoading(prev => ({ ...prev, companies: true }));
     setError(prev => ({ ...prev, companies: null }));
-    
+
     try {
-      const response = await axios.post(`${backendUrl}/api/companies`, companyData);
+      const formData = new FormData();
+
+      // Add all non-file fields to FormData
+      Object.keys(companyData).forEach(key => {
+        if (key === 'documents') {
+          Object.keys(companyData[key]).forEach(docKey => {
+            if (docKey === 'otherDocuments' && Array.isArray(companyData[key][docKey])) {
+              companyData[key][docKey].forEach((file) => {
+                if (file instanceof File) {
+                  formData.append('documents.otherDocuments', file);
+                }
+              });
+            } else if (companyData[key][docKey] instanceof File) {
+              formData.append(`documents.${docKey}`, companyData[key][docKey]);
+            } else if (typeof companyData[key][docKey] === 'object' && companyData[key][docKey] !== null) {
+              if (companyData[key][docKey].file instanceof File) {
+                formData.append(`documents.${docKey}`, companyData[key][docKey].file);
+              }
+              Object.keys(companyData[key][docKey]).forEach(propKey => {
+                if (propKey !== 'file') {
+                  formData.append(`documents.${docKey}.${propKey}`, companyData[key][docKey][propKey]);
+                }
+              });
+            }
+          });
+        } else if (key === 'bankDetails') {
+          formData.append(key, JSON.stringify(companyData[key]));
+        } else if (typeof companyData[key] === 'object' && companyData[key] !== null) {
+          Object.keys(companyData[key]).forEach(subKey => {
+            if (typeof companyData[key][subKey] === 'object' && companyData[key][subKey] !== null) {
+              Object.keys(companyData[key][subKey]).forEach(deepKey => {
+                if (companyData[key][subKey][deepKey] instanceof File) {
+                  formData.append(`${key}.${subKey}.${deepKey}`, companyData[key][subKey][deepKey]);
+                } else if (
+                  typeof companyData[key][subKey][deepKey] === 'object' &&
+                  companyData[key][subKey][deepKey] !== null
+                ) {
+                  if (companyData[key][subKey][deepKey].file instanceof File) {
+                    formData.append(`${key}.${subKey}.${deepKey}`, companyData[key][subKey][deepKey].file);
+                  }
+                  Object.keys(companyData[key][subKey][deepKey]).forEach(propKey => {
+                    if (propKey !== 'file') {
+                      formData.append(`${key}.${subKey}.${deepKey}.${propKey}`, companyData[key][subKey][deepKey][propKey]);
+                    }
+                  });
+                } else {
+                  formData.append(`${key}.${subKey}.${deepKey}`, companyData[key][subKey][deepKey]);
+                }
+              });
+            } else if (companyData[key][subKey] instanceof File) {
+              formData.append(`${key}.${subKey}`, companyData[key][subKey]);
+            } else {
+              formData.append(`${key}.${subKey}`, companyData[key][subKey]);
+            }
+          });
+        } else if (companyData[key] instanceof File) {
+          formData.append(key, companyData[key]);
+        } else {
+          formData.append(key, companyData[key]);
+        }
+      });
+
+      const response = await axios.post(`${backendUrl}/api/companies`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
       setCompanies(prev => [...prev, response.data]);
       return response.data;
     } catch (err) {
@@ -347,11 +414,12 @@ export const DataProvider = ({ children }) => {
     }
   };
 
+
   // Add task
   const addTask = async (taskData) => {
     setLoading(prev => ({ ...prev, tasks: true }));
     setError(prev => ({ ...prev, tasks: null }));
-    
+
     try {
       const response = await axios.post(`${backendUrl}/api/tasks`, taskData);
       setTasks(prev => [...prev, response?.data?.data]);
@@ -370,7 +438,7 @@ export const DataProvider = ({ children }) => {
   const addBank = async (bankData) => {
     setLoading(prev => ({ ...prev, banks: true }));
     setError(prev => ({ ...prev, banks: null }));
-    
+
     try {
       const response = await axios.post(`${backendUrl}/api/banks`, bankData);
       setBanks(prev => [...prev, response?.data?.data]);
@@ -388,7 +456,7 @@ export const DataProvider = ({ children }) => {
   const addExpense = async (expenseData) => {
     setLoading(prev => ({ ...prev, expenses: true }));
     setError(prev => ({ ...prev, expenses: null }));
-    
+
     try {
       const response = await axios.post(`${backendUrl}/api/expenses`, expenseData);
       setExpenses(prev => [...prev, response?.data?.data]);
@@ -406,11 +474,11 @@ export const DataProvider = ({ children }) => {
   const updateCompany = async (id, companyData) => {
     setLoading(prev => ({ ...prev, companies: true }));
     setError(prev => ({ ...prev, companies: null }));
-    
+
     try {
       // Create FormData object
       const formData = new FormData();
-      
+
       // Add all non-file fields to FormData
       Object.keys(companyData).forEach(key => {
         if (key === 'documents') {
@@ -482,8 +550,8 @@ export const DataProvider = ({ children }) => {
           'Content-Type': 'multipart/form-data'
         }
       });
-      
-      setCompanies(prev => 
+
+      setCompanies(prev =>
         prev.map(company => company._id === id ? response.data : company)
       );
       return response.data;
@@ -500,10 +568,10 @@ export const DataProvider = ({ children }) => {
   const updateTask = async (id, taskData) => {
     setLoading(prev => ({ ...prev, tasks: true }));
     setError(prev => ({ ...prev, tasks: null }));
-    
+
     try {
       const response = await axios.put(`${backendUrl}/api/tasks/${id}`, taskData);
-      setTasks(prev => 
+      setTasks(prev =>
         prev.map(task => task._id === id ? response?.data?.data : task)
       );
       return response?.data?.data;
@@ -520,10 +588,10 @@ export const DataProvider = ({ children }) => {
   const updateBank = async (id, bankData) => {
     setLoading(prev => ({ ...prev, banks: true }));
     setError(prev => ({ ...prev, banks: null }));
-    
+
     try {
       const response = await axios.put(`${backendUrl}/api/banks/${id}`, bankData);
-      setBanks(prev => 
+      setBanks(prev =>
         prev.map(bank => bank._id === id ? response?.data?.data : bank)
       );
       return response?.data?.data;
@@ -540,10 +608,10 @@ export const DataProvider = ({ children }) => {
   const updateExpense = async (id, expenseData) => {
     setLoading(prev => ({ ...prev, expenses: true }));
     setError(prev => ({ ...prev, expenses: null }));
-    
+
     try {
       const response = await axios.put(`${backendUrl}/api/expenses/${id}`, expenseData);
-      setExpenses(prev => 
+      setExpenses(prev =>
         prev.map(expense => expense._id === id ? response?.data?.data : expense)
       );
       return response?.data?.data;
@@ -560,7 +628,7 @@ export const DataProvider = ({ children }) => {
   const deleteCompany = async (id) => {
     setLoading(prev => ({ ...prev, companies: true }));
     setError(prev => ({ ...prev, companies: null }));
-    
+
     try {
       await axios.delete(`${backendUrl}/api/companies/${id}`);
       setCompanies(prev => prev.filter(company => company._id !== id));
@@ -577,7 +645,7 @@ export const DataProvider = ({ children }) => {
   const deleteTask = async (id) => {
     setLoading(prev => ({ ...prev, tasks: true }));
     setError(prev => ({ ...prev, tasks: null }));
-    
+
     try {
       await axios.delete(`${backendUrl}/api/tasks/${id}`);
       setTasks(prev => prev.filter(task => task._id !== id));
@@ -594,7 +662,7 @@ export const DataProvider = ({ children }) => {
   const deleteBank = async (id) => {
     setLoading(prev => ({ ...prev, banks: true }));
     setError(prev => ({ ...prev, banks: null }));
-    
+
     try {
       await axios.delete(`${backendUrl}/api/banks/${id}`);
       setBanks(prev => prev.filter(bank => bank._id !== id));
@@ -611,7 +679,7 @@ export const DataProvider = ({ children }) => {
   const deleteExpense = async (id) => {
     setLoading(prev => ({ ...prev, expenses: true }));
     setError(prev => ({ ...prev, expenses: null }));
-    
+
     try {
       await axios.delete(`${backendUrl}/api/expenses/${id}`);
       setExpenses(prev => prev.filter(expense => expense._id !== id));
@@ -643,7 +711,7 @@ export const DataProvider = ({ children }) => {
 
   useEffect(() => {
     fetchCompanies();
-  }, [fetchCompanies]);  
+  }, [fetchCompanies]);
 
   useEffect(() => {
     fetchTasks();
@@ -651,47 +719,47 @@ export const DataProvider = ({ children }) => {
 
   useEffect(() => {
     fetchBanks();
-  }, [fetchBanks]); 
+  }, [fetchBanks]);
 
   useEffect(() => {
     fetchExpenses();
   }, [fetchExpenses]);
 
-  useEffect(() => { 
+  useEffect(() => {
     fetchBrokers();
   }, [fetchBrokers]);
 
   useEffect(() => {
     fetchProfitLoss();
-  }, [fetchProfitLoss]);  
+  }, [fetchProfitLoss]);
 
   // Add broker
   const addBroker = async (brokerData) => {
     if (!token) return;
-    
+
     setLoading(prev => ({ ...prev, brokers: true }));
     setError(prev => ({ ...prev, brokers: null }));
-    
+
     try {
       const response = await axios.post(`${backendUrl}/api/brokers`, brokerData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (response.data && response.data.success) {
         // Refresh brokers list
         fetchBrokers();
         return { success: true, data: response.data.data };
       } else {
-        setError(prev => ({ 
-          ...prev, 
-          brokers: response.data.message || 'Failed to add broker' 
+        setError(prev => ({
+          ...prev,
+          brokers: response.data.message || 'Failed to add broker'
         }));
         return { success: false, message: response.data.message || 'Failed to add broker' };
       }
     } catch (err) {
-      setError(prev => ({ 
-        ...prev, 
-        brokers: err.response?.data?.message || 'Failed to add broker' 
+      setError(prev => ({
+        ...prev,
+        brokers: err.response?.data?.message || 'Failed to add broker'
       }));
       return { success: false, message: err.response?.data?.message || 'Failed to add broker' };
     } finally {
@@ -702,30 +770,30 @@ export const DataProvider = ({ children }) => {
   // Update broker
   const updateBroker = async (id, brokerData) => {
     if (!token) return;
-    
+
     setLoading(prev => ({ ...prev, brokers: true }));
     setError(prev => ({ ...prev, brokers: null }));
-    
+
     try {
       const response = await axios.put(`${backendUrl}/api/brokers/${id}`, brokerData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (response.data && response.data.success) {
         // Refresh brokers list
         fetchBrokers();
         return { success: true, data: response.data.data };
       } else {
-        setError(prev => ({ 
-          ...prev, 
-          brokers: response.data.message || 'Failed to update broker' 
+        setError(prev => ({
+          ...prev,
+          brokers: response.data.message || 'Failed to update broker'
         }));
         return { success: false, message: response.data.message || 'Failed to update broker' };
       }
     } catch (err) {
-      setError(prev => ({ 
-        ...prev, 
-        brokers: err.response?.data?.message || 'Failed to update broker' 
+      setError(prev => ({
+        ...prev,
+        brokers: err.response?.data?.message || 'Failed to update broker'
       }));
       return { success: false, message: err.response?.data?.message || 'Failed to update broker' };
     } finally {
@@ -736,30 +804,30 @@ export const DataProvider = ({ children }) => {
   // Delete broker
   const deleteBroker = async (id) => {
     if (!token) return;
-    
+
     setLoading(prev => ({ ...prev, brokers: true }));
     setError(prev => ({ ...prev, brokers: null }));
-    
+
     try {
       const response = await axios.delete(`${backendUrl}/api/brokers/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (response.data && response.data.success) {
         // Refresh brokers list
         fetchBrokers();
         return { success: true };
       } else {
-        setError(prev => ({ 
-          ...prev, 
-          brokers: response.data.message || 'Failed to delete broker' 
+        setError(prev => ({
+          ...prev,
+          brokers: response.data.message || 'Failed to delete broker'
         }));
         return { success: false, message: response.data.message || 'Failed to delete broker' };
       }
     } catch (err) {
-      setError(prev => ({ 
-        ...prev, 
-        brokers: err.response?.data?.message || 'Failed to delete broker' 
+      setError(prev => ({
+        ...prev,
+        brokers: err.response?.data?.message || 'Failed to delete broker'
       }));
       return { success: false, message: err.response?.data?.message || 'Failed to delete broker' };
     } finally {
@@ -770,28 +838,28 @@ export const DataProvider = ({ children }) => {
   // Get broker by ID
   const getBrokerById = async (id) => {
     if (!token) return;
-    
+
     setLoading(prev => ({ ...prev, brokers: true }));
     setError(prev => ({ ...prev, brokers: null }));
-    
+
     try {
       const response = await axios.get(`${backendUrl}/api/brokers/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (response.data && response.data.success) {
         return { success: true, data: response.data.data };
       } else {
-        setError(prev => ({ 
-          ...prev, 
-          brokers: response.data.message || 'Failed to get broker' 
+        setError(prev => ({
+          ...prev,
+          brokers: response.data.message || 'Failed to get broker'
         }));
         return { success: false, message: response.data.message || 'Failed to get broker' };
       }
     } catch (err) {
-      setError(prev => ({ 
-        ...prev, 
-        brokers: err.response?.data?.message || 'Failed to get broker' 
+      setError(prev => ({
+        ...prev,
+        brokers: err.response?.data?.message || 'Failed to get broker'
       }));
       return { success: false, message: err.response?.data?.message || 'Failed to get broker' };
     } finally {
@@ -802,30 +870,30 @@ export const DataProvider = ({ children }) => {
   // Add referral to broker
   const addReferral = async (brokerId, referralData) => {
     if (!token) return;
-    
+
     setLoading(prev => ({ ...prev, brokers: true }));
     setError(prev => ({ ...prev, brokers: null }));
-    
+
     try {
       const response = await axios.post(`${backendUrl}/api/brokers/${brokerId}/referrals`, referralData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (response.data && response.data.success) {
         // Refresh brokers list
         fetchBrokers();
         return { success: true, data: response.data.data };
       } else {
-        setError(prev => ({ 
-          ...prev, 
-          brokers: response.data.message || 'Failed to add referral' 
+        setError(prev => ({
+          ...prev,
+          brokers: response.data.message || 'Failed to add referral'
         }));
         return { success: false, message: response.data.message || 'Failed to add referral' };
       }
     } catch (err) {
-      setError(prev => ({ 
-        ...prev, 
-        brokers: err.response?.data?.message || 'Failed to add referral' 
+      setError(prev => ({
+        ...prev,
+        brokers: err.response?.data?.message || 'Failed to add referral'
       }));
       return { success: false, message: err.response?.data?.message || 'Failed to add referral' };
     } finally {
@@ -836,30 +904,30 @@ export const DataProvider = ({ children }) => {
   // Update referral
   const updateReferral = async (brokerId, referralId, referralData) => {
     if (!token) return;
-    
+
     setLoading(prev => ({ ...prev, brokers: true }));
     setError(prev => ({ ...prev, brokers: null }));
-    
+
     try {
       const response = await axios.put(`${backendUrl}/api/brokers/${brokerId}/referrals/${referralId}`, referralData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (response.data && response.data.success) {
         // Refresh brokers list
         fetchBrokers();
         return { success: true, data: response.data.data };
       } else {
-        setError(prev => ({ 
-          ...prev, 
-          brokers: response.data.message || 'Failed to update referral' 
+        setError(prev => ({
+          ...prev,
+          brokers: response.data.message || 'Failed to update referral'
         }));
         return { success: false, message: response.data.message || 'Failed to update referral' };
       }
     } catch (err) {
-      setError(prev => ({ 
-        ...prev, 
-        brokers: err.response?.data?.message || 'Failed to update referral' 
+      setError(prev => ({
+        ...prev,
+        brokers: err.response?.data?.message || 'Failed to update referral'
       }));
       return { success: false, message: err.response?.data?.message || 'Failed to update referral' };
     } finally {
@@ -870,30 +938,30 @@ export const DataProvider = ({ children }) => {
   // Delete referral
   const deleteReferral = async (brokerId, referralId) => {
     if (!token) return;
-    
+
     setLoading(prev => ({ ...prev, brokers: true }));
     setError(prev => ({ ...prev, brokers: null }));
-    
+
     try {
       const response = await axios.delete(`${backendUrl}/api/brokers/${brokerId}/referrals/${referralId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (response.data && response.data.success) {
         // Refresh brokers list
         fetchBrokers();
         return { success: true };
       } else {
-        setError(prev => ({ 
-          ...prev, 
-          brokers: response.data.message || 'Failed to delete referral' 
+        setError(prev => ({
+          ...prev,
+          brokers: response.data.message || 'Failed to delete referral'
         }));
         return { success: false, message: response.data.message || 'Failed to delete referral' };
       }
     } catch (err) {
-      setError(prev => ({ 
-        ...prev, 
-        brokers: err.response?.data?.message || 'Failed to delete referral' 
+      setError(prev => ({
+        ...prev,
+        brokers: err.response?.data?.message || 'Failed to delete referral'
       }));
       return { success: false, message: err.response?.data?.message || 'Failed to delete referral' };
     } finally {
@@ -918,7 +986,7 @@ export const DataProvider = ({ children }) => {
         loading,
         error,
         profitLossData,
-        
+
         // Actions
         fetchCompanies,
         fetchTasks,

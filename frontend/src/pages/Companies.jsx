@@ -792,8 +792,6 @@ const Companies = () => {
                 </div>
 
                 {/* Bank Details */}
-                <div className="border-t border-gray-200 pt-4">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Bank Details</h3>
                   <BankDetailsForm
                     bankDetails={formData.bankDetails}
                     onChange={(index, field, value) => {
@@ -840,7 +838,6 @@ const Companies = () => {
                       }));
                     }}
                   />
-                </div>
 
                 {/* Documents */}
                 <div className="border-t border-gray-200 pt-4">
@@ -1358,7 +1355,7 @@ const Companies = () => {
                           <label className="block text-sm font-medium text-gray-500">Incorporation Certificate</label>
                           <div className="mt-1 flex items-center">
                             <a 
-                              href={selectedCompany.documents.incorporationCertificate} 
+                              href={selectedCompany.documents.incorporationCertificate.url} 
                               target="_blank" 
                               rel="noopener noreferrer"
                               className="text-indigo-600 hover:text-indigo-900 flex items-center"
@@ -1377,7 +1374,7 @@ const Companies = () => {
                           <label className="block text-sm font-medium text-gray-500">Memorandum of Association</label>
                           <div className="mt-1 flex items-center">
                             <a 
-                              href={selectedCompany.documents.memorandumOfAssociation} 
+                              href={selectedCompany.documents.memorandumOfAssociation.url} 
                               target="_blank" 
                               rel="noopener noreferrer"
                               className="text-indigo-600 hover:text-indigo-900 flex items-center"
@@ -1396,7 +1393,7 @@ const Companies = () => {
                           <label className="block text-sm font-medium text-gray-500">Articles of Association</label>
                           <div className="mt-1 flex items-center">
                             <a 
-                              href={selectedCompany.documents.articlesOfAssociation} 
+                              href={selectedCompany.documents.articlesOfAssociation.url} 
                               target="_blank" 
                               rel="noopener noreferrer"
                               className="text-indigo-600 hover:text-indigo-900 flex items-center"
@@ -1415,7 +1412,7 @@ const Companies = () => {
                           <label className="block text-sm font-medium text-gray-500">Board Resolution</label>
                           <div className="mt-1 flex items-center">
                             <a 
-                              href={selectedCompany.documents.boardResolution} 
+                              href={selectedCompany.documents.boardResolution.url} 
                               target="_blank" 
                               rel="noopener noreferrer"
                               className="text-indigo-600 hover:text-indigo-900 flex items-center"
@@ -1434,7 +1431,7 @@ const Companies = () => {
                           <label className="block text-sm font-medium text-gray-500">Tax Registration</label>
                           <div className="mt-1 flex items-center">
                             <a 
-                              href={selectedCompany.documents.taxRegistration} 
+                              href={selectedCompany.documents.taxRegistration.url} 
                               target="_blank" 
                               rel="noopener noreferrer"
                               className="text-indigo-600 hover:text-indigo-900 flex items-center"

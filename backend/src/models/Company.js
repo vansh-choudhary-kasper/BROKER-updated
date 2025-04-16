@@ -102,16 +102,8 @@ const companySchema = new mongoose.Schema({
 
   // Financial account information
   bankDetails: [{
-    accountNumber: String, // For financial transactions
-    ifscCode: String, // Bank branch identifier
-    bankName: String,
-    branchName: String,
-    accountType: String, // Type of bank account
-    accountHolderName: String, // Name on the account
-    accountHolderPan: String, // PAN of account holder
-    accountHolderAadhar: String, // Aadhar of account holder
-    bankStatement: { type: String, url: String }, // Proof of account
-    cancelledCheque: { type: String, url: String } // For bank verification
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Bank'
   }],
 
   documents: {
