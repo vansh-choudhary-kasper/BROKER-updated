@@ -316,7 +316,6 @@ const Companies = () => {
                 <option value="pending_verification">Pending Verification</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
-                <option value="blacklisted">Blacklisted</option>
               </select>
             </div>
             <div>
@@ -411,7 +410,6 @@ const Companies = () => {
                         <option value="pending_verification">Pending Verification</option>
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
-                        <option value="blacklisted">Blacklisted</option>
                       </select>
                     </div>
                   </div>
@@ -1066,7 +1064,6 @@ const Companies = () => {
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         company.status === 'active' ? 'bg-green-100 text-green-800' :
                         company.status === 'inactive' ? 'bg-red-100 text-red-800' :
-                        company.status === 'blacklisted' ? 'bg-red-100 text-red-800' :
                         'bg-yellow-100 text-yellow-800'
                       }`}>
                         {company.status}

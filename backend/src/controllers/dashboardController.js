@@ -1,14 +1,37 @@
 const Company = require('../models/Company');
 const Bank = require('../models/Bank');
 const Expense = require('../models/Expense');
+const User = require('../models/User');
 
 const getDashboardStats = async (req, res) => {
     try {
-        // Get total companies count
-        const totalCompanies = await Company.countDocuments({ name: { $ne: 'other' } });
+        // Get total companies count, type-wise counts, total brokers, and total accounts
+        const [totalCompanies, companyTypeCounts, totalBrokers, totalAccounts] = await Promise.all([
+            Company.countDocuments({ name: { $ne: 'other' } }),
+            Company.aggregate([
+                {
+                    $match: { name: { $ne: 'other' } }
+                },
+                {
+                    $group: {
+                        _id: '$type',
+                        count: { $sum: 1 }
+                    }
+                }
+            ]),
+            User.countDocuments({ role: 'broker' }),
+            Bank.countDocuments()
+        ]);
 
-        // Get total accounts count
-        const totalAccounts = await Bank.countDocuments();
+        // Convert company type counts array to object
+        const companyTypes = companyTypeCounts.reduce((acc, curr) => {
+            acc[curr._id] = curr.count;
+            return acc;
+        }, {
+            client: 0,
+            provider: 0,
+            both: 0
+        });
 
         // Get current date and calculate start of month/year
         const currentDate = new Date();
@@ -63,7 +86,9 @@ const getDashboardStats = async (req, res) => {
         res.json({
             success: true,
             totalCompanies,
+            totalBrokers,
             totalAccounts,
+            companyTypes,
             monthlyExpenses: {
                 total: totalMonthlyExpenses,
                 categories: monthlyExpenseCategories

@@ -49,8 +49,7 @@ const MainLayout = () => {
         { name: 'All Companies', path: '/companies' },
         { name: 'Clients', path: '/companies?type=client' },
         { name: 'Providers', path: '/companies?type=provider' },
-        { name: 'Both', path: '/companies?type=both' },
-        { name: 'Blacklisted', path: '/companies?type=blacklisted' }
+        { name: 'Both', path: '/companies?type=both' }
       ]
     },
     {

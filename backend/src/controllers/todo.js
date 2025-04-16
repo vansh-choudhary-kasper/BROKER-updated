@@ -55,7 +55,6 @@ class TodoController {
                 );
             }
 
-            console.log(tags);
             const newTodo = {
                 title,
                 description,

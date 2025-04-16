@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { format } from 'date-fns';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const TodoList = () => {
   const [todos, setTodos] = useState([]);
@@ -33,7 +35,7 @@ const TodoList = () => {
       const sortedTodos = response.data.sort((a, b) => {
         const priorityOrder = { high: 0, medium: 1, low: 2 };
         const statusOrder = { pending: 0, in_progress: 1, completed: 2 };
-        
+
         if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
           return priorityOrder[a.priority] - priorityOrder[b.priority];
         }
@@ -54,7 +56,7 @@ const TodoList = () => {
         ...newTodo,
         status: 'pending'
       };
-      
+
       const response = await axios.post(`${backendUrl}/api/todos`, todoData, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -109,7 +111,7 @@ const TodoList = () => {
   const handleToggleStatus = async (todo) => {
     try {
       const newStatus = todo.status === 'completed' ? 'pending' : 'completed';
-      await handleUpdateTodo(todo._id, { 
+      await handleUpdateTodo(todo._id, {
         status: newStatus,
         updatedAt: new Date()
       });
@@ -211,9 +213,8 @@ const TodoList = () => {
       </button>
 
       {/* Todo List Panel */}
-      <div className={`fixed bottom-24 right-6 z-40 transition-transform duration-300 transform ${
-        isOpen ? 'translate-x-0' : 'translate-x-[calc(100%+24px)]'
-      }`}>
+      <div className={`fixed bottom-24 right-6 z-40 transition-transform duration-300 transform ${isOpen ? 'translate-x-0' : 'translate-x-[calc(100%+24px)]'
+        }`}>
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-xl p-6 w-[400px] max-h-[80vh] overflow-y-auto 
           scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400
           [&::-webkit-scrollbar]:w-2
@@ -251,10 +252,10 @@ const TodoList = () => {
                 onChange={(e) => setNewTodo({ ...newTodo, description: e.target.value })}
                 className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <input
-                type="date"
-                value={newTodo.dueDate}
-                onChange={(e) => setNewTodo({ ...newTodo, dueDate: e.target.value })}
+              <DatePicker
+                selected={newTodo.dueDate}
+                onChange={(date) => setNewTodo({ ...newTodo, dueDate: date.toISOString().split('T')[0] })}
+                placeholderText="Due Date"
                 className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <select
@@ -329,7 +330,7 @@ const TodoList = () => {
                         key={todo._id}
                         className="flex items-start space-x-3 group hover:bg-gray-50 rounded-lg p-2"
                       >
-                        <div 
+                        <div
                           onClick={() => handleToggleStatus(todo)}
                           className="flex-shrink-0 w-5 h-5 mt-0.5 border border-gray-300 rounded cursor-pointer"
                         >
@@ -355,14 +356,14 @@ const TodoList = () => {
                                 <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(todo.status)}`}>
                                   {todo.status.replace('_', ' ')}
                                 </span>
-                                
+
                                 {/* Due Date */}
                                 {todo.dueDate && (
                                   <span className="text-xs text-gray-500">
                                     Due: {format(new Date(todo.dueDate), 'MMM d, yyyy')}
                                   </span>
                                 )}
-                                
+
                                 {/* Tags */}
                                 {todo.tags && todo.tags.length > 0 && todo.tags.map((tag, index) => (
                                   <span
@@ -388,7 +389,7 @@ const TodoList = () => {
                                 <option value="in_progress">In Progress</option>
                                 <option value="completed">Completed</option>
                               </select>
-                              
+
                               {/* Delete Button */}
                               <button
                                 onClick={() => {

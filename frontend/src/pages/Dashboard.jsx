@@ -23,13 +23,19 @@ const Dashboard = () => {
 
   const { token } = useAuth();
 
-    // Add view type state
+  // Add view type state
   const [viewType, setViewType] = useState('monthly');
   const [accountFilter, setAccountFilter] = useState('all');
   const [expenseViewType, setExpenseViewType] = useState('monthly');
   const [dashboardStats, setDashboardStats] = useState({
     totalCompanies: 0,
+    totalBrokers: 0,
     totalAccounts: 0,
+    companyTypes: {
+      client: 0,
+      provider: 0,
+      both: 0
+    },
     monthlyExpenses: {
       total: 0,
       categories: {}
@@ -78,7 +84,13 @@ const Dashboard = () => {
           if (statsResponse.data?.success) {
             setDashboardStats({
               totalCompanies: statsResponse.data.totalCompanies || 0,
+              totalBrokers: statsResponse.data.totalBrokers || 0,
               totalAccounts: statsResponse.data.totalAccounts || 0,
+              companyTypes: statsResponse.data.companyTypes || {
+                client: 0,
+                provider: 0,
+                both: 0
+              },
               monthlyExpenses: statsResponse.data.monthlyExpenses || { total: 0, categories: {} },
               yearlyExpenses: statsResponse.data.yearlyExpenses || { total: 0, categories: {} },
               loading: false,
@@ -176,7 +188,7 @@ const Dashboard = () => {
     : {};
 
   // Desired order
-  const typeOrder = ['provider', 'client', 'both', 'blacklisted'];
+  const typeOrder = ['provider', 'client', 'both'];
 
   // Reordering companyTypes based on the specified typeOrder
   const companyTypes = {};
@@ -204,9 +216,38 @@ const Dashboard = () => {
     : [];
 
   // Colors for charts
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+  const COLORS = [
+    '#00CCCC', // Soft Cyan
+    '#FF9933', // Soft Orange
+    '#9966FF', // Soft Purple
+    '#99CC33', // Lime Green
+    '#FF99CC', // Light Pink
+    '#66CCFF', // Sky Blue
+    '#FFCC99', // Peach
+    '#CC99FF', // Lavender
+    '#99CCFF', // Light Blue
+    '#FFFF99',  // Light Yellow
+    '#0088FE', // Royal Blue
+    '#00C49F', // Teal Green
+    '#FFBB28', // Golden Yellow
+    '#FF8042', // Coral Orange
+    '#8884D8'  // Muted Purple
+  ];
   const PROFIT_COLOR = '#10B981'; // Green
   const LOSS_COLOR = '#EF4444'; // Red
+
+  // Function to generate consistent color based on category name
+  const getCategoryColor = (categoryName) => {
+    // Convert category name to ASCII sum
+    const asciiSum = categoryName.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+
+    // Generate RGB values using ASCII sum
+    const r = (asciiSum * 37) % 200 + 55; // Range: 55-255
+    const g = (asciiSum * 73) % 200 + 55; // Range: 55-255
+    const b = (asciiSum * 101) % 200 + 55; // Range: 55-255
+
+    return COLORS[asciiSum % COLORS.length];
+  };
 
   // Loading skeleton component
   const LoadingSkeleton = () => (
@@ -263,8 +304,9 @@ const Dashboard = () => {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
 
-      {/* Profit & Loss Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      {/* Stats Overview Section - All cards in one row */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        {/* Profit Card */}
         <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-sm font-medium text-gray-500">
@@ -288,21 +330,6 @@ const Dashboard = () => {
                 {viewType === 'monthly' ? (monthlyGrowth >= 0 ? '+' : '') : (yearlyGrowth >= 0 ? '+' : '')}
                 {viewType === 'monthly' ? monthlyGrowth.toFixed(1) : yearlyGrowth.toFixed(1)}%
               </span>
-              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                {viewType === 'monthly' ? (
-                  monthlyGrowth >= 0 ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  )
-                ) : (
-                  yearlyGrowth >= 0 ? (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                  ) : (
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  )
-                )}
-              </svg>
             </div>
           </div>
           <p className="text-xs text-gray-500 mt-1">
@@ -310,7 +337,25 @@ const Dashboard = () => {
           </p>
         </div>
 
-        {/* Accounts Stats */}
+        {/* Total Brokers Card */}
+        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-indigo-500">
+          <h3 className="text-sm font-medium text-gray-500">Total Brokers</h3>
+          <div className="mt-2">
+            <p className="text-2xl font-bold text-gray-900">{dashboardStats.totalBrokers}</p>
+            <p className="text-xs text-gray-500 mt-1">Active Brokers in System</p>
+          </div>
+        </div>
+
+        {/* Total Companies Card */}
+        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
+          <h3 className="text-sm font-medium text-gray-500">Total Companies</h3>
+          <div className="mt-2">
+            <p className="text-2xl font-bold text-gray-900">{dashboardStats.totalCompanies}</p>
+            <p className="text-xs text-gray-500 mt-1">Registered Companies</p>
+          </div>
+        </div>
+
+        {/* Accounts Card */}
         <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
           <div className="flex justify-between items-center mb-2">
             <h3 className="text-sm font-medium text-gray-500">Accounts</h3>
@@ -333,15 +378,10 @@ const Dashboard = () => {
             </p>
             <p className="text-xs text-gray-500 mt-1">
               {accountFilter === 'all' 
-                ? 'Total Accounts' 
+                ? 'Total Bank Accounts' 
                 : `${accountFilter.charAt(0).toUpperCase() + accountFilter.slice(1)} Accounts`}
             </p>
           </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
-          <h3 className="text-sm font-medium text-gray-500">Total Companies</h3>
-          <p className="text-2xl font-bold text-gray-900 mt-2">{dashboardStats.totalCompanies}</p>
         </div>
       </div>
 
@@ -359,12 +399,12 @@ const Dashboard = () => {
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey={viewType === 'monthly' ? 'month' : 'year'} 
+                <XAxis
+                  dataKey={viewType === 'monthly' ? 'month' : 'year'}
                   tickFormatter={(value) => viewType === 'monthly' ? value : `${value}`}
                 />
                 <YAxis />
-                <Tooltip 
+                <Tooltip
                   formatter={(value) => `₹${value.toLocaleString()}`}
                   labelFormatter={(label) => viewType === 'monthly' ? `Month: ${label}` : `Year: ${label}`}
                 />
@@ -395,8 +435,8 @@ const Dashboard = () => {
                 <option value="yearly">Yearly</option>
               </select>
               <div className="text-sm font-medium text-gray-600">
-                Total: ₹{expenseViewType === 'monthly' 
-                  ? dashboardStats.monthlyExpenses.total.toLocaleString() 
+                Total: ₹{expenseViewType === 'monthly'
+                  ? dashboardStats.monthlyExpenses.total.toLocaleString()
                   : dashboardStats.yearlyExpenses.total.toLocaleString()}
               </div>
             </div>
@@ -405,12 +445,12 @@ const Dashboard = () => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={Object.entries(expenseViewType === 'monthly' 
-                    ? dashboardStats.monthlyExpenses.categories 
+                  data={Object.entries(expenseViewType === 'monthly'
+                    ? dashboardStats.monthlyExpenses.categories
                     : dashboardStats.yearlyExpenses.categories).map(([name, value]) => ({
-                    name: name.charAt(0).toUpperCase() + name.slice(1).replace('_', ' '),
-                    value
-                  }))}
+                      name: name.charAt(0).toUpperCase() + name.slice(1).replace('_', ' '),
+                      value
+                    }))}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -419,11 +459,11 @@ const Dashboard = () => {
                   dataKey="value"
                   label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                 >
-                  {Object.entries(expenseViewType === 'monthly' 
-                    ? dashboardStats.monthlyExpenses.categories 
-                    : dashboardStats.yearlyExpenses.categories).map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
+                  {Object.entries(expenseViewType === 'monthly'
+                    ? dashboardStats.monthlyExpenses.categories
+                    : dashboardStats.yearlyExpenses.categories).map(([name], index) => (
+                      <Cell key={`cell-${index}`} fill={getCategoryColor(name)} />
+                    ))}
                 </Pie>
                 <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
                 <Legend />
@@ -434,27 +474,24 @@ const Dashboard = () => {
       </div>
 
       {/* Company Types Section */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {typeOrder.map((type) => {
-          const count = companyTypes[type] || 0;
+          const count = dashboardStats.companyTypes[type] || 0;
           const typeName = type.charAt(0).toUpperCase() + type.slice(1);
           const bgColor = {
             provider: 'bg-blue-50',
             client: 'bg-green-50',
-            both: 'bg-purple-50',
-            blacklisted: 'bg-red-50'
+            both: 'bg-purple-50'
           }[type];
           const textColor = {
             provider: 'text-blue-600',
             client: 'text-green-600',
-            both: 'text-purple-600',
-            blacklisted: 'text-red-600'
+            both: 'text-purple-600'
           }[type];
           const borderColor = {
             provider: 'border-blue-500',
             client: 'border-green-500',
-            both: 'border-purple-500',
-            blacklisted: 'border-red-500'
+            both: 'border-purple-500'
           }[type];
 
           return (
