@@ -115,6 +115,7 @@ const Companies = () => {
     debouncedSearch(value);
   };
 
+  const [loaded, setLoaded] = useState(false);
   // Initialize filters with URL parameters
   useEffect(() => {
     const type = searchParams.get('type');
@@ -122,6 +123,7 @@ const Companies = () => {
     const search = searchParams.get('search');
     const page = searchParams.get('page');
     
+    setLoaded(false);
     setTimeout(() => {
       setFilters(prev => ({
         ...prev,
@@ -130,6 +132,7 @@ const Companies = () => {
         search: search || '',
         page: page ? parseInt(page) : 1
       }));
+      setLoaded(true);
     }, 1000);
   }, [searchParams]);
 
@@ -1037,7 +1040,7 @@ const Companies = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              {loaded ? <tbody className="bg-white divide-y divide-gray-200">
                 {companiesList.map((company) => (
                   <tr key={company._id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -1082,7 +1085,15 @@ const Companies = () => {
                     </td>
                   </tr>
                 ))}
-              </tbody>
+              </tbody> : <tbody className="bg-white divide-y divide-gray-200">
+                <tr>
+                  <td colSpan="6" className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <div className="flex justify-center items-center h-full">
+                      <div className="w-10 h-10 border-t-2 border-b-2 border-gray-900 rounded-full animate-spin"></div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>}
             </table>
           </div>
 

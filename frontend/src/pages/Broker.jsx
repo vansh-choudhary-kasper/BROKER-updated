@@ -2,17 +2,20 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { useData } from '../context/DataContext';
 import { debounce } from 'lodash';
+// import BankDetailsForm from './BankDetailsForm';
 
 const Broker = () => {
-  const { 
-    brokers, 
-    loading, 
-    error, 
-    totalBrokers, 
-    fetchBrokers, 
-    addBroker, 
-    updateBroker, 
-    deleteBroker 
+  const {
+    brokers,
+    loading,
+    error,
+    totalBrokers,
+    fetchBrokers,
+    addBroker,
+    updateBroker,
+    deleteBroker,
+    companies,
+    banks
   } = useData();
 
   const initialFormState = {
@@ -28,12 +31,8 @@ const Broker = () => {
     },
     gstNumber: '',
     panNumber: '',
-    bankDetails: {
-      accountNumber: '',
-      ifscCode: '',
-      bankName: '',
-      branchName: ''
-    },
+    company: undefined,
+    bankAccounts: [],
     financialSummary: {
       totalTasks: 0,
       totalCommission: 0,
@@ -86,7 +85,7 @@ const Broker = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Handle nested objects (address, bankDetails)
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
@@ -102,6 +101,18 @@ const Broker = () => {
         ...prev,
         [name]: value
       }));
+    }
+  };
+
+  const handleBankAccountChange = (e) => {
+    const selectedBank = e.target.value;
+    if (selectedBank) {
+      setFormData(prev => ({
+        ...prev,
+        bankAccounts: [...prev.bankAccounts, selectedBank]
+      }));
+      // Reset the select value after adding
+      e.target.value = '';
     }
   };
 
@@ -148,12 +159,8 @@ const Broker = () => {
       },
       gstNumber: broker.gstNumber || '',
       panNumber: broker.panNumber || '',
-      bankDetails: broker.bankDetails || {
-        accountNumber: '',
-        ifscCode: '',
-        bankName: '',
-        branchName: ''
-      },
+      company: broker.company,
+      bankAccounts: broker.bankAccounts || [],
       financialSummary: broker.financialSummary || {
         totalTasks: 0,
         totalCommission: 0,
@@ -266,9 +273,10 @@ const Broker = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Name</label>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name *</label>
                   <input
                     type="text"
+                    id="name"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
@@ -277,9 +285,10 @@ const Broker = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email *</label>
                   <input
                     type="email"
+                    id="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
@@ -288,22 +297,92 @@ const Broker = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Phone</label>
+                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone *</label>
                   <input
                     type="tel"
+                    id="phone"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     required
-                    pattern="[6-9][0-9]{9}"
-                    title="Please enter a valid 10-digit phone number starting with 6-9"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">GST Number</label>
+                  <label htmlFor="company" className="block text-sm font-medium text-gray-700">Company</label>
+                  <select
+                    id="company"
+                    name="company"
+                    value={formData.company}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  >
+                    <option value={undefined}>Select a company</option>
+                    {companies && companies.map(company => (
+                      <option key={company._id} value={company._id}>
+                        {company.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="bankAccounts" className="block text-sm font-medium text-gray-700">Bank Accounts</label>
+                  <select
+                    id="bankAccounts"
+                    name="bankAccounts"
+                    onChange={handleBankAccountChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    value=""
+                  >
+                    <option value={undefined}>Select a bank account</option>
+                    {banks && banks.map(bank => {
+                      // Only show banks that haven't been selected yet
+                      if (!formData.bankAccounts.includes(bank._id)) {
+                        return (
+                          <option key={bank._id} value={bank._id}>
+                            {bank.bankName} - {bank.accountNumber}
+                          </option>
+                        );
+                      }
+                      return null;
+                    })}
+                  </select>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Select accounts to add them to the list (optional)
+                  </p>
+                  {formData.bankAccounts.length > 0 && (
+                    <div className="mt-2">
+                      <label className="block text-sm font-medium text-gray-700">Selected Bank Accounts</label>
+                      <div className="mt-1 space-y-1">
+                        {formData.bankAccounts.map(accountId => {
+                          const bank = banks.find(b => b._id === accountId);
+                          return bank ? (
+                            <div key={accountId} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                              <span>{bank.bankName} - {bank.accountNumber}</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    bankAccounts: prev.bankAccounts.filter(id => id !== accountId)
+                                  }));
+                                }}
+                                className="text-red-600 hover:text-red-800"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ) : null;
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="gstNumber" className="block text-sm font-medium text-gray-700">GST Number</label>
                   <input
                     type="text"
+                    id="gstNumber"
                     name="gstNumber"
                     value={formData.gstNumber}
                     onChange={handleChange}
@@ -311,20 +390,19 @@ const Broker = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">PAN Number</label>
+                  <label htmlFor="panNumber" className="block text-sm font-medium text-gray-700">PAN Number</label>
                   <input
                     type="text"
+                    id="panNumber"
                     name="panNumber"
                     value={formData.panNumber}
                     onChange={handleChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}"
-                    title="Please enter a valid PAN number (e.g., ABCDE1234F)"
                   />
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700">Address</label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
+                  <div className="mt-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <input
                       type="text"
                       name="address.street"
@@ -367,57 +445,19 @@ const Broker = () => {
                     />
                   </div>
                 </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">Bank Details</label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-                    <input
-                      type="text"
-                      name="bankDetails.accountNumber"
-                      value={formData.bankDetails.accountNumber}
-                      onChange={handleChange}
-                      placeholder="Account Number"
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    />
-                    <input
-                      type="text"
-                      name="bankDetails.ifscCode"
-                      value={formData.bankDetails.ifscCode}
-                      onChange={handleChange}
-                      placeholder="IFSC Code"
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    />
-                    <input
-                      type="text"
-                      name="bankDetails.bankName"
-                      value={formData.bankDetails.bankName}
-                      onChange={handleChange}
-                      placeholder="Bank Name"
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    />
-                    <input
-                      type="text"
-                      name="bankDetails.branchName"
-                      value={formData.bankDetails.branchName}
-                      onChange={handleChange}
-                      placeholder="Branch Name"
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    />
-                  </div>
-                </div>
-                <div className="md:col-span-2">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="status"
-                      name="status"
-                      checked={formData.status === 'active'}
-                      onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.checked ? 'active' : 'inactive' }))}
-                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="status" className="ml-2 block text-sm text-gray-900">
-                      Active Broker
-                    </label>
-                  </div>
+                <div>
+                  <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
+                  <select
+                    id="status"
+                    name="status"
+                    value={formData.status}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="suspended">Suspended</option>
+                  </select>
                 </div>
               </div>
 
@@ -486,6 +526,12 @@ const Broker = () => {
                     <p className="mt-1 text-sm text-gray-900">{selectedBroker.status}</p>
                   </div>
                   <div>
+                    <label className="block text-sm font-medium text-gray-500">Company</label>
+                    <p className="mt-1 text-sm text-gray-900">
+                      {companies?.find(c => c._id === selectedBroker.company)?.name || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
                     <label className="block text-sm font-medium text-gray-500">GST Number</label>
                     <p className="mt-1 text-sm text-gray-900">{selectedBroker.gstNumber || 'N/A'}</p>
                   </div>
@@ -493,6 +539,42 @@ const Broker = () => {
                     <label className="block text-sm font-medium text-gray-500">PAN Number</label>
                     <p className="mt-1 text-sm text-gray-900">{selectedBroker.panNumber || 'N/A'}</p>
                   </div>
+                </div>
+              </div>
+
+              {/* Bank Accounts */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Bank Accounts</h3>
+                <div className="space-y-3">
+                  {selectedBroker.bankAccounts && selectedBroker.bankAccounts.length > 0 ? (
+                    selectedBroker.bankAccounts.map(accountId => {
+                      const bank = banks?.find(b => b._id === accountId);
+                      return bank ? (
+                        <div key={accountId} className="bg-white p-3 rounded border border-gray-200">
+                          <div className="space-y-2">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-500">Bank Name</label>
+                              <p className="mt-1 text-sm text-gray-900">{bank.bankName}</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-500">Account Number</label>
+                              <p className="mt-1 text-sm text-gray-900">{bank.accountNumber}</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-500">IFSC Code</label>
+                              <p className="mt-1 text-sm text-gray-900">{bank.ifscCode || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-500">Branch Name</label>
+                              <p className="mt-1 text-sm text-gray-900">{bank.branchName || 'N/A'}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ) : null;
+                    })
+                  ) : (
+                    <p className="text-sm text-gray-500">No bank accounts associated</p>
+                  )}
                 </div>
               </div>
 
@@ -523,29 +605,6 @@ const Broker = () => {
                 </div>
               </div>
 
-              {/* Bank Details */}
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Bank Details</h3>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500">Account Number</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.bankDetails?.accountNumber || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500">IFSC Code</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.bankDetails?.ifscCode || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500">Bank Name</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.bankDetails?.bankName || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500">Branch Name</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.bankDetails?.branchName || 'N/A'}</p>
-                  </div>
-                </div>
-              </div>
-
               {/* Financial Summary */}
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Financial Summary</h3>
@@ -565,8 +624,8 @@ const Broker = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-500">Last Updated</label>
                     <p className="mt-1 text-sm text-gray-900">
-                      {selectedBroker.financialSummary?.lastUpdated ? 
-                        new Date(selectedBroker.financialSummary.lastUpdated).toLocaleDateString() : 
+                      {selectedBroker.financialSummary?.lastUpdated ?
+                        new Date(selectedBroker.financialSummary.lastUpdated).toLocaleDateString() :
                         'N/A'}
                     </p>
                   </div>
@@ -600,7 +659,7 @@ const Broker = () => {
                 <tr className="bg-gray-100">
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Financial Summary</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -618,7 +677,9 @@ const Broker = () => {
                       </button>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">{broker.email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{broker.phone}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {companies?.find(c => c._id === broker.company)?.name || 'N/A'}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm">
                         <div>Tasks: {broker.financialSummary?.totalTasks || 0}</div>
@@ -627,11 +688,10 @@ const Broker = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        broker.status === 'active' ? 'bg-green-100 text-green-800' :
-                        broker.status === 'inactive' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${broker.status === 'active' ? 'bg-green-100 text-green-800' :
+                          broker.status === 'inactive' ? 'bg-red-100 text-red-800' :
+                            'bg-yellow-100 text-yellow-800'
+                        }`}>
                         {broker.status}
                       </span>
                     </td>

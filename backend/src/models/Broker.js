@@ -36,7 +36,21 @@ const brokerSchema = new mongoose.Schema({
     trim: true
   },
 
-  // Bank details
+  // Company reference
+  company: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Company',
+    required: false
+  },
+
+  // Bank accounts (multiple)
+  bankAccounts: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Bank',
+    required: false
+  }],
+
+  // Bank details (legacy field, can be removed in future)
   bankDetails: {
     accountNumber: {
       type: String,
@@ -134,6 +148,8 @@ brokerSchema.index({ status: 1 });
 brokerSchema.index({ 'financialSummary.totalCommission': 1 });
 brokerSchema.index({ 'taskPayments.taskId': 1 });
 brokerSchema.index({ 'taskPayments.status': 1 });
+brokerSchema.index({ company: 1 });
+brokerSchema.index({ bankAccounts: 1 });
 
 const Broker = mongoose.model('Broker', brokerSchema);
 
