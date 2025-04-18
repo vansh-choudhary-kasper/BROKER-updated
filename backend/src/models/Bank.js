@@ -6,6 +6,16 @@ const bankSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  accountHolderPan: {
+    type: String,
+    required: false,
+    trim: true
+  },
+  accountHolderAadhar: {
+    type: String,
+    required: false,
+    trim: true
+  },
   accountNumber: {
     type: String,
     required: true,
@@ -52,6 +62,7 @@ const bankSchema = new mongoose.Schema({
       ref: 'Company'
     }
   }],
+
   createdAt: {
     type: Date,
     default: Date.now

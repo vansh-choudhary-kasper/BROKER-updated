@@ -44,25 +44,11 @@ const brokerSchema = new mongoose.Schema({
   },
 
   // Bank accounts (multiple)
-  bankAccounts: [{
+  bankDetails: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Bank',
     required: false
   }],
-
-  // Bank details (legacy field, can be removed in future)
-  bankDetails: {
-    accountNumber: {
-      type: String,
-    },
-    ifscCode: {
-      type: String,
-    },
-    bankName: {
-      type: String,
-    },
-    branchName: String
-  },
 
   // Financial summary
   financialSummary: {

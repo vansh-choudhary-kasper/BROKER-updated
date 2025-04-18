@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { useData } from '../context/DataContext';
 import { debounce } from 'lodash';
+ import BankDetailsForm from '../components/BankDetailsForm';
 // import BankDetailsForm from './BankDetailsForm';
 
 const Broker = () => {
@@ -32,7 +33,16 @@ const Broker = () => {
     gstNumber: '',
     panNumber: '',
     company: undefined,
-    bankAccounts: [],
+    bankDetails: [{
+      accountNumber: '',
+      ifscCode: '',
+      bankName: '',
+      branchName: '',
+      accountType: '',
+      accountHolderName: '',
+      accountHolderPan: '',
+      accountHolderAadhar: '',
+    }],
     financialSummary: {
       totalTasks: 0,
       totalCommission: 0,
@@ -105,12 +115,25 @@ const Broker = () => {
   };
 
   const handleBankAccountChange = (e) => {
-    const selectedBank = e.target.value;
-    if (selectedBank) {
-      setFormData(prev => ({
-        ...prev,
-        bankAccounts: [...prev.bankAccounts, selectedBank]
-      }));
+    const selectedBankId = e.target.value;
+    if (selectedBankId && selectedBankId !== 'undefined') {
+      // Find the selected bank from the banks array
+      const selectedBank = banks.find(bank => bank._id === selectedBankId);
+      if (selectedBank) {
+        setFormData(prev => ({
+          ...prev,
+          bankDetails: [...(prev.bankDetails || []), {
+            accountNumber: selectedBank.accountNumber,
+            ifscCode: selectedBank.ifscCode,
+            bankName: selectedBank.bankName,
+            branchName: selectedBank.branchName,
+            accountType: selectedBank.accountType || 'savings',
+            accountHolderName: selectedBank.accountHolderName,
+            accountHolderPan: selectedBank.accountHolderPan || '',
+            accountHolderAadhar: selectedBank.accountHolderAadhar || '',
+          }]
+        }));
+      }
       // Reset the select value after adding
       e.target.value = '';
     }
@@ -160,7 +183,16 @@ const Broker = () => {
       gstNumber: broker.gstNumber || '',
       panNumber: broker.panNumber || '',
       company: broker.company,
-      bankAccounts: broker.bankAccounts || [],
+      bankDetails: broker.bankDetails || [{
+        accountNumber: '',
+        ifscCode: '',
+        bankName: '',
+        branchName: '',
+        accountType: '',
+        accountHolderName: '',
+        accountHolderPan: '',
+        accountHolderAadhar: '',
+      }],
       financialSummary: broker.financialSummary || {
         totalTasks: 0,
         totalCommission: 0,
@@ -326,18 +358,18 @@ const Broker = () => {
                   </select>
                 </div>
                 <div>
-                  <label htmlFor="bankAccounts" className="block text-sm font-medium text-gray-700">Bank Accounts</label>
+                  <label htmlFor="bankDetails" className="block text-sm font-medium text-gray-700">Bank Details</label>
                   <select
-                    id="bankAccounts"
-                    name="bankAccounts"
+                    id="bankDetails"
+                    name="bankDetails"
                     onChange={handleBankAccountChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     value=""
                   >
-                    <option value={undefined}>Select a bank account</option>
+                    <option value="">Select a bank account</option>
                     {banks && banks.map(bank => {
                       // Only show banks that haven't been selected yet
-                      if (!formData.bankAccounts.includes(bank._id)) {
+                      if (!formData.bankDetails?.some(b => b.accountNumber === bank.accountNumber)) {
                         return (
                           <option key={bank._id} value={bank._id}>
                             {bank.bankName} - {bank.accountNumber}
@@ -350,30 +382,27 @@ const Broker = () => {
                   <p className="mt-1 text-sm text-gray-500">
                     Select accounts to add them to the list (optional)
                   </p>
-                  {formData.bankAccounts.length > 0 && (
+                  {formData.bankDetails?.length > 0 && (
                     <div className="mt-2">
                       <label className="block text-sm font-medium text-gray-700">Selected Bank Accounts</label>
                       <div className="mt-1 space-y-1">
-                        {formData.bankAccounts.map(accountId => {
-                          const bank = banks.find(b => b._id === accountId);
-                          return bank ? (
-                            <div key={accountId} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                              <span>{bank.bankName} - {bank.accountNumber}</span>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setFormData(prev => ({
-                                    ...prev,
-                                    bankAccounts: prev.bankAccounts.filter(id => id !== accountId)
-                                  }));
-                                }}
-                                className="text-red-600 hover:text-red-800"
-                              >
-                                Remove
-                              </button>
-                            </div>
-                          ) : null;
-                        })}
+                        {formData.bankDetails.map((bank, index) => (
+                          <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
+                            <span>{bank.bankName} - {bank.accountNumber}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  bankDetails: prev.bankDetails.filter((_, i) => i !== index)
+                                }));
+                              }}
+                              className="text-red-600 hover:text-red-800"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}
@@ -461,6 +490,56 @@ const Broker = () => {
                 </div>
               </div>
 
+              {/* Bank Details */}
+              <BankDetailsForm
+                bankDetails={formData.bankDetails}
+                onChange={(index, field, value) => {
+                  const newBankDetails = [...formData.bankDetails];
+                  newBankDetails[index] = {
+                    ...newBankDetails[index],
+                    [field]: value
+                  };
+                  setFormData(prev => ({
+                    ...prev,
+                    bankDetails: newBankDetails
+                  }));
+                }}
+                onFileChange={(index, field, file) => {
+                  const newBankDetails = [...formData.bankDetails];
+                  newBankDetails[index] = {
+                    ...newBankDetails[index],
+                    [field]: file
+                  };
+                  setFormData(prev => ({
+                    ...prev,
+                    bankDetails: newBankDetails
+                  }));
+                }}
+                onAdd={() => {
+                  setFormData(prev => ({
+                    ...prev,
+                    bankDetails: [...prev.bankDetails, {
+                      accountNumber: '',
+                      ifscCode: '',
+                      bankName: '',
+                      branchName: '',
+                      accountType: '',
+                      accountHolderName: '',
+                      accountHolderPan: '',
+                      accountHolderAadhar: '',
+                      bankStatement: null,
+                      cancelledCheque: null
+                    }]
+                  }));
+                }}
+                onRemove={(index) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    bankDetails: prev.bankDetails.filter((_, i) => i !== index)
+                  }));
+                }}
+              />
+
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"
@@ -546,32 +625,29 @@ const Broker = () => {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Bank Accounts</h3>
                 <div className="space-y-3">
-                  {selectedBroker.bankAccounts && selectedBroker.bankAccounts.length > 0 ? (
-                    selectedBroker.bankAccounts.map(accountId => {
-                      const bank = banks?.find(b => b._id === accountId);
-                      return bank ? (
-                        <div key={accountId} className="bg-white p-3 rounded border border-gray-200">
-                          <div className="space-y-2">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-500">Bank Name</label>
-                              <p className="mt-1 text-sm text-gray-900">{bank.bankName}</p>
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-500">Account Number</label>
-                              <p className="mt-1 text-sm text-gray-900">{bank.accountNumber}</p>
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-500">IFSC Code</label>
-                              <p className="mt-1 text-sm text-gray-900">{bank.ifscCode || 'N/A'}</p>
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-500">Branch Name</label>
-                              <p className="mt-1 text-sm text-gray-900">{bank.branchName || 'N/A'}</p>
-                            </div>
+                  {selectedBroker.bankDetails && selectedBroker.bankDetails.length > 0 ? (
+                    selectedBroker.bankDetails.map((bank, index) => (
+                      <div key={index} className="bg-white p-3 rounded border border-gray-200">
+                        <div className="space-y-2">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-500">Bank Name</label>
+                            <p className="mt-1 text-sm text-gray-900">{bank.bankName}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-500">Account Number</label>
+                            <p className="mt-1 text-sm text-gray-900">{bank.accountNumber}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-500">IFSC Code</label>
+                            <p className="mt-1 text-sm text-gray-900">{bank.ifscCode || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-500">Branch Name</label>
+                            <p className="mt-1 text-sm text-gray-900">{bank.branchName || 'N/A'}</p>
                           </div>
                         </div>
-                      ) : null;
-                    })
+                      </div>
+                    ))
                   ) : (
                     <p className="text-sm text-gray-500">No bank accounts associated</p>
                   )}

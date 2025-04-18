@@ -1,16 +1,45 @@
+const Bank = require('../models/Bank');
 const Broker = require('../models/Broker');
 const Company = require('../models/Company');
 
 // Create broker
 exports.createBroker = async (req, res) => {
   try {
-    const broker = await Broker.create(req.body);
+    const { bankDetails, ...brokerData } = req.body;
+    console.log(req.body);
+    
+    const bankIds = [];
+    console.log(bankDetails);
+    // forEach doesn't wait for async operations, use for...of instead
+    for (const bank of bankDetails) {
+      try {
+        let bankData = await Bank.findOne({ accountNumber: bank.accountNumber });
+        if (!bankData) {
+          bankData = await Bank.create(bank);
+        }
+        bankIds.push({_id: bankData._id});
+      } catch (error) {
+        console.error("Error processing bank:", error);
+        throw error; // Re-throw to be caught by outer try-catch
+      }
+    }
+    console.log(bankIds);
+    // Create broker with parsed data
+    const broker = await Broker.create({
+      ...brokerData,
+      bankDetails: bankIds
+    });
+
     res.status(201).json({
       success: true,
       data: broker
     });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error("Error in creating broker:", error);
+    res.status(400).json({ 
+      success: false,
+      message: error.message 
+    });
   }
 };
 
@@ -38,6 +67,7 @@ exports.getBrokers = async (req, res) => {
     
     // Execute query with pagination
     const brokers = await Broker.find(query)
+      .populate('bankDetails')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit)
@@ -78,25 +108,75 @@ exports.getBrokerById = async (req, res) => {
 // Update broker
 exports.updateBroker = async (req, res) => {
   try {
-    const broker = await Broker.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, runValidators: true }
-    );
+    const { bankDetails, ...brokerData } = req.body;
     
+    // First find the broker
+    const broker = await Broker.findById(req.params.id);
     if (!broker) {
       return res.status(404).json({
         success: false,
         message: 'Broker not found'
       });
     }
+
+    // Update bank accounts
+    if (bankDetails && bankDetails.length > 0) {
+      // Clear existing bank accounts
+      broker.bankDetails = [];
+      
+      // Create/update bank accounts
+      for (let bank of bankDetails) {
+        try {
+          // Validate bank details
+          if (!bank.accountNumber || !bank.bankName || !bank.accountHolderName) {
+            throw new Error('Missing required bank details');
+          }
+
+          let bankAccount = await Bank.findOneAndUpdate(
+            { accountNumber: bank.accountNumber },
+            { ...bank, updatedAt: new Date() },
+            { new: true, runValidators: true, upsert: true }
+          );
+
+          if (!bankAccount) {
+            bankAccount = await Bank.create(bank);
+          } 
+
+          broker.bankDetails.push(bankAccount._id);
+        } catch (error) {
+          console.error("Error in updating/creating bank account:", error);
+          return res.status(400).json({
+            success: false,
+            message: `Error updating bank account: ${error.message}`
+          });
+        }
+      }
+    }
+
+    // Update broker data
+    Object.assign(broker, brokerData);
+
+    // Save the updated broker
+    await broker.save();
     
+    // Fetch the updated broker with populated references
+    const updatedBroker = await Broker.findById(broker._id)
+      .populate({
+        path: 'bankDetails',
+        select: '-transactions' // Exclude sensitive transaction data
+      })
+      .populate('company');
+
     res.json({
       success: true,
-      data: broker
+      data: updatedBroker
     });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error("Error in updateBroker:", error);
+    res.status(400).json({ 
+      success: false,
+      message: error.message 
+    });
   }
 };
 
@@ -104,6 +184,10 @@ exports.updateBroker = async (req, res) => {
 exports.deleteBroker = async (req, res) => {
   try {
     const broker = await Broker.findByIdAndDelete(req.params.id);
+    const bankDetails = broker.bankDetails;
+    for (let bank of bankDetails) {
+      await Bank.findByIdAndDelete(bank._id);
+    }
     
     if (!broker) {
       return res.status(404).json({

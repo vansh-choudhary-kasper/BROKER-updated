@@ -104,6 +104,63 @@ const validateCompanyData = (data) => {
   };
 };
 
+const validateBrokerData = (data) => {
+  const errors = [];
+
+  // Basic information validation
+  if (!data.name) {
+    errors.push('Name is required');
+  }
+  if (!data.email) {
+    errors.push('Email is required');
+  } else if (!isValidEmail(data.email)) {
+    errors.push('Invalid email format');
+  }
+  if (!data.phone) {
+    errors.push('Phone number is required');
+  } else if (!isValidPhone(data.phone)) {
+    errors.push('Invalid phone number format');
+  }
+
+  // Address validation
+  if (data.address) {
+    if (data.address.pincode && !isValidPincode(data.address.pincode)) {
+      errors.push('Invalid pincode format');
+    }
+  }
+
+  // Bank details validation
+  if (data.bankDetails && data.bankDetails.length > 0) {
+    data.bankDetails.forEach((bank, index) => {
+      if (!bank.accountNumber) {
+        errors.push(`Bank account number is required for account #${index + 1}`);
+      }
+      if (!bank.ifscCode) {
+        errors.push(`IFSC code is required for account #${index + 1}`);
+      } else if (!isValidIFSC(bank.ifscCode)) {
+        errors.push(`Invalid IFSC code format for account #${index + 1}`);
+      }
+      if (!bank.bankName) {
+        errors.push(`Bank name is required for account #${index + 1}`);
+      }
+      if (!bank.branchName) {
+        errors.push(`Branch name is required for account #${index + 1}`);
+      }
+      if (!bank.accountType || !['savings', 'current', 'fixed_deposit'].includes(bank.accountType)) {
+        errors.push(`Valid account type is required for account #${index + 1}`);
+      }
+      if (!bank.accountHolderName) {
+        errors.push(`Account holder name is required for account #${index + 1}`);
+      }
+    });
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};
+
 // Validation helper functions
 const isValidEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -135,6 +192,12 @@ const isValidIFSC = (ifsc) => {
   return ifscRegex.test(ifsc);
 };
 
+const isValidAadhar = (aadhar) => {
+  const aadharRegex = /^[0-9]{12}$/;
+  return aadharRegex.test(aadhar);
+};
+
 module.exports = {
-  validateCompanyData
+  validateCompanyData,
+  validateBrokerData
 }; 
