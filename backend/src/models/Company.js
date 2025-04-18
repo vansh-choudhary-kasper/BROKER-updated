@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slabSchema = require('./SlabSchema');
 
 const documentSchema = new mongoose.Schema({
   fieldPath: String,
@@ -133,6 +134,9 @@ const companySchema = new mongoose.Schema({
     default: 'pending_verification'
     // Current operational status of the company
   },
+
+  // Slabs
+  slabs: [slabSchema],
 
   // Risk management
   riskAssessment: {

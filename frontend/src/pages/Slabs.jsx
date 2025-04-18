@@ -3,7 +3,7 @@ import { useData } from '../context/DataContext';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
-const Slabs = () => {
+const Slabs = ({ slabs, onSlabsChange }) => {
   const { token } = useAuth();
   const [clientSlabs, setClientSlabs] = useState([]);
   const [providerSlabs, setProviderSlabs] = useState([]);
@@ -20,6 +20,7 @@ const Slabs = () => {
 
   const [newClientSlab, setNewClientSlab] = useState(initialSlabState);
   const [newProviderSlab, setNewProviderSlab] = useState(initialSlabState);
+  const [type, setType] = useState(slabs?.length > 0 ? 'client' : '');
 
   // Fetch user data using token
   const fetchUserData = async () => {
@@ -38,7 +39,7 @@ const Slabs = () => {
   // Handle commission input to prevent scientific notation and maintain trailing zeros
   const handleCommissionChange = (e, setSlabFunction, currentSlab) => {
     const value = e.target.value;
-    
+
     // Allow empty string for clearing the input
     if (value === '') {
       setSlabFunction({ ...currentSlab, commission: '' });
@@ -47,14 +48,14 @@ const Slabs = () => {
 
     // Remove any non-numeric characters except decimal point
     const cleanValue = value.replace(/[^\d.]/g, '');
-    
+
     // Ensure only one decimal point
     const parts = cleanValue.split('.');
     if (parts.length > 2) return;
-    
+
     // Limit decimal places to 8
     if (parts[1] && parts[1].length > 15) return;
-    
+
     // Prevent values over 100
     if (parseFloat(cleanValue) > 100) return;
 
@@ -77,10 +78,15 @@ const Slabs = () => {
       const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (response.data) {
-        setClientSlabs(response.data.clientSlabs || []);
-        setProviderSlabs(response.data.providerSlabs || []);
+        if(onSlabsChange) {
+          setClientSlabs(slabs || []);
+          setProviderSlabs(slabs || []);
+        } else {
+          setClientSlabs(response.data.clientSlabs || []);
+          setProviderSlabs(response.data.providerSlabs || []);
+        }
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch slabs');
@@ -116,9 +122,17 @@ const Slabs = () => {
       throw new Error('Commission must be between 0 and 100');
     }
 
-    // Sort slabs excluding the editing slab
+    // Convert and sort slabs excluding the editing slab
     const otherSlabs = currentSlabs
-      .filter(slab => (!editingId || slab._id !== editingId))
+      .filter(slab => (!editingId || (
+        parseInt(slab.minAmount) !== parseInt(editingId.minAmount) && 
+        parseInt(slab.maxAmount) !== parseInt(editingId.maxAmount)
+      )))
+      .map(slab => ({
+        ...slab,
+        minAmount: parseInt(slab.minAmount, 10),
+        maxAmount: parseInt(slab.maxAmount, 10)
+      }))
       .sort((a, b) => a.minAmount - b.minAmount);
 
     // If this is the first slab, it should start from 0
@@ -130,7 +144,7 @@ const Slabs = () => {
 
     // Find where this slab would fit
     const insertIndex = otherSlabs.findIndex(slab => slab.minAmount > minAmount);
-    
+
     // Check for overlaps and gaps
     if (insertIndex === -1) {
       // This would be the last slab
@@ -148,7 +162,7 @@ const Slabs = () => {
           throw new Error(`Minimum amount must be ${prevSlab.maxAmount + 1}`);
         }
       }
-      
+
       // Check with next slab
       const nextSlab = otherSlabs[insertIndex];
       if (maxAmount >= nextSlab.minAmount) {
@@ -164,28 +178,58 @@ const Slabs = () => {
       setError(null);
       setLoading(true);
 
+      // Convert values to numbers
+      const newSlab = {
+        ...slabData,
+        minAmount: parseInt(slabData.minAmount, 10),
+        maxAmount: parseInt(slabData.maxAmount, 10),
+        commission: parseFloat(slabData.commission)
+      };
+
       // Validate slab range
-      validateSlabRange(type, slabData);
+      validateSlabRange(type, newSlab);
 
-      const slabsToUpdate = type === 'client' ? 
-        [...clientSlabs, slabData].sort((a, b) => a.minAmount - b.minAmount) :
-        [...providerSlabs, slabData].sort((a, b) => a.minAmount - b.minAmount);
+      const currentSlabs = type === 'client' ? clientSlabs : providerSlabs;
+      
+      // Convert all existing slabs to ensure numbers
+      const existingSlabs = currentSlabs.map(slab => ({
+        ...slab,
+        minAmount: parseInt(slab.minAmount, 10),
+        maxAmount: parseInt(slab.maxAmount, 10),
+        commission: parseFloat(slab.commission)
+      }));
 
-      const response = await axios.patch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/${userData?._id}`,
-        { 
-          [type === 'client' ? 'clientSlabs' : 'providerSlabs']: slabsToUpdate 
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const slabsToUpdate = [...existingSlabs, newSlab]
+        .sort((a, b) => parseInt(a.minAmount, 10) - parseInt(b.minAmount, 10));
 
-      if (response.data) {
+      if (onSlabsChange) {
+        // If onSlabsChange is provided, use it instead of API call
+        onSlabsChange(slabsToUpdate);
         if (type === 'client') {
-          setClientSlabs(response.data.clientSlabs);
+          setClientSlabs(slabsToUpdate);
           setNewClientSlab(initialSlabState);
         } else {
-          setProviderSlabs(response.data.providerSlabs);
+          setProviderSlabs(slabsToUpdate);
           setNewProviderSlab(initialSlabState);
+        }
+      } else {
+        // Use API call if onSlabsChange is not provided
+        const response = await axios.patch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/users/${userData?._id}`,
+          {
+            [type === 'client' ? 'clientSlabs' : 'providerSlabs']: slabsToUpdate
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (response.data) {
+          if (type === 'client') {
+            setClientSlabs(response.data.clientSlabs);
+            setNewClientSlab(initialSlabState);
+          } else {
+            setProviderSlabs(response.data.providerSlabs);
+            setNewProviderSlab(initialSlabState);
+          }
         }
       }
     } catch (err) {
@@ -220,17 +264,17 @@ const Slabs = () => {
 
   function normalizeSlabs(slabs) {
     if (!Array.isArray(slabs) || slabs.length === 0) return [];
-  
+
     // First, sort slabs by minAmount to ensure proper order
     slabs.sort((a, b) => a.minAmount - b.minAmount);
-  
+
     for (let i = 1; i < slabs.length; i++) {
       const prevMax = slabs[i - 1].maxAmount;
       if (slabs[i].minAmount !== prevMax + 1) {
         slabs[i].minAmount = prevMax + 1;
       }
     }
-  
+
     return slabs;
   }
 
@@ -241,30 +285,33 @@ const Slabs = () => {
 
       const currentSlabs = type === 'client' ? clientSlabs : providerSlabs;
       let updatedSlabs = [...currentSlabs];
-      
-      // Find the index of the slab being edited
-      const editingIndex = updatedSlabs.findIndex(slab => slab._id === editingSlab._id);
-      
+
+      // Find the index of the slab being edited using min and max amounts
+      const editingIndex = updatedSlabs.findIndex(slab => 
+        parseInt(slab.minAmount) === parseInt(editingSlab.minAmount) && 
+        parseInt(slab.maxAmount) === parseInt(editingSlab.maxAmount)
+      );
+
       // Auto-adjust adjacent slabs based on changes
       if (editingIndex !== -1) {
         const oldSlab = updatedSlabs[editingIndex];
-        
+
         // If maxAmount changed, adjust next slab's minAmount
-        if (parseInt(slabData.maxAmount) !== oldSlab.maxAmount && editingIndex < updatedSlabs.length - 1) {
+        if (parseInt(slabData.maxAmount) !== parseInt(oldSlab.maxAmount) && editingIndex < updatedSlabs.length - 1) {
           updatedSlabs[editingIndex + 1] = {
             ...updatedSlabs[editingIndex + 1],
             minAmount: parseInt(slabData.maxAmount) + 1
           };
         }
-        
+
         // If minAmount changed, adjust previous slab's maxAmount
-        if (parseInt(slabData.minAmount) !== oldSlab.minAmount && editingIndex > 0) {
+        if (parseInt(slabData.minAmount) !== parseInt(oldSlab.minAmount) && editingIndex > 0) {
           updatedSlabs[editingIndex - 1] = {
             ...updatedSlabs[editingIndex - 1],
             maxAmount: parseInt(slabData.minAmount) - 1
           };
         }
-        
+
         // Update the current slab
         updatedSlabs[editingIndex] = {
           ...slabData,
@@ -275,36 +322,48 @@ const Slabs = () => {
       }
 
       // Sort and validate all slabs
-      updatedSlabs.sort((a, b) => a.minAmount - b.minAmount);
-      
+      updatedSlabs.sort((a, b) => parseInt(a.minAmount) - parseInt(b.minAmount));
+
       // Validate continuity
       for (let i = 0; i < updatedSlabs.length - 1; i++) {
-        if (updatedSlabs[i].maxAmount + 1 !== updatedSlabs[i + 1].minAmount) {
+        if (parseInt(updatedSlabs[i].maxAmount) + 1 !== parseInt(updatedSlabs[i + 1].minAmount)) {
           throw new Error('Slabs must be continuous without gaps');
         }
       }
 
-      // updatedSlabs = normalizeSlabs(updatedSlabs);
-
-      const response = await axios.patch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/${userData?._id}`,
-        { 
-          [type === 'client' ? 'clientSlabs' : 'providerSlabs']: updatedSlabs 
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
-      if (response.data) {
+      if (onSlabsChange) {
+        // If onSlabsChange is provided, use it instead of API call
+        onSlabsChange(updatedSlabs);
         if (type === 'client') {
-          setClientSlabs(response.data.clientSlabs);
+          setClientSlabs(updatedSlabs);
         } else {
-          setProviderSlabs(response.data.providerSlabs);
+          setProviderSlabs(updatedSlabs);
         }
-        
         // Reset form
         setEditingSlab(null);
         setNewClientSlab(initialSlabState);
         setNewProviderSlab(initialSlabState);
+      } else {
+        // Use API call if onSlabsChange is not provided
+        const response = await axios.patch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/users/${userData?._id}`,
+          {
+            [type === 'client' ? 'clientSlabs' : 'providerSlabs']: updatedSlabs
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (response.data) {
+          if (type === 'client') {
+            setClientSlabs(response.data.clientSlabs);
+          } else {
+            setProviderSlabs(response.data.providerSlabs);
+          }
+          // Reset form
+          setEditingSlab(null);
+          setNewClientSlab(initialSlabState);
+          setNewProviderSlab(initialSlabState);
+        }
       }
     } catch (err) {
       setError(err.message || 'Failed to update slab');
@@ -319,14 +378,17 @@ const Slabs = () => {
       setLoading(true);
 
       const currentSlabs = type === 'client' ? clientSlabs : providerSlabs;
-      const slabIndex = currentSlabs.findIndex(s => s._id === slab._id);
-      
+      const slabIndex = currentSlabs.findIndex(s => 
+        parseInt(s.minAmount) === parseInt(slab.minAmount) && 
+        parseInt(s.maxAmount) === parseInt(slab.maxAmount)
+      );
+
       if (slabIndex === -1) {
         throw new Error('Slab not found');
       }
 
       let updatedSlabs = [...currentSlabs];
-      
+
       // If it's not the last slab, adjust the next slab's minAmount
       if (slabIndex < updatedSlabs.length - 1) {
         updatedSlabs[slabIndex + 1] = {
@@ -342,22 +404,36 @@ const Slabs = () => {
         return;
       }
 
-      // Remove the slab
-      updatedSlabs = updatedSlabs.filter(s => s._id !== slab._id);
-
-      const response = await axios.patch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/users/${userData?._id}`,
-        { 
-          [type === 'client' ? 'clientSlabs' : 'providerSlabs']: updatedSlabs 
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
+      // Remove the slab using min and max amount comparison
+      updatedSlabs = updatedSlabs.filter(s => 
+        parseInt(s.minAmount) !== parseInt(slab.minAmount) || 
+        parseInt(s.maxAmount) !== parseInt(slab.maxAmount)
       );
 
-      if (response.data) {
+      if (onSlabsChange) {
+        // If onSlabsChange is provided, use it instead of API call
+        onSlabsChange(updatedSlabs);
         if (type === 'client') {
-          setClientSlabs(response.data.clientSlabs);
+          setClientSlabs(updatedSlabs);
         } else {
-          setProviderSlabs(response.data.providerSlabs);
+          setProviderSlabs(updatedSlabs);
+        }
+      } else {
+        // Use API call if onSlabsChange is not provided
+        const response = await axios.patch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/users/${userData?._id}`,
+          {
+            [type === 'client' ? 'clientSlabs' : 'providerSlabs']: updatedSlabs
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (response.data) {
+          if (type === 'client') {
+            setClientSlabs(response.data.clientSlabs);
+          } else {
+            setProviderSlabs(response.data.providerSlabs);
+          }
         }
       }
     } catch (err) {
@@ -385,14 +461,35 @@ const Slabs = () => {
         </div>
       )}
 
-      <div className="grid gap-8 md:grid-cols-2">
-        {/* Client Slabs Section */}
+      {!type ? (
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Select Slab Type</label>
+          <select
+            value={type}
+            onChange={(e) => {
+              setType(e.target.value);
+              if (onSlabsChange) {
+                if (e.target.value === 'client') {
+                  onSlabsChange(clientSlabs);
+                } else if (e.target.value === 'provider') {
+                  onSlabsChange(providerSlabs);
+                }
+              }
+            }}
+            className="block w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">Select Type</option>
+            <option value="client">Client Slabs</option>
+            <option value="provider">Provider Slabs</option>
+          </select>
+        </div>
+      ) : type === 'client' ? (
         <div className="bg-white rounded-lg shadow-lg overflow-hidden transition duration-150 ease-in-out hover:shadow-xl">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900">Client Slabs</h2>
             <p className="mt-1 text-sm text-gray-600">Commission rates for client transactions</p>
           </div>
-          
+
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -501,14 +598,13 @@ const Slabs = () => {
             </div>
           </div>
         </div>
-
-        {/* Provider Slabs Section */}
+      ) : (
         <div className="bg-white rounded-lg shadow-lg overflow-hidden transition duration-150 ease-in-out hover:shadow-xl">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900">Provider Slabs</h2>
             <p className="mt-1 text-sm text-gray-600">Commission rates for provider transactions</p>
           </div>
-          
+
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -617,7 +713,7 @@ const Slabs = () => {
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {error && (
         <div className="mt-6 rounded-md bg-red-50 p-4">

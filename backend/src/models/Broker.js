@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slabSchema = require('./SlabSchema');
 
 const brokerSchema = new mongoose.Schema({
   // Basic information
@@ -69,6 +70,9 @@ const brokerSchema = new mongoose.Schema({
       default: Date.now
     }
   },
+
+  // Slabs
+  slabs: [slabSchema],
 
   // Task payments tracking
   taskPayments: [{

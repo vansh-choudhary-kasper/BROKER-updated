@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { useData } from '../context/DataContext';
 import { debounce } from 'lodash';
- import BankDetailsForm from '../components/BankDetailsForm';
-// import BankDetailsForm from './BankDetailsForm';
+import BankDetailsForm from '../components/BankDetailsForm';
+import Slabs from './Slabs';
 
 const Broker = () => {
   const {
@@ -49,6 +49,7 @@ const Broker = () => {
       pendingCommission: 0,
       lastUpdated: new Date()
     },
+    slabs: [],
     status: 'inactive',
     referrals: []
   };
@@ -113,6 +114,13 @@ const Broker = () => {
       }));
     }
   };
+
+  const handleSlabsChange = (slabs) => {
+    setFormData(prev => ({
+      ...prev,
+      slabs: slabs
+    }));
+  };  
 
   const handleBankAccountChange = (e) => {
     const selectedBankId = e.target.value;
@@ -199,6 +207,7 @@ const Broker = () => {
         pendingCommission: 0,
         lastUpdated: new Date()
       },
+      slabs: broker.slabs || [],
       status: broker.status
     });
     setEditingBroker(broker);
@@ -540,6 +549,10 @@ const Broker = () => {
                 }}
               />
 
+              <div onClick={(e) => e.preventDefault()}>
+                <Slabs slabs={formData.slabs} onSlabsChange={handleSlabsChange} />
+              </div>
+
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"
@@ -707,6 +720,35 @@ const Broker = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Commission Slabs */}
+              <div className="bg-gray-50 p-4 rounded-lg md:col-span-2">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Commission Slabs</h3>
+                {selectedBroker.slabs && selectedBroker.slabs.length > 0 ? (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-100">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Min Amount</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Max Amount</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Commission %</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {selectedBroker.slabs.map((slab, index) => (
+                          <tr key={index}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹{slab.minAmount.toLocaleString()}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹{slab.maxAmount.toLocaleString()}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{slab.commission}%</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">No commission slabs defined</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -765,8 +807,8 @@ const Broker = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${broker.status === 'active' ? 'bg-green-100 text-green-800' :
-                          broker.status === 'inactive' ? 'bg-red-100 text-red-800' :
-                            'bg-yellow-100 text-yellow-800'
+                        broker.status === 'inactive' ? 'bg-red-100 text-red-800' :
+                          'bg-yellow-100 text-yellow-800'
                         }`}>
                         {broker.status}
                       </span>

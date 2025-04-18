@@ -23,7 +23,7 @@ exports.createBroker = async (req, res) => {
         throw error; // Re-throw to be caught by outer try-catch
       }
     }
-    console.log(bankIds);
+    console.log(brokerData.slabs);
     // Create broker with parsed data
     const broker = await Broker.create({
       ...brokerData,

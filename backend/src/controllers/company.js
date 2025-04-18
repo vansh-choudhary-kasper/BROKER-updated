@@ -86,6 +86,9 @@ class CompanyController {
                 }
             }
             companyData.bankDetails = bankDetails;
+            if(companyData.slabs) {
+                companyData.slabs = Object.values(companyData.slabs);
+            }
             const newCompany = new Company(companyData);
             await newCompany.save();
     
@@ -278,8 +281,13 @@ class CompanyController {
                 }
             }
             
+            //convert slabs object to array
+            if(companyData.slabs) {
+                companyData.slabs = Object.values(companyData.slabs);
+            }
             // Update other company data
             Object.assign(company, companyData);
+            console.log(companyData.slabs);
             
             const updatedCompany = await company.save();
             await updatedCompany.populate('bankDetails');

@@ -3,6 +3,7 @@ import { useData } from '../context/DataContext';
 import BankDetailsForm from '../components/BankDetailsForm';
 import { debounce } from 'lodash';
 import { useSearchParams } from 'react-router-dom';
+import Slabs from './Slabs';
 
 const Companies = () => {
   const [searchParams] = useSearchParams();
@@ -39,7 +40,6 @@ const Companies = () => {
       tdsNumber: '',
       registrationDate: '',
       registrationAuthority: '',
-      registrationCertificate: null
     },
     legalDetails: {
       registeredName: '',
@@ -79,6 +79,7 @@ const Companies = () => {
       taxRegistration: null,
       otherDocuments: []
     },
+    slabs: [],
     status: 'pending_verification',
     riskAssessment: {
       score: 0,
@@ -233,6 +234,13 @@ const Companies = () => {
     } catch (error) {
       console.error('Error submitting form:', error);
     }
+  };
+
+  const handleSlabsChange = (slabs) => {
+    setFormData(prev => ({
+      ...prev,
+      slabs: slabs
+    }));
   };
 
   const handleEdit = (company) => {
@@ -588,18 +596,6 @@ const Companies = () => {
                       />
                     </div>
 
-                    <div>
-                      <label htmlFor="businessDetails.registrationCertificate" className="block text-sm font-medium text-gray-700">
-                        Registration Certificate
-                      </label>
-                      <input
-                        type="file"
-                        id="businessDetails.registrationCertificate"
-                        name="businessDetails.registrationCertificate"
-                        onChange={handleFileChange}
-                        className="mt-1 block w-full"
-                      />
-                    </div>
                   </div>
                 </div>
 
@@ -841,6 +837,9 @@ const Companies = () => {
                       }));
                     }}
                   />
+                <div onClick={(e) => e.preventDefault()}>
+                  <Slabs slabs={formData.slabs} onSlabsChange={handleSlabsChange} />
+                </div>
 
                 {/* Documents */}
                 <div className="border-t border-gray-200 pt-4">
@@ -1502,6 +1501,62 @@ const Companies = () => {
                       )}
                     </div>
                   </div>
+                </div>
+
+                {/* Financial Summary */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Financial Summary</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-500">Total Tasks</label>
+                      <p className="mt-1 text-sm text-gray-900">{selectedCompany.financialSummary?.totalTasks || 0}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-500">Total Commission</label>
+                      <p className="mt-1 text-sm text-gray-900">₹{selectedCompany.financialSummary?.totalCommission || 0}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-500">Pending Commission</label>
+                      <p className="mt-1 text-sm text-gray-900">₹{selectedCompany.financialSummary?.pendingCommission || 0}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-500">Last Updated</label>
+                      <p className="mt-1 text-sm text-gray-900">
+                        {selectedCompany.financialSummary?.lastUpdated ?
+                          new Date(selectedCompany.financialSummary.lastUpdated).toLocaleDateString() :
+                          'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Commission Slabs */}
+                <div className="bg-gray-50 p-4 rounded-lg md:col-span-2">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Commission Slabs</h3>
+                  {selectedCompany.slabs && selectedCompany.slabs.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-100">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Min Amount</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Max Amount</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Commission %</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {selectedCompany.slabs.map((slab, index) => (
+                            <tr key={index}>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹{slab.minAmount.toLocaleString()}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">₹{slab.maxAmount.toLocaleString()}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{slab.commission}%</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500">No commission slabs defined</p>
+                  )}
                 </div>
               </div>
 
