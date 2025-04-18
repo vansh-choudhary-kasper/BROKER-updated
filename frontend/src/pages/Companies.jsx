@@ -1263,6 +1263,17 @@ const Companies = () => {
                           <p className="mt-1 text-lg font-medium text-gray-900">{bank.accountHolderName}</p>
                         </div>
                       </div>
+                      <br />
+                      <hr />
+                      <br />
+                      <div>
+                        <div className="text-lg font-medium text-gray-500">Custom Fields</div>
+                        <div>
+                          {Object.entries(bank.customFields || {}).map(([key, value]) => (
+                              <div className="flex items-center gap-2"><label className="text-sm font-medium text-gray-900 capitalize">{key}:</label><p className="text-lg font-medium text-gray-500">{value}</p></div>
+                          ))}
+                          </div>
+                      </div>
                     </div>
                   ))}
                 </div>

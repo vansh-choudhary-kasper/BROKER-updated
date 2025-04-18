@@ -5,7 +5,13 @@ const logger = require('../utils/logger');
 class BankController {
     async createBank(req, res) {
         try {
-            const bank = await Bank.create(req.body);
+            const { customFields, ...bankData } = req.body;
+
+            const bank = await Bank.create({
+                ...bankData,
+                customFields: customFields || {}
+            });
+
             return res.status(201).json(
                 ApiResponse.created('Bank account created successfully', bank)
             );
@@ -19,7 +25,7 @@ class BankController {
 
     async getBanks(req, res) {
         try {
-            const { page = 1, limit = 10, isActive, accountType, search } = req.query;
+            const { page = 1, limit = 10, isActive, accountType, search, owner, ownerType } = req.query;
             const query = {};
 
             // Handle isActive filter
@@ -32,16 +38,27 @@ class BankController {
                 query.accountType = accountType;
             }
 
+            // Handle owner filter
+            if (owner) {
+                query.owner = owner;
+            }
+
+            // Handle ownerType filter
+            if (ownerType) {
+                query.ownerType = ownerType;
+            }
+
             // Handle search
             if (search) {
                 query.$or = [
-                    { accountName: { $regex: search, $options: 'i' } },
+                    { accountHolderName: { $regex: search, $options: 'i' } },
                     { accountNumber: { $regex: search, $options: 'i' } },
                     { bankName: { $regex: search, $options: 'i' } }
                 ];
             }
 
             const banks = await Bank.find(query)
+                .populate('owner')
                 .limit(limit * 1)
                 .skip((page - 1) * limit)
                 .exec();
@@ -66,7 +83,7 @@ class BankController {
 
     async getBank(req, res) {
         try {
-            const bank = await Bank.findById(req.params.id);
+            const bank = await Bank.findById(req.params.id).populate('owner');
             if (!bank) {
                 return res.status(404).json(
                     ApiResponse.notFound('Bank account not found')
@@ -86,14 +103,21 @@ class BankController {
 
     async updateBank(req, res) {
         try {
+            const { owner, ownerType, customFields, ...updateData } = req.body;
             const bank = await Bank.findById(req.params.id);
+            
             if (!bank) {
                 return res.status(404).json(
                     ApiResponse.notFound('Bank account not found')
                 );
             }
 
-            Object.assign(bank, req.body);
+            // Only allow updating customFields, not owner or ownerType
+            Object.assign(bank, {
+                ...updateData,
+                customFields: customFields || bank.customFields
+            });
+
             await bank.save();
 
             return res.status(200).json(

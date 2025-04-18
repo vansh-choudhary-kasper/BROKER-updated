@@ -26,12 +26,6 @@ const bankValidation = [
     body('isActive')
         .optional()
         .isBoolean().withMessage('isActive must be a boolean'),
-    body('balance')
-        .optional()
-        .isNumeric().withMessage('Balance must be a number'),
-    body('openingBalance')
-        .optional()
-        .isNumeric().withMessage('Opening balance must be a number')
 ];
 
 // Routes

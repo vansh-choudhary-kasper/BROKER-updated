@@ -38,6 +38,19 @@ const bankSchema = new mongoose.Schema({
     enum: ['savings', 'current', 'fixed_deposit'],
     required: true
   },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    refPath: 'ownerType',
+  },
+  ownerType: {
+    type: String,
+    enum: ['Company', 'Broker'],
+  },
+  customFields: {
+    type: Map,
+    of: mongoose.Schema.Types.Mixed,
+    default: {}
+  },
   isActive: {
     type: Boolean,
     default: true
@@ -79,6 +92,8 @@ const bankSchema = new mongoose.Schema({
 bankSchema.index({ accountNumber: 1 });
 bankSchema.index({ ifscCode: 1 });
 bankSchema.index({ isActive: 1 });
+bankSchema.index({ owner: 1 });
+bankSchema.index({ ownerType: 1 });
 
 const Bank = mongoose.model('Bank', bankSchema);
 

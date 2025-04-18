@@ -32,9 +32,11 @@ const Banks = () => {
     branchName: '',
     accountType: 'savings',
     isActive: true,
+    customFields: {}
   };
 
   const [formData, setFormData] = useState(initialFormState);
+  const [newCustomField, setNewCustomField] = useState({ name: '', value: '' });
   const [editingAccount, setEditingAccount] = useState(null);
   const [filters, setFilters] = useState({
     search: '',
@@ -106,6 +108,30 @@ const Banks = () => {
     }));
   };
 
+  const handleAddCustomField = () => {
+    if (newCustomField.name && newCustomField.value) {
+      setFormData(prev => ({
+        ...prev,
+        customFields: {
+          ...prev.customFields,
+          [newCustomField.name]: newCustomField.value
+        }
+      }));
+      setNewCustomField({ name: '', value: '' });
+    }
+  };
+
+  const handleRemoveCustomField = (fieldName) => {
+    setFormData(prev => {
+      const updatedCustomFields = { ...prev.customFields };
+      delete updatedCustomFields[fieldName];
+      return {
+        ...prev,
+        customFields: updatedCustomFields
+      };
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -135,6 +161,7 @@ const Banks = () => {
       branchName: account.branchName || '',
       accountType: account.accountType || 'savings',
       isActive: account.isActive ?? true,
+      customFields: account.customFields || {}
     });
     setEditingAccount(account);
     setShowForm(true);
@@ -201,7 +228,7 @@ const Banks = () => {
             }));
             
             // Validate headersk
-            const requiredHeaders = ['date', 'companyname', 'bankname', 'accountno', 'amount', 'credit/debit'];
+            const requiredHeaders = ['date', 'companyName', 'bankName', 'accountno', 'amount', 'credit/debit'];
             const hasValidHeaders = requiredHeaders.every(header => {
               if(!headers.includes(header.toLowerCase())){
                 return false;
@@ -342,7 +369,11 @@ const Banks = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">Bank Accounts</h1>
         <button
-          onClick={() => setShowForm(true)}
+          onClick={() => {
+            setFormData(initialFormState);
+            setEditingAccount(null);
+            setShowForm(true);
+          }}
           className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
         >
           Add Bank Account
@@ -518,6 +549,61 @@ const Banks = () => {
                 </div>
               </div>
 
+              {/* Custom Fields Section */}
+              <div className="mt-6 border-t border-gray-200 pt-4">
+                <h4 className="text-md font-medium text-gray-800 mb-4">Custom Fields</h4>
+                
+                {/* Add Custom Field Form */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Field Name"
+                      value={newCustomField.name}
+                      onChange={(e) => setNewCustomField({ ...newCustomField, name: e.target.value })}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Field Value"
+                      value={newCustomField.value}
+                      onChange={(e) => setNewCustomField({ ...newCustomField, value: e.target.value })}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <button
+                      type="button"
+                      onClick={handleAddCustomField}
+                      className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                      Add Custom Field
+                    </button>
+                  </div>
+                </div>
+
+                {/* Display Custom Fields */}
+                {Object.entries(formData.customFields).length > 0 && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(formData.customFields).map(([fieldName, fieldValue]) => (
+                      <div key={fieldName} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                        <span className="font-medium">{fieldName}:</span>
+                        <span>{fieldValue}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveCustomField(fieldName)}
+                          className="ml-auto text-red-600 hover:text-red-800"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="flex justify-end space-x-3 mt-6">
                 <button
                   type="button"
@@ -680,7 +766,7 @@ const Banks = () => {
                 type="text"
                 value={searchTerm}
                 onChange={handleSearchChange}
-                placeholder="Search by account name, number, bank name..."
+                placeholder="Search by account holder name, number, bank name..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-md pl-10"
               />
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -690,7 +776,7 @@ const Banks = () => {
               </div>
             </div>
             <p className="mt-1 text-sm text-gray-500">
-              Search by account name, number, or bank name
+              Search by account holder name, number, or bank name
             </p>
           </div>
           <div>
@@ -731,7 +817,7 @@ const Banks = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Account Name
+                  Account Holder Name
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Account Number
