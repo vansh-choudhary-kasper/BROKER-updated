@@ -23,17 +23,14 @@ const Banks = () => {
   const { token } = useAuth();
 
   const initialFormState = {
-    accountName: '',
+    accountHolderName: '',
+    accountHolderPan: '',
+    accountHolderAadhar: '',
     accountNumber: '',
-    bankName: '',
     ifscCode: '',
+    bankName: '',
     branchName: '',
-    address: '',
-    contactPerson: '',
-    email: '',
-    phone: '',
     accountType: 'savings',
-    balance: 0,
     isActive: true,
   };
 
@@ -129,17 +126,14 @@ const Banks = () => {
 
   const handleEdit = (account) => {
     setFormData({
-      accountName: account.accountName || '',
+      accountHolderName: account.accountHolderName || '',
+      accountHolderPan: account.accountHolderPan || '',
+      accountHolderAadhar: account.accountHolderAadhar || '',
       accountNumber: account.accountNumber || '',
-      bankName: account.bankName || '',
       ifscCode: account.ifscCode || '',
+      bankName: account.bankName || '',
       branchName: account.branchName || '',
-      address: account.address || '',
-      contactPerson: account.contactPerson || '',
-      email: account.email || '',
-      phone: account.phone || '',
       accountType: account.accountType || 'savings',
-      balance: account.balance || 0,
       isActive: account.isActive ?? true,
     });
     setEditingAccount(account);
@@ -385,17 +379,45 @@ const Banks = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="accountName" className="block text-sm font-medium text-gray-700">
-                    Account Name *
+                  <label htmlFor="accountHolderName" className="block text-sm font-medium text-gray-700">
+                    Account Holder Name *
                   </label>
                   <input
                     type="text"
-                    id="accountName"
-                    name="accountName"
-                    value={formData.accountName}
+                    id="accountHolderName"
+                    name="accountHolderName"
+                    value={formData.accountHolderName}
                     onChange={handleChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="accountHolderPan" className="block text-sm font-medium text-gray-700">
+                    Account Holder PAN
+                  </label>
+                  <input
+                    type="text"
+                    id="accountHolderPan"
+                    name="accountHolderPan"
+                    value={formData.accountHolderPan}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="accountHolderAadhar" className="block text-sm font-medium text-gray-700">
+                    Account Holder Aadhar
+                  </label>
+                  <input
+                    type="text"
+                    id="accountHolderAadhar"
+                    name="accountHolderAadhar"
+                    value={formData.accountHolderAadhar}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   />
                 </div>
 
@@ -462,70 +484,6 @@ const Banks = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                    Address *
-                  </label>
-                  <input
-                    type="text"
-                    id="address"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="contactPerson" className="block text-sm font-medium text-gray-700">
-                    Contact Person *
-                  </label>
-                  <input
-                    type="text"
-                    id="contactPerson"
-                    name="contactPerson"
-                    value={formData.contactPerson}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    required
-                    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                    title="Please enter a valid email address"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                    Phone Number *
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    pattern="[0-9]{10}"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    required
-                    title="Please enter a valid 10-digit phone number"
-                  />
-                </div>
-
-                <div>
                   <label htmlFor="accountType" className="block text-sm font-medium text-gray-700">
                     Account Type *
                   </label>
@@ -541,22 +499,6 @@ const Banks = () => {
                     <option value="current">Current</option>
                     <option value="fixed_deposit">Fixed Deposit</option>
                   </select>
-                </div>
-
-                <div>
-                  <label htmlFor="balance" className="block text-sm font-medium text-gray-700">
-                    Balance
-                  </label>
-                  <input
-                    type="number"
-                    id="balance"
-                    name="balance"
-                    value={formData.balance}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    min="0"
-                    step="0.01"
-                  />
                 </div>
 
                 <div className="md:col-span-2">

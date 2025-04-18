@@ -10,16 +10,28 @@ const { upload } = require('../middleware/fileUpload');
 
 // Validation middleware
 const bankValidation = [
-    body('accountName').notEmpty().withMessage('Account name is required'),
+    body('accountHolderName').notEmpty().withMessage('Account holder name is required'),
     body('accountNumber').notEmpty().withMessage('Account number is required'),
-    body('ifscCode').notEmpty().withMessage('IFSC code is required'),
+    body('ifscCode')
+        .notEmpty().withMessage('IFSC code is required')
+        .matches(/^[A-Z]{4}0[A-Z0-9]{6}$/).withMessage('Invalid IFSC code format'),
     body('bankName').notEmpty().withMessage('Bank name is required'),
     body('branchName').notEmpty().withMessage('Branch name is required'),
-    body('accountType').isIn(['savings', 'current', 'fixed_deposit']).withMessage('Invalid account type'),
-    body('address').notEmpty().withMessage('Address is required'),
-    body('contactPerson').notEmpty().withMessage('Contact person is required'),
-    body('email').isEmail().withMessage('Please enter a valid email'),
-    body('phone').matches(/^[0-9]{10}$/).withMessage('Please enter a valid 10-digit phone number')
+    body('accountType')
+        .isIn(['savings', 'current', 'fixed_deposit'])
+        .withMessage('Valid account type is required (savings, current, or fixed_deposit)'),
+    body('accountHolderPan')
+        .notEmpty().withMessage('Account holder PAN is required')
+        .matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/).withMessage('Invalid PAN format'),
+    body('isActive')
+        .optional()
+        .isBoolean().withMessage('isActive must be a boolean'),
+    body('balance')
+        .optional()
+        .isNumeric().withMessage('Balance must be a number'),
+    body('openingBalance')
+        .optional()
+        .isNumeric().withMessage('Opening balance must be a number')
 ];
 
 // Routes

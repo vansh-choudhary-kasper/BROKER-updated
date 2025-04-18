@@ -140,7 +140,7 @@ exports.updateBroker = async (req, res) => {
 
           if (!bankAccount) {
             bankAccount = await Bank.create(bank);
-          } 
+          }
 
           broker.bankDetails.push(bankAccount._id);
         } catch (error) {
