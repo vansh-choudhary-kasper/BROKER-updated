@@ -11,7 +11,6 @@ const Expenses = () => {
     error,
     fetchExpenses,
     fetchCompanies,
-    fetchBanks,
     addExpense,
     updateExpense,
     deleteExpense,
@@ -68,8 +67,7 @@ const Expenses = () => {
       limit: filters.limit
     });
     fetchCompanies();
-    fetchBanks();
-  }, [fetchExpenses, fetchCompanies, fetchBanks, filters]);
+  }, [fetchExpenses, fetchCompanies, filters]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -349,27 +347,6 @@ const Expenses = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="bank" className="block text-sm font-medium text-gray-700">
-                    Bank *
-                  </label>
-                  <select
-                    id="bank"
-                    name="bank"
-                    value={formData.bank}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    required
-                  >
-                    <option value="">Select a bank</option>
-                    {banks && banks.map(bank => (
-                      <option key={bank._id} value={bank._id}>
-                        {bank.bankName} - {bank.accountNumber}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
                   <label htmlFor="status" className="block text-sm font-medium text-gray-700">
                     Status *
                   </label>
@@ -452,9 +429,6 @@ const Expenses = () => {
                   Company
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Bank
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -481,9 +455,6 @@ const Expenses = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {expense.company?.name || 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {expense.bank?.bankName || 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(expense.status)}`}>

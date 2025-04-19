@@ -33,11 +33,6 @@ const expenseSchema = new mongoose.Schema({
     ref: 'Company',
     required: true
   },
-  bank: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Bank',
-    required: true
-  },
   receipts: [{
     name: String,
     type: String,

@@ -21,7 +21,58 @@ const Dashboard = () => {
     fetchExpenses,
   } = useData();
 
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+
+  // Helper function to get current and last month/year values
+  const getTotalAmountValues = () => {
+    if (!user?.totalAmount) {
+      return {
+        currentMonthValue: 0,
+        lastMonthValue: 0,
+        currentYearTotal: 0,
+        lastYearTotal: 0
+      };
+    }
+
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear().toString();
+    const lastYear = (currentDate.getFullYear() - 1).toString();
+    
+    const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+    const currentMonth = months[currentDate.getMonth()];
+    const lastMonth = months[(currentDate.getMonth() - 1 + 12) % 12];
+
+    // Get values from user.totalAmount Map
+    const currentYearMap = user.totalAmount[currentYear] || {};
+    const lastYearMap = user.totalAmount[lastYear] || {};
+
+    // Calculate current month value
+    const currentMonthValue = currentYearMap[currentMonth] || 0;
+
+    // Calculate last month value considering year transition
+    let lastMonthValue = 0;
+    if (currentDate.getMonth() === 0) { // January
+      lastMonthValue = lastYearMap['december'] || 0;
+    } else {
+      lastMonthValue = currentYearMap[lastMonth] || 0;
+    }
+
+    // Calculate yearly totals
+    const currentYearTotal = currentYearMap ? 
+      Object.values(currentYearMap).reduce((sum, val) => sum + (Number(val) || 0), 0) : 0;
+    
+    const lastYearTotal = lastYearMap ? 
+      Object.values(lastYearMap).reduce((sum, val) => sum + (Number(val) || 0), 0) : 0;
+
+    return {
+      currentMonthValue,
+      lastMonthValue,
+      currentYearTotal,
+      lastYearTotal
+    };
+  };
+
+  console.log(getTotalAmountValues());
 
   // Add view type state
   const [viewType, setViewType] = useState('monthly');
@@ -48,18 +99,6 @@ const Dashboard = () => {
     error: null
   });
 
-  // New state for profit and loss data
-  const [profitLossData, setProfitLossData] = useState({
-    monthly: [],
-    yearly: [],
-    currentMonth: 0,
-    lastMonth: 0,
-    currentYear: 0,
-    lastYear: 0,
-    loading: true,
-    error: null
-  });
-
   // Combined data fetching
   useEffect(() => {
     let isMounted = true;
@@ -67,15 +106,8 @@ const Dashboard = () => {
 
     const fetchAllData = async () => {
       try {
-
         // Fetch dashboard statistics
         const statsResponse = await axios.get(`${backendUrl}/api/dashboard/stats`, {
-          headers: { Authorization: `Bearer ${token}` },
-          signal: controller.signal
-        });
-
-        // Fetch profit and loss data
-        const profitLossResponse = await axios.get(`${backendUrl}/api/dashboard/profit-loss`, {
           headers: { Authorization: `Bearer ${token}` },
           signal: controller.signal
         });
@@ -97,19 +129,6 @@ const Dashboard = () => {
               error: null
             });
           }
-
-          if (profitLossResponse.data?.success) {
-            setProfitLossData({
-              monthly: profitLossResponse.data.monthly || [],
-              yearly: profitLossResponse.data.yearly || [],
-              currentMonth: profitLossResponse.data.currentMonth || 0,
-              lastMonth: profitLossResponse.data.lastMonth || 0,
-              currentYear: profitLossResponse.data.currentYear || 0,
-              lastYear: profitLossResponse.data.lastYear || 0,
-              loading: false,
-              error: null
-            });
-          }
         }
       } catch (err) {
         if (isMounted) {
@@ -118,11 +137,6 @@ const Dashboard = () => {
             ...prev,
             loading: false,
             error: err.message || 'Failed to fetch dashboard statistics'
-          }));
-          setProfitLossData(prev => ({
-            ...prev,
-            loading: false,
-            error: err.message || 'Failed to fetch profit and loss data'
           }));
         }
       }
@@ -149,24 +163,51 @@ const Dashboard = () => {
   }, { total: 0, active: 0, inactive: 0, blacklisted: 0 }) : { total: 0, active: 0, inactive: 0, blacklisted: 0 };
 
   // Check if any data is still loading
-  const isLoading = loading.companies || loading.banks || loading.expenses || profitLossData.loading || dashboardStats.loading;
+  const isLoading = loading.companies || loading.banks || loading.expenses || dashboardStats.loading;
 
   // Check if there are any errors
-  const hasError = error.companies || error.banks || error.expenses || profitLossData.error || dashboardStats.error;
+  const hasError = error.companies || error.banks || error.expenses || dashboardStats.error;
 
   // Calculate statistics with null checks
   const totalExpenses = Array.isArray(expenses)
     ? expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0)
     : 0;
 
+  const { currentMonthValue, lastMonthValue, currentYearTotal, lastYearTotal } = getTotalAmountValues();
+
   // Calculate profit growth percentages
-  const monthlyGrowth = profitLossData.lastMonth > 0
-    ? ((profitLossData.currentMonth - profitLossData.lastMonth) / profitLossData.lastMonth) * 100
+  const monthlyGrowth = lastMonthValue > 0
+    ? ((currentMonthValue - lastMonthValue) / lastMonthValue) * 100
     : 0;
 
-  const yearlyGrowth = profitLossData.lastYear > 0
-    ? ((profitLossData.currentYear - profitLossData.lastYear) / profitLossData.lastYear) * 100
+  const yearlyGrowth = lastYearTotal > 0
+    ? ((currentYearTotal - lastYearTotal) / lastYearTotal) * 100
     : 0;
+
+  // Prepare monthly and yearly data for charts from totalAmount
+  const getMonthlyData = () => {
+    if (!user?.totalAmount) return [];
+    
+    const currentYear = new Date().getFullYear().toString();
+    const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+    
+    return months.map(month => ({
+      month: month.charAt(0).toUpperCase() + month.slice(1, 3),
+      profit: user.totalAmount[currentYear]?.[month] || 0
+    }));
+  };
+
+  const getYearlyData = () => {
+    if (!user?.totalAmount) return [];
+    
+    return Object.entries(user.totalAmount).map(([year, data]) => ({
+      year,
+      profit: Object.values(data).reduce((sum, val) => sum + (Number(val) || 0), 0)
+    })).sort((a, b) => a.year - b.year);
+  };
+
+  const monthlyData = getMonthlyData();
+  const yearlyData = getYearlyData();
 
   const expenseCategories = Array.isArray(expenses)
     ? expenses.reduce((acc, expense) => {
@@ -282,7 +323,6 @@ const Dashboard = () => {
             {error.companies && <div>Companies: {error.companies}</div>}
             {error.banks && <div>Banks: {error.banks}</div>}
             {error.expenses && <div>Expenses: {error.expenses}</div>}
-            {profitLossData.error && <div>Profit & Loss: {profitLossData.error}</div>}
             {dashboardStats.error && <div>Dashboard Stats: {dashboardStats.error}</div>}
           </p>
           <button
@@ -323,7 +363,7 @@ const Dashboard = () => {
           </div>
           <div className="flex items-center justify-between mt-2">
             <p className="text-2xl font-bold text-gray-900">
-              ₹{viewType === 'monthly' ? profitLossData.currentMonth.toLocaleString() : profitLossData.currentYear.toLocaleString()}
+              ₹{viewType === 'monthly' ? currentMonthValue.toLocaleString() : currentYearTotal.toLocaleString()}
             </p>
             <div className={`flex items-center ${viewType === 'monthly' ? (monthlyGrowth >= 0 ? 'text-green-500' : 'text-red-500') : (yearlyGrowth >= 0 ? 'text-green-500' : 'text-red-500')}`}>
               <span className="text-sm font-medium">
@@ -333,7 +373,7 @@ const Dashboard = () => {
             </div>
           </div>
           <p className="text-xs text-gray-500 mt-1">
-            vs. {viewType === 'monthly' ? 'Last Month' : 'Last Year'}: ₹{viewType === 'monthly' ? profitLossData.lastMonth.toLocaleString() : profitLossData.lastYear.toLocaleString()}
+            vs. {viewType === 'monthly' ? 'Last Month' : 'Last Year'}: ₹{viewType === 'monthly' ? lastMonthValue.toLocaleString() : lastYearTotal.toLocaleString()}
           </p>
         </div>
 
@@ -395,7 +435,7 @@ const Dashboard = () => {
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
-                data={viewType === 'monthly' ? profitLossData.monthly : profitLossData.yearly}
+                data={viewType === 'monthly' ? monthlyData : yearlyData}
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />

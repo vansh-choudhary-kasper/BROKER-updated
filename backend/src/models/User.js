@@ -33,6 +33,69 @@ const todoSchema = new mongoose.Schema({
   timestamps: true
 });
 
+const statementHistorySchema = new mongoose.Schema({
+  fileName: {
+    type: String,
+    required: true
+  },
+  fileType: {
+    type: String,
+    enum: ['csv', 'xml'],
+    required: true
+  },
+  uploadDate: {
+    type: Date,
+    default: Date.now
+  },
+  originalTransactions: [{
+    date: String,
+    companyName: String,
+    bankName: String,
+    accountNo: String,
+    creditAmount: Number
+  }],
+  companySummaries: [{
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company',
+      required: true
+    },
+    totalAmount: {
+      type: Number,
+      required: true,
+      default: 0
+    },
+    commission: {
+      type: Number,
+      required: true,
+      default: 0
+    },
+    applicableSlab: {
+      minAmount: Number,
+      maxAmount: Number,
+      commission: Number
+    }
+  }],
+  totalAmount: {
+    type: Number,
+    required: true,
+    default: 0
+  },
+  totalCommission: {
+    type: Number,
+    required: true,
+    default: 0
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'processed', 'error'],
+    default: 'pending'
+  },
+  error: String
+}, {
+  timestamps: true
+});
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -77,13 +140,22 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  todos: [todoSchema]
+  todos: [todoSchema],
+  statementHistory: [statementHistorySchema],
+  totalAmount: {
+    type: Map,
+    of: {
+      type: Map,
+      of: Number // months as keys, numbers as values
+    },
+    default: {}
+  }
 }, {
   timestamps: true
 });
 
 // Validate slabs before saving
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
   // Skip validation if slabs are not modified
   if (!this.isModified('clientSlabs') && !this.isModified('providerSlabs')) {
     return next();
@@ -94,7 +166,7 @@ userSchema.pre('save', async function(next) {
     if (this.clientSlabs.length > 0) {
       // Sort slabs by minAmount
       this.clientSlabs.sort((a, b) => a.minAmount - b.minAmount);
-      
+
       // Check for gaps and overlaps
       for (let i = 0; i < this.clientSlabs.length - 1; i++) {
         if (this.clientSlabs[i].maxAmount + 1 !== this.clientSlabs[i + 1].minAmount) {
@@ -107,7 +179,7 @@ userSchema.pre('save', async function(next) {
     if (this.providerSlabs.length > 0) {
       // Sort slabs by minAmount
       this.providerSlabs.sort((a, b) => a.minAmount - b.minAmount);
-      
+
       // Check for gaps and overlaps
       for (let i = 0; i < this.providerSlabs.length - 1; i++) {
         if (this.providerSlabs[i].maxAmount + 1 !== this.providerSlabs[i + 1].minAmount) {
@@ -123,9 +195,9 @@ userSchema.pre('save', async function(next) {
 });
 
 // Hash password before saving
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  
+
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
@@ -136,7 +208,7 @@ userSchema.pre('save', async function(next) {
 });
 
 // Method to compare password
-userSchema.methods.comparePassword = async function(candidatePassword) {
+userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 

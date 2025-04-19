@@ -1,6 +1,6 @@
 const Expense = require('../models/Expense');
 const Company = require('../models/Company');
-const Bank = require('../models/Bank');
+const User = require('../models/User');
 const ApiResponse = require('../utils/apiResponse');
 const logger = require('../utils/logger');
 
@@ -14,7 +14,7 @@ class ExpenseController {
                 category,
                 description,
                 company,
-                bank
+                status      
             } = req.body;
 
             // Verify company exists
@@ -25,13 +25,6 @@ class ExpenseController {
                 );
             }
 
-            // Verify bank exists
-            const bankExists = await Bank.findById(bank);
-            if (!bankExists) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Bank not found')
-                );
-            }
 
             // Create expense with receipts
             const receipts = req.files ? req.files.map(file => ({
@@ -48,10 +41,36 @@ class ExpenseController {
                 category,
                 description,
                 company,
-                bank,
                 receipts,
-                createdBy: req.user.userId
+                status,
+                createdBy: req.user.userId  
             });
+
+            // Update user's total amount
+            const user = await User.findById(req.user.userId);
+            if (!user) {
+                return res.status(404).json(
+                    ApiResponse.notFound('User not found')
+                );  
+            }
+
+            // Update total amount for the month
+            const month = date.getMonth();
+            const year = date.getFullYear();
+            const expenseAmount = parseFloat(amount);
+
+            if (!user.totalAmount[year]) {
+                user.totalAmount[year] = {};
+            }
+
+            if (!user.totalAmount[year][month]) {   
+                user.totalAmount[year][month] = 0;
+            }
+
+            if(status === 'approved') {
+                user.totalAmount[year][month] -= expenseAmount;
+            }
+            await user.save();      
 
             return res.status(201).json(
                 ApiResponse.created('Expense created successfully', expense)
@@ -88,7 +107,6 @@ class ExpenseController {
 
             const expenses = await Expense.find(query)
                 .populate('company', 'name')
-                .populate('bank', 'bankName')
                 .limit(limit * 1)
                 .skip((page - 1) * limit)
                 .exec();
@@ -114,8 +132,7 @@ class ExpenseController {
     async getExpense(req, res) {
         try {
             const expense = await Expense.findById(req.params.id)
-                .populate('company', 'name')
-                .populate('bank', 'name');
+                .populate('company', 'name');
 
             if (!expense) {
                 return res.status(404).json(
@@ -143,7 +160,7 @@ class ExpenseController {
                 category,
                 description,
                 company,
-                bank
+                status
             } = req.body;
 
             const expense = await Expense.findById(req.params.id);
@@ -161,13 +178,29 @@ class ExpenseController {
                 );
             }
 
-            // Verify bank exists
-            const bankExists = await Bank.findById(bank);
-            if (!bankExists) {
+            // Update user's total amount
+            const user = await User.findById(req.user.userId);
+            if (!user) {
                 return res.status(404).json(
-                    ApiResponse.notFound('Bank not found')
-                );
-            }
+                    ApiResponse.notFound('User not found')
+                );  
+            }       
+
+            // Update total amount for the month
+            const numMonth = new Date(date).getMonth();
+            const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+            const month = months[numMonth];
+            const year = new Date(date).getFullYear();
+            const expenseAmount = parseFloat(amount);
+            console.log(numMonth, month, year, expenseAmount);
+
+            if(status === 'approved' && expense.status !== 'approved') {
+                user.totalAmount[year][month] -= expenseAmount;
+            } else if(status !== 'approved' && expense.status === 'approved') {
+                user.totalAmount[year][month] += expense.amount;
+            }   
+
+            await user.save();
 
             // Update expense details
             Object.assign(expense, {
@@ -177,7 +210,7 @@ class ExpenseController {
                 category,
                 description,
                 company,
-                bank
+                status
             });
 
             // Add new receipts if any

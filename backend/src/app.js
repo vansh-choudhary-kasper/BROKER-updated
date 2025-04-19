@@ -20,6 +20,7 @@ const brokerRoutes = require('./routes/broker');
 const dashboardRoutes = require('./routes/dashboard');
 const userRoutes = require('./routes/user');
 const todoRoutes = require('./routes/todo');
+const statementRoutes = require('./routes/statementRoutes');
 // Create Express app
 const app = express();
 
@@ -54,6 +55,7 @@ app.use('/api/brokers', brokerRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/todos', todoRoutes);
+app.use('/api/statements', statementRoutes);
 // Error handling
 app.use(errorHandler);
 

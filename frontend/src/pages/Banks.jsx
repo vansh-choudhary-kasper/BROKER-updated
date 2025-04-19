@@ -3,7 +3,6 @@ import { useData } from '../context/DataContext';
 import { debounce } from 'lodash';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import PapaParse from 'papaparse';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -50,15 +49,6 @@ const Banks = () => {
 
   // New state for bank statements
   const [selectedBank, setSelectedBank] = useState(null);
-
-  // New state for bank history upload
-  const [uploadHistory, setUploadHistory] = useState({
-    file: null,
-    loading: false,
-    error: null,
-    success: false,
-    preview: []
-  });
 
   // New state for transactions
   const [showTransactionsModal, setShowTransactionsModal] = useState(false);
@@ -197,119 +187,6 @@ const Banks = () => {
   };
 
   const bankAccountsList = Array.isArray(banks) ? banks : [];
-
-  // New function to handle bank history file upload
-  const handleBankHistoryUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    setUploadHistory(prev => ({
-      ...prev,
-      file,
-      loading: true,
-      error: null,
-      success: false
-    }));
-
-    try {
-      if (file.name.endsWith('.csv')) {
-        // Handle CSV file
-        PapaParse.parse(file, {
-          complete: async (results) => {
-            let headers = results.data[0];
-            headers = headers.map(header => header.toLowerCase().replace(/ /g, '_').trim());
-            const data = results.data.slice(1).map(row => ({
-              date: row[headers.indexOf('date')],
-              companyName: row[headers.indexOf('companyname')], 
-              bankName: row[headers.indexOf('bankname')],
-              accountNo: row[headers.indexOf('accountno')],
-              amount: row[headers.indexOf('amount')],
-              creditDebit: row[headers.indexOf('credit/debit')]
-            }));
-            
-            // Validate headersk
-            const requiredHeaders = ['date', 'companyName', 'bankName', 'accountno', 'amount', 'credit/debit'];
-            const hasValidHeaders = requiredHeaders.every(header => {
-              if(!headers.includes(header.toLowerCase())){
-                return false;
-              }
-              return true;
-            }
-            );
-
-            if (!hasValidHeaders) {
-              throw new Error('Invalid file format. Required columns: date, companyName, bankName, accountNo, amount, credit/debit');
-            }
-
-            // Process and upload the data
-            await uploadBankHistory(data, headers);
-          },
-          error: (error) => {
-            throw new Error('Error parsing CSV file: ' + error.message);
-          }
-        });
-      } else if (file.name.endsWith('.xml')) {
-        // Handle XML file
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          try {
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
-            const transactions = Array.from(xmlDoc.getElementsByTagName('transaction'));
-            
-            const data = transactions.map(transaction => ({
-              date: transaction.getElementsByTagName('date')[0]?.textContent,
-              companyName: transaction.getElementsByTagName('companyName')[0]?.textContent,
-              bankName: transaction.getElementsByTagName('bankName')[0]?.textContent,
-              accountNo: transaction.getElementsByTagName('accountNo')[0]?.textContent,
-              amount: transaction.getElementsByTagName('amount')[0]?.textContent,
-              creditDebit: transaction.getElementsByTagName('creditDebit')[0]?.textContent
-            }));
-
-            await uploadBankHistory(data);
-          } catch (error) {
-            throw new Error('Error parsing XML file: ' + error.message);
-          }
-        };
-        reader.readAsText(file);
-      } else {
-        throw new Error('Unsupported file format. Please upload a CSV or XML file.');
-      }
-    } catch (error) {
-      setUploadHistory(prev => ({
-        ...prev,
-        loading: false,
-        error: error.message,
-        success: false
-      }));
-    }
-  };
-
-  const uploadBankHistory = async (data, headers = null) => {
-    try {
-          const response = await axios.post(`${backendUrl}/api/banks/statements/upload`, 
-        { transactions: data },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
-      setUploadHistory(prev => ({
-        ...prev,
-        loading: false,
-        success: true,
-        preview: data.slice(0, 5) // Show first 5 records as preview
-      }));
-
-      // Refresh the banks list
-      fetchBanks(filters);
-    } catch (error) {
-      throw new Error(error.response?.data?.message || 'Failed to upload bank history');
-    }
-  };
 
   // New handlers for bank transactions
   const handleViewTransactions = async (bank) => {
@@ -627,134 +504,6 @@ const Banks = () => {
           </div>
         </div>
       )}
-
-      {/* Bank History Upload Section */}
-      <div className="bg-white shadow rounded-lg p-6 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Upload Bank History</h2>
-        
-        {/* File Structure Information */}
-        <div className="mb-6 bg-gray-50 p-4 rounded-md">
-          <h3 className="text-lg font-medium text-gray-900 mb-3">Expected File Structure</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* CSV Format */}
-            <div>
-              <h4 className="text-md font-medium text-gray-800 mb-2">CSV Format</h4>
-              <div className="bg-gray-100 p-3 rounded border border-gray-300 overflow-x-auto">
-                <pre className="text-sm text-gray-700 whitespace-pre">
-{`date,companyName,bankName,accountNo,amount,credit/debit
-2024-03-20,Company A,HDFC Bank,1234567890,5000.00,credit
-2024-03-21,Company B,ICICI Bank,0987654321,2500.00,debit
-2024-03-22,Company A,SBI Bank,1122334455,7500.00,credit`}
-                </pre>
-              </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Required columns: date, companyName, bankName, accountNo, amount, credit/debit
-              </p>
-            </div>
-            
-            {/* XML Format */}
-            <div>
-              <h4 className="text-md font-medium text-gray-800 mb-2">XML Format</h4>
-              <div className="bg-gray-100 p-3 rounded border border-gray-300 overflow-x-auto">
-                <pre className="text-sm text-gray-700 whitespace-pre">
-{`<?xml version="1.0" encoding="UTF-8"?>
-<transactions>
-  <transaction>
-    <date>2024-03-20</date>
-    <companyName>Company A</companyName>
-    <bankName>HDFC Bank</bankName>
-    <accountNo>1234567890</accountNo>
-    <amount>5000.00</amount>
-    <creditDebit>credit</creditDebit>
-  </transaction>
-  <transaction>
-    <date>2024-03-21</date>
-    <companyName>Company B</companyName>
-    <bankName>ICICI Bank</bankName>
-    <accountNo>0987654321</accountNo>
-    <amount>2500.00</amount>
-    <creditDebit>debit</creditDebit>
-  </transaction>
-</transactions>`}
-                </pre>
-              </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Required tags: date, companyName, bankName, accountNo, amount, creditDebit (credit/debit)
-              </p>
-            </div>
-          </div>
-          
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-sm text-blue-800">
-              <span className="font-medium">Note:</span> Transactions with incorrect bank names or account numbers will be rejected, as the system doesn't create new accounts or companies.
-            </p>
-          </div>
-        </div>
-        
-        <div className="space-y-4">
-          <div className="flex items-center space-x-4">
-            <input
-              type="file"
-              accept=".csv,.xml"
-              onChange={handleBankHistoryUpload}
-              className="block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-md file:border-0
-                file:text-sm file:font-semibold
-                file:bg-indigo-50 file:text-indigo-700
-                hover:file:bg-indigo-100"
-            />
-          </div>
-
-          {uploadHistory.loading && (
-            <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-            </div>
-          )}
-
-          {uploadHistory.error && (
-            <div className="bg-red-50 border-l-4 border-red-400 p-4">
-              <p className="text-red-700">{uploadHistory.error}</p>
-            </div>
-          )}
-
-          {uploadHistory.success && (
-            <div className="bg-green-50 border-l-4 border-green-400 p-4">
-              <p className="text-green-700">Bank history uploaded successfully!</p>
-              {uploadHistory.preview.length > 0 && (
-                <div className="mt-4">
-                  <h3 className="text-sm font-medium text-gray-900 mb-2">Preview (First 5 records):</h3>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          {Object.keys(uploadHistory.preview[0]).map(header => (
-                            <th key={header} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              {header}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {uploadHistory.preview.map((record, index) => (
-                          <tr key={index}>
-                            {Object.values(record).map((value, i) => (
-                              <td key={i} className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {value}
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
 
       {/* Filters */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">

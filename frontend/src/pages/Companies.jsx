@@ -39,7 +39,6 @@ const Companies = () => {
       cinNumber: '',
       tdsNumber: '',
       registrationDate: '',
-      registrationAuthority: '',
     },
     legalDetails: {
       registeredName: '',
@@ -81,10 +80,6 @@ const Companies = () => {
     },
     slabs: [],
     status: 'pending_verification',
-    riskAssessment: {
-      score: 0,
-      factors: []
-    }
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -577,20 +572,6 @@ const Companies = () => {
                         id="businessDetails.registrationDate"
                         name="businessDetails.registrationDate"
                         value={formData.businessDetails.registrationDate}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      />
-                    </div>
-
-                    <div>
-                      <label htmlFor="businessDetails.registrationAuthority" className="block text-sm font-medium text-gray-700">
-                        Registration Authority
-                      </label>
-                      <input
-                        type="text"
-                        id="businessDetails.registrationAuthority"
-                        name="businessDetails.registrationAuthority"
-                        value={formData.businessDetails.registrationAuthority}
                         onChange={handleChange}
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                       />
@@ -1311,51 +1292,6 @@ const Companies = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-500">Landmark</label>
                         <p className="mt-1 text-lg font-medium text-gray-900">{selectedCompany.address?.landmark}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Risk Assessment */}
-                <div className="bg-gray-50 p-6 rounded-lg">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <svg className="h-5 w-5 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Risk Assessment
-                  </h3>
-                  <div className="bg-white p-6 rounded-md shadow-sm">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-500">Risk Score</label>
-                        <div className="mt-1 flex items-center">
-                          <div className="w-full bg-gray-200 rounded-full h-2.5">
-                            <div 
-                              className={`h-2.5 rounded-full ${
-                                selectedCompany.riskAssessment?.score <= 30 ? 'bg-green-500' :
-                                selectedCompany.riskAssessment?.score <= 70 ? 'bg-yellow-500' :
-                                'bg-red-500'
-                              }`}
-                              style={{ width: `${selectedCompany.riskAssessment?.score}%` }}
-                            ></div>
-                          </div>
-                          <span className="ml-2 text-lg font-medium text-gray-900">
-                            {selectedCompany.riskAssessment?.score}%
-                          </span>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-500">Risk Factors</label>
-                        <div className="mt-1 flex flex-wrap gap-2">
-                          {selectedCompany.riskAssessment?.factors?.map((factor, index) => (
-                            <span 
-                              key={index} 
-                              className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800"
-                            >
-                              {factor}
-                            </span>
-                          ))}
-                        </div>
                       </div>
                     </div>
                   </div>

@@ -80,7 +80,7 @@ const Slabs = ({ slabs, onSlabsChange }) => {
       });
 
       if (response.data) {
-        if(onSlabsChange) {
+        if(onSlabsChange && slabs?.length > 0) {
           setClientSlabs(slabs || []);
           setProviderSlabs(slabs || []);
         } else {

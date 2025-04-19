@@ -23,7 +23,6 @@ const expenseValidation = [
     ]).withMessage('Invalid category'),
     body('description').optional(),
     body('company').isMongoId().withMessage('Invalid company ID'),
-    body('bank').isMongoId().withMessage('Invalid bank ID'),
     body('status').optional().isIn(['pending', 'approved', 'rejected']).withMessage('Invalid status')
 ];
 
