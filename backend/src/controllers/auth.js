@@ -116,7 +116,7 @@ exports.refreshToken = async (req, res) => {
 
         res.json({ token: newToken });
     } catch (error) {
-        res.status(401).json({ message: 'Invalid token' });
+        res.status(401).json({ message: `Invalid token, ${error.message}` });
     }
 };
 
@@ -166,7 +166,7 @@ exports.resetPassword = async (req, res) => {
 
         res.json({ message: 'Password reset successful' });
     } catch (error) {
-        res.status(401).json({ message: 'Invalid or expired token' });
+        res.status(401).json({ message: `Invalid or expired token, ${error.message}` });
     }
 };
 

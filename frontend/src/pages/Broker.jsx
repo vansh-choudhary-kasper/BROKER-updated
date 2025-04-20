@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 import { useData } from '../context/DataContext';
 import { debounce } from 'lodash';
@@ -67,6 +67,8 @@ const Broker = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedBroker, setSelectedBroker] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [formError, setFormError] = useState(null);
+  const formErrorRef = useRef(null);
 
   // Debounced search function
   const debouncedSearch = useCallback(
@@ -93,6 +95,12 @@ const Broker = () => {
       setTotalPages(Math.ceil(totalBrokers / filters.limit));
     }
   }, [totalBrokers, filters.limit]);
+
+  useEffect(() => {
+    if (formError && formErrorRef.current) {
+      formErrorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [formError]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -149,6 +157,7 @@ const Broker = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError(null);
     try {
       if (editingBroker) {
         const result = await updateBroker(editingBroker._id, formData);
@@ -158,7 +167,7 @@ const Broker = () => {
           setEditingBroker(null);
           setShowForm(false);
         } else {
-          toast.error(result.message || 'Failed to update broker');
+          setFormError(result.message || 'Failed to update broker');
         }
       } else {
         const result = await addBroker(formData);
@@ -168,11 +177,11 @@ const Broker = () => {
           setEditingBroker(null);
           setShowForm(false);
         } else {
-          toast.error(result.message || 'Failed to add broker');
+          setFormError(result.message || 'Failed to add broker');
         }
       }
     } catch (error) {
-      toast.error(error.message || 'Failed to save broker');
+      setFormError(error.message || 'Failed to save broker');
     }
   };
 
@@ -303,6 +312,7 @@ const Broker = () => {
                   setShowForm(false);
                   setFormData(initialFormState);
                   setEditingBroker(null);
+                  setFormError(null);
                 }}
                 className="text-gray-400 hover:text-gray-500"
               >
@@ -311,6 +321,11 @@ const Broker = () => {
                 </svg>
               </button>
             </div>
+            {formError && (
+              <div ref={formErrorRef} className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                {formError}
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>

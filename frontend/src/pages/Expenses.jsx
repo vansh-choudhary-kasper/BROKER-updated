@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useData } from '../context/DataContext';
 import { debounce } from 'lodash';
 import { useAuth } from '../context/AuthContext';
@@ -43,6 +43,8 @@ const Expenses = () => {
   });
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [formError, setFormError] = useState(null);
+  const formErrorRef = useRef(null);
 
   // Debounced search function
   const debouncedSearch = useCallback(
@@ -72,6 +74,12 @@ const Expenses = () => {
     fetchCompanies(); 
   }, [fetchExpenses, fetchCompanies, filters]);
 
+  useEffect(() => {
+    if (formError && formErrorRef.current) {
+      formErrorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [formError]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -82,20 +90,34 @@ const Expenses = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError(null);
     try {
       if (editingExpense) {
-        await updateExpense(editingExpense._id, formData);
+        const result = await updateExpense(editingExpense._id, formData);
+        if (result.success) {
+          setFormData(initialFormState);
+          setEditingExpense(null);
+          setShowForm(false);
+          fetchExpenses(filters);
+          checkAuth();
+        } else {
+          setFormError(result.message || 'Failed to update expense');
+        }
       } else {
-        await addExpense(formData);
+        const result = await addExpense(formData);
+        if (result.success) {
+          setFormData(initialFormState);
+          setEditingExpense(null);
+          setShowForm(false);
+          fetchExpenses(filters);
+          checkAuth();
+        } else {
+          setFormError(result.message || 'Failed to add expense');
+        }
       }
-      setFormData(initialFormState);
-      setEditingExpense(null);
-      setShowForm(false);
-      fetchExpenses(filters);
-      checkAuth();
     } catch (err) {
       console.error('Failed to save expense:', err);
-      alert(`Failed to save expense: ${err}`);
+      setFormError(err.message || 'Failed to save expense');
     }
   };
 
@@ -249,6 +271,7 @@ const Expenses = () => {
                   setShowForm(false);
                   setFormData(initialFormState);
                   setEditingExpense(null);
+                  setFormError(null);
                 }}
                 className="text-gray-400 hover:text-gray-500"
               >
@@ -257,6 +280,11 @@ const Expenses = () => {
                 </svg>
               </button>
             </div>
+            {formError && (
+              <div ref={formErrorRef} className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                {formError}
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>

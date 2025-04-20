@@ -72,8 +72,6 @@ const Dashboard = () => {
     };
   };
 
-  console.log(getTotalAmountValues());
-
   // Add view type state
   const [viewType, setViewType] = useState('monthly');
   const [accountFilter, setAccountFilter] = useState('all');

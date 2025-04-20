@@ -25,7 +25,7 @@ class TodoController {
         } catch (error) {
             logger.error('Get Todos Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError('Failed to get todos')
+                ApiResponse.serverError('Failed to get todos ' + error.message)
             );
         }
     }
@@ -44,14 +44,14 @@ class TodoController {
             // Validate priority
             if (!['high', 'medium', 'low'].includes(priority)) {
                 return res.status(400).json(
-                    ApiResponse.error('Invalid priority value')
+                    ApiResponse.error('Invalid priority value, should be high, medium or low')
                 );
             }
 
             // Validate status
             if (status && !['pending', 'in_progress', 'completed'].includes(status)) {
                 return res.status(400).json(
-                    ApiResponse.error('Invalid status value')
+                    ApiResponse.error('Invalid status value, should be pending, in_progress or completed')
                 );
             }
 
@@ -75,7 +75,7 @@ class TodoController {
         } catch (error) {
             logger.error('Create Todo Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError('Failed to create todo')
+                ApiResponse.serverError('Failed to create todo ' + error.message)
             );
         }
     }
@@ -102,14 +102,14 @@ class TodoController {
             // Validate priority if provided
             if (priority && !['high', 'medium', 'low'].includes(priority)) {
                 return res.status(400).json(
-                    ApiResponse.error('Invalid priority value')
+                    ApiResponse.error('Invalid priority value, should be high, medium or low')
                 );
             }
 
             // Validate status if provided
             if (status && !['pending', 'in_progress', 'completed'].includes(status)) {
                 return res.status(400).json(
-                    ApiResponse.error('Invalid status value')
+                    ApiResponse.error('Invalid status value, should be pending, in_progress or completed')
                 );
             }
 
@@ -131,7 +131,7 @@ class TodoController {
         } catch (error) {
             logger.error('Update Todo Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError('Failed to update todo')
+                ApiResponse.serverError('Failed to update todo ' + error.message)
             );
         }
     }
@@ -163,7 +163,7 @@ class TodoController {
         } catch (error) {
             logger.error('Delete Todo Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError('Failed to delete todo')
+                ApiResponse.serverError('Failed to delete todo ' + error.message)
             );
         }
     }

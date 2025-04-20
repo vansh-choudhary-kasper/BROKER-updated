@@ -9,16 +9,16 @@ const { protect } = require('../middleware/auth');
 // Validation middleware
 const loginValidation = [
     body('email').isEmail().withMessage('Please enter a valid email'),
-    body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
 ];
 
 const registerValidation = [
     body('name').notEmpty().withMessage('Name is required'),
     body('email').isEmail().withMessage('Please enter a valid email'),
     body('password')
-        .isLength({ min: 8 })
-        .withMessage('Password must be at least 8 characters long')
-        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
+        .isLength({ min: 6 })
+        .withMessage('Password must be at least 6 characters long')
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/)
         .withMessage('Password must contain at least one uppercase letter, one lowercase letter, one number and one special character'),
     // body('role').isIn(['admin']).withMessage('Invalid role')
 ];

@@ -6,10 +6,7 @@ const Company = require('../models/Company');
 exports.createBroker = async (req, res) => {
   try {
     const { bankDetails, ...brokerData } = req.body;
-    console.log(req.body);
-    
     const bankIds = [];
-    console.log(bankDetails);
     // forEach doesn't wait for async operations, use for...of instead
     for (const bank of bankDetails) {
       try {
@@ -23,7 +20,6 @@ exports.createBroker = async (req, res) => {
         throw error; // Re-throw to be caught by outer try-catch
       }
     }
-    console.log(brokerData.slabs);
     // Create broker with parsed data
     const broker = await Broker.create({
       ...brokerData,

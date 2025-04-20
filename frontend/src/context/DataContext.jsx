@@ -24,7 +24,6 @@ export const DataProvider = ({ children }) => {
     banks: false,
     expenses: false,
     brokers: false,
-    profitLoss: false
   });
   const [error, setError] = useState({
     companies: null,
@@ -32,7 +31,6 @@ export const DataProvider = ({ children }) => {
     banks: null,
     expenses: null,
     brokers: null,
-    profitLoss: null
   });
   const [lastFetchTime, setLastFetchTime] = useState({
     companies: 0,
@@ -40,17 +38,6 @@ export const DataProvider = ({ children }) => {
     banks: 0,
     expenses: 0,
     brokers: 0,
-    profitLoss: 0
-  });
-
-  // Add profit-loss state
-  const [profitLossData, setProfitLossData] = useState({
-    monthly: [],
-    yearly: [],
-    currentMonth: 0,
-    lastMonth: 0,
-    currentYear: 0,
-    lastYear: 0
   });
 
   // Debounce time in milliseconds (5 seconds)
@@ -293,41 +280,6 @@ export const DataProvider = ({ children }) => {
       setLoading(prev => ({ ...prev, brokers: false }));
     }
   }, [token, lastFetchTime.brokers]);
-
-  // Fetch profit and loss data with debounce
-  const fetchProfitLoss = useCallback(async () => {
-    if (!token) return;
-
-    // Check if we've fetched recently
-    const now = Date.now();
-    if (now - lastFetchTime.profitLoss < DEBOUNCE_TIME) {
-      return;
-    }
-
-    setLoading(prev => ({ ...prev, profitLoss: true }));
-    setError(prev => ({ ...prev, profitLoss: null }));
-
-    try {
-      const response = await axios.get(`${backendUrl}/api/dashboard/profit-loss`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (response.data && response.data.success) {
-        setProfitLossData(response.data.data);
-      } else {
-        throw new Error('Failed to fetch profit and loss data');
-      }
-
-      setLastFetchTime(prev => ({ ...prev, profitLoss: now }));
-    } catch (err) {
-      setError(prev => ({
-        ...prev,
-        profitLoss: err.response?.data?.message || 'Failed to fetch profit and loss data'
-      }));
-    } finally {
-      setLoading(prev => ({ ...prev, profitLoss: false }));
-    }
-  }, [token, lastFetchTime.profitLoss]);
 
   // Add company
   const addCompany = async (companyData) => {
@@ -705,7 +657,6 @@ export const DataProvider = ({ children }) => {
       fetchBanks();
       fetchExpenses();
       fetchBrokers();
-      fetchProfitLoss();
     }
   }, [token]);
 
@@ -728,10 +679,6 @@ export const DataProvider = ({ children }) => {
   useEffect(() => {
     fetchBrokers();
   }, [fetchBrokers]);
-
-  useEffect(() => {
-    fetchProfitLoss();
-  }, [fetchProfitLoss]);
 
   // Add broker
   const addBroker = async (brokerData) => {
@@ -985,7 +932,6 @@ export const DataProvider = ({ children }) => {
         totalBrokers,
         loading,
         error,
-        profitLossData,
 
         // Actions
         fetchCompanies,
@@ -993,7 +939,6 @@ export const DataProvider = ({ children }) => {
         fetchBanks,
         fetchExpenses,
         fetchBrokers,
-        fetchProfitLoss,
         addCompany,
         addTask,
         addBank,

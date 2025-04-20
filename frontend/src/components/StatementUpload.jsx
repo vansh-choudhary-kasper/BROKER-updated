@@ -28,7 +28,6 @@ const StatementUpload = ({ onUpload }) => {
       companies.forEach(company => {
         slabsMap[company.name] = company.slabs || [];
       });
-      console.log(slabsMap);
       setCompanySlabs(slabsMap);
     } catch (error) {
       console.error('Error fetching company slabs:', error);

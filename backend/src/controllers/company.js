@@ -11,23 +11,17 @@ class CompanyController {
     async createCompany(req, res) {
         try {
             const companyData = buildNestedObject(req.body); // Flattened form parsing
-            console.log(req.files);
     
             // Handle file uploads
             if (req.files && Object.keys(req.files).length > 0) {
-                console.log('Files found:', req.files);
                 for (const fieldName in req.files) {
-                    console.log('Processing field:', fieldName);
                     const files = req.files[fieldName];
     
                     for (const file of files) {
-                        console.log('Processing file:', file.originalname);
                         const uploadResult = await uploadToStorage(file);
-                        console.log('Upload result:', uploadResult);
     
                         const isDocument = file.fieldname.startsWith('documents.');
                         const docKey = file.fieldname.split('.')[1];
-                        console.log('Is document:', isDocument, 'Document key:', docKey);
     
                         const docData = {
                             fieldPath: file.fieldname,
@@ -43,32 +37,26 @@ class CompanyController {
                         // Ensure documents object exists
                         if (!companyData.documents) companyData.documents = {};
     
-                        console.log('Document data:', docData);
                         if (isDocument) {
                             if (docKey === 'otherDocuments') {
-                                console.log('Adding to otherDocuments array');
                                 if (!companyData.documents.otherDocuments) {
                                     companyData.documents.otherDocuments = [];
                                 }
                                 companyData.documents.otherDocuments.push(docData);
                             } else {
-                                console.log('Setting document for key:', docKey);
                                 companyData.documents[docKey] = docData;
                             }
                         } else {
                             // Set flat or nested non-document file field
                             const flatKey = file.fieldname;
-                            console.log('Setting non-document field:', flatKey);
                             companyData[flatKey] = uploadResult.url;
                         }
                     }
                 }
-                console.log('Final company data:', companyData);
             }
     
             // Validate company data
             const validationResult = validateCompanyData(companyData);
-            console.log(validationResult);
             if (!validationResult.isValid) {
                 return res.status(400).json({ message: validationResult.errors });
             }
@@ -77,7 +65,6 @@ class CompanyController {
             const bankDetails = [];
             for (const bank of companyData.bankDetails) {
                 try {
-                    console.log(bank);
                     const newBank = new Bank(bank);
                     await newBank.save();
                     bankDetails.push({_id: newBank._id});
@@ -95,7 +82,7 @@ class CompanyController {
             return res.status(201).json(ApiResponse.success('Company created successfully', newCompany));
         } catch (error) {
             logger.error('Create Company Error:', error);
-            return res.status(500).json(ApiResponse.serverError());
+            return res.status(500).json(ApiResponse.serverError(error.message));
         }
     }    
 
@@ -187,7 +174,7 @@ class CompanyController {
             );
         } catch (error) {
             logger.error('Get Companies Error:', error);
-            return res.status(500).json(ApiResponse.serverError());
+            return res.status(500).json(ApiResponse.serverError(error.message));
         }
     }
     
@@ -207,7 +194,7 @@ class CompanyController {
         } catch (error) {
             logger.error('Get Company Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError()
+                ApiResponse.serverError(error.message)
             );
         }
     }
@@ -287,7 +274,6 @@ class CompanyController {
             }
             // Update other company data
             Object.assign(company, companyData);
-            console.log(companyData.slabs);
             
             const updatedCompany = await company.save();
             await updatedCompany.populate('bankDetails');
@@ -297,7 +283,7 @@ class CompanyController {
             );
         } catch (error) {
             logger.error('Update Company Error:', error);
-            return res.status(500).json(ApiResponse.serverError());
+            return res.status(500).json(ApiResponse.serverError(error.message));
         }
     }
        
@@ -322,7 +308,7 @@ class CompanyController {
         } catch (error) {
             logger.error('Delete Company Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError()
+                ApiResponse.serverError(error.message)
             );
         }
     }
@@ -347,7 +333,7 @@ class CompanyController {
         } catch (error) {
             logger.error('Update Company Status Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError()
+                ApiResponse.serverError(error.message)
             );
         }
     }
@@ -378,7 +364,7 @@ class CompanyController {
         } catch (error) {
             logger.error('Update Risk Assessment Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError()
+                ApiResponse.serverError(error.message)
             );
         }
     }
@@ -425,7 +411,7 @@ class CompanyController {
         } catch (error) {
             logger.error('Add Documents Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError()
+                ApiResponse.serverError(error.message)
             );
         }
     }
@@ -475,7 +461,7 @@ class CompanyController {
         } catch (error) {
             logger.error('Delete Document Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError()
+                ApiResponse.serverError(error.message)
             );
         }
     }

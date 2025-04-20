@@ -72,8 +72,6 @@ const uploadStatement = async (req, res) => {
       throw new Error('User not found');
     }
 
-    console.log("transactions", transactions);
-    console.log("user.statementHistory", user.statementHistory);
     // Check for duplicate transactions
     const isDuplicate = transactions.some(newTrans => {
       return user.statementHistory.some(statement =>

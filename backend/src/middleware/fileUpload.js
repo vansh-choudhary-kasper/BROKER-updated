@@ -55,7 +55,7 @@ const handleUploadError = (error, req, res, next) => {
         logger.error('Multer Error:', error);
         return res.status(400).json({
             success: false,
-            message: 'File upload error'
+            message: `File upload error, ${error.message}`
         });
     }
     
@@ -63,7 +63,7 @@ const handleUploadError = (error, req, res, next) => {
         logger.error('File Upload Error:', error);
         return res.status(400).json({
             success: false,
-            message: error.message
+            message: `File upload error, ${error.message}`
         });
     }
     

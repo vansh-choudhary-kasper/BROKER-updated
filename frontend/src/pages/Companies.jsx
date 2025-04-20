@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useData } from '../context/DataContext';
 import BankDetailsForm from '../components/BankDetailsForm';
 import { debounce } from 'lodash';
@@ -95,6 +95,8 @@ const Companies = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [formError, setFormError] = useState(null);
+  const formErrorRef = useRef(null);
 
   // Debounced search function
   const debouncedSearch = useCallback(
@@ -213,6 +215,7 @@ const Companies = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError(null); // Clear any previous form errors
     try {
       if (editingCompany) {
         await updateCompany(editingCompany._id, formData);
@@ -228,6 +231,8 @@ const Companies = () => {
       setShowForm(false);
     } catch (error) {
       console.error('Error submitting form:', error);
+      // Set form-specific error
+      setFormError(error.message || 'Failed to save company. Please try again.');
     }
   };
 
@@ -271,6 +276,13 @@ const Companies = () => {
 
   // Check if companies is an array before rendering
   const companiesList = Array.isArray(companies) ? companies : [];
+
+  // Add useEffect to scroll to error when it appears
+  useEffect(() => {
+    if (formError && formErrorRef.current) {
+      formErrorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [formError]);
 
   return (
     <>
@@ -342,6 +354,14 @@ const Companies = () => {
           </div>
         </div>
 
+        {/* Add this after the filters section and before the company form modal */}
+        {error.companies && (!formError) && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <strong className="font-bold">Error: </strong>
+            <span className="block sm:inline">{error.companies}</span>
+          </div>
+        )}
+
         {/* Company Form Modal */}
         {showForm && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
@@ -364,6 +384,18 @@ const Companies = () => {
                 </button>
               </div>
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Form Error Display */}
+                {formError && (
+                  <div 
+                    ref={formErrorRef}
+                    className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" 
+                    role="alert"
+                  >
+                    <strong className="font-bold">Error: </strong>
+                    <span className="block sm:inline">{formError}</span>
+                  </div>
+                )}
+
                 {/* Basic Information */}
                 <div>
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h3>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useData } from '../context/DataContext';
 import { debounce } from 'lodash';
 import axios from 'axios';
@@ -62,6 +62,9 @@ const Banks = () => {
     limit: 10
   });
 
+  const [formError, setFormError] = useState(null);
+  const formErrorRef = useRef(null);
+
   // Debounced search function
   const debouncedSearch = useCallback(
     debounce((value) => {
@@ -89,6 +92,13 @@ const Banks = () => {
   useEffect(() => {
     fetchBanks(filters);
   }, [fetchBanks, filters]);
+
+  // Add useEffect to scroll to error when it appears
+  useEffect(() => {
+    if (formError && formErrorRef.current) {
+      formErrorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [formError]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -124,6 +134,7 @@ const Banks = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError(null); // Clear any previous form errors
     try {
       if (editingAccount) {
         await updateBank(editingAccount._id, formData);
@@ -136,7 +147,7 @@ const Banks = () => {
       fetchBanks(filters);
     } catch (err) {
       console.error('Failed to save bank account:', err);
-      alert(`Failed to save bank account: ${err.message || err}`);
+      setFormError(`Failed to save bank account: ${err.message || err}`);
     }
   };
 
@@ -285,6 +296,18 @@ const Banks = () => {
               </button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Form Error Display */}
+              {formError && (
+                <div 
+                  ref={formErrorRef}
+                  className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" 
+                  role="alert"
+                >
+                  <strong className="font-bold">Error: </strong>
+                  <span className="block sm:inline">{formError}</span>
+                </div>
+              )}
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label htmlFor="accountHolderName" className="block text-sm font-medium text-gray-700">

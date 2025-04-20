@@ -23,7 +23,7 @@ router.post('/',
     { name: 'documents.articlesOfAssociation', maxCount: 1 },
     { name: 'documents.boardResolution', maxCount: 1 },
     { name: 'documents.taxRegistration', maxCount: 1 },
-    { name: 'documents.otherDocuments', maxCount: 5 }
+    { name: 'documents.otherDocuments', maxCount: 10 }
   ]),
   handleUploadError,
   companyController.createCompany
@@ -51,7 +51,7 @@ router.put('/:id',
     { name: 'documents.articlesOfAssociation', maxCount: 1 },
     { name: 'documents.boardResolution', maxCount: 1 },
     { name: 'documents.taxRegistration', maxCount: 1 },
-    { name: 'documents.otherDocuments', maxCount: 5 }
+    { name: 'documents.otherDocuments', maxCount: 10 }
   ]),
   handleUploadError,
   companyController.updateCompany
@@ -62,7 +62,7 @@ router.delete('/:id', companyController.deleteCompany);
 
 // Add documents to a company
 router.post('/:id/documents',
-  upload.array('documents', 5),
+  upload.array('documents', 10),
   handleUploadError,
   companyController.addDocuments
 );

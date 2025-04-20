@@ -53,31 +53,12 @@ class ExpenseController {
                     ApiResponse.notFound('User not found')
                 );  
             }
-
-            // Update total amount for the month
-            // const month = date.getMonth();
-            // const year = date.getFullYear();
-            // const expenseAmount = parseFloat(amount);
-
-            // if (!user.totalAmount[year]) {
-            //     user.totalAmount[year] = {};
-            // }
-
-            // if (!user.totalAmount[year][month]) {   
-            //     user.totalAmount[year][month] = 0;
-            // }
-
-            // if(status === 'approved') {
-            //     user.totalAmount[year][month] -= expenseAmount;
-            // }
-            // await user.save(); 
             
             const numMonth = new Date(date).getMonth();
             const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
             const month = months[numMonth];
             const year = new Date(date).getFullYear().toString();
             const expenseAmount = parseFloat(amount);
-            console.log(numMonth, month, year, expenseAmount);
 
             if (!user.totalAmount.has(year)) {
                 user.totalAmount.set(year, new Map());
@@ -101,7 +82,7 @@ class ExpenseController {
         } catch (error) {
             logger.error('Create Expense Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError()
+                ApiResponse.serverError(error.message)
             );
         }
     }
@@ -147,7 +128,7 @@ class ExpenseController {
         } catch (error) {
             logger.error('Get Expenses Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError()
+                ApiResponse.serverError(error.message)
             );
         }
     }
@@ -169,7 +150,7 @@ class ExpenseController {
         } catch (error) {
             logger.error('Get Expense Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError()
+                ApiResponse.serverError(error.message)
             );
         }
     }
@@ -215,7 +196,6 @@ class ExpenseController {
             const month = months[numMonth];
             const year = new Date(date).getFullYear().toString();
             const expenseAmount = parseFloat(amount);
-            console.log(numMonth, month, year, expenseAmount);
 
             if (!user.totalAmount.has(year)) {
                 user.totalAmount.set(year, new Map());
@@ -274,7 +254,7 @@ class ExpenseController {
         } catch (error) {
             logger.error('Update Expense Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError()
+                ApiResponse.serverError(error.message)
             );
         }
     }
@@ -294,7 +274,7 @@ class ExpenseController {
         } catch (error) {
             logger.error('Delete Expense Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError()
+                ApiResponse.serverError(error.message)
             );
         }
     }
@@ -330,7 +310,7 @@ class ExpenseController {
         } catch (error) {
             logger.error('Add Receipts Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError()
+                ApiResponse.serverError(error.message)
             );
         }
     }
@@ -363,7 +343,7 @@ class ExpenseController {
         } catch (error) {
             logger.error('Delete Receipt Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError()
+                ApiResponse.serverError(error.message)
             );
         }
     }
@@ -388,7 +368,7 @@ class ExpenseController {
         } catch (error) {
             logger.error('Update Expense Status Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError()
+                ApiResponse.serverError(error.message)
             );
         }
     }

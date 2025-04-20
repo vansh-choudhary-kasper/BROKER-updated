@@ -53,21 +53,4 @@ router.put('/:id',
 
 router.delete('/:id', taskController.deleteTask);
 
-// Task comment routes
-router.post('/:id/comments',
-    body('comment').notEmpty().withMessage('Comment is required'),
-    validateRequest,
-    taskController.addComment
-);
-
-router.delete('/:id/comments/:commentId', taskController.deleteComment);
-
-// Task attachment routes
-router.post('/:id/attachments',
-    upload.array('attachments', 5),
-    taskController.addAttachments
-);
-
-router.delete('/:id/attachments/:attachmentId', taskController.deleteAttachment);
-
 module.exports = router; 

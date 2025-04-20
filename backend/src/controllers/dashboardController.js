@@ -108,55 +108,6 @@ const getDashboardStats = async (req, res) => {
     }
 };
 
-const getProfitLoss = async (req, res) => {
-    try {
-        // Get date range from query params or use default (last 30 days)
-        const endDate = new Date();
-        const startDate = new Date();
-        startDate.setDate(startDate.getDate() - 30);
-
-        // Get all income and expenses within date range
-        const expenses = await Expense.aggregate([
-            {
-                $match: {
-                    date: { $gte: startDate, $lte: endDate }
-                }
-            },
-            {
-                $group: {
-                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
-                    totalExpense: { $sum: "$amount" }
-                }
-            },
-            { $sort: { _id: 1 } }
-        ]);
-
-        // Format response data
-        const profitLossData = expenses.map(item => ({
-            date: item._id,
-            expense: item.totalExpense,
-        }));
-
-        res.json({
-            success: true,
-            data: profitLossData,
-            dateRange: {
-                start: startDate,
-                end: endDate
-            }
-        });
-
-    } catch (error) {
-        console.error('Error fetching profit/loss data:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch profit/loss data',
-            error: error.message
-        });
-    }
-}
-
 module.exports = {
     getDashboardStats,
-    getProfitLoss
 };

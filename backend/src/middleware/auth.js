@@ -10,7 +10,7 @@ const protect = async (req, res, next) => {
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({ 
                 success: false, 
-                message: 'Authentication required' 
+                message: 'Authentication required, please login' 
             });
         }
         
@@ -18,7 +18,7 @@ const protect = async (req, res, next) => {
         if (!token) {
             return res.status(401).json({ 
                 success: false, 
-                message: 'Authentication required' 
+                message: 'Authentication required, please login' 
             });
         }
 
@@ -31,7 +31,7 @@ const protect = async (req, res, next) => {
         logger.error('Auth Middleware Error:', error);
         res.status(401).json({ 
             success: false, 
-            message: 'Invalid token' 
+            message: `Invalid token, ${error.message}` 
         });
     }
 };
@@ -43,7 +43,7 @@ const admin = async (req, res, next) => {
         if (req.user.role !== 'admin') {
             return res.status(403).json({ 
                 success: false, 
-                message: 'Admin access required' 
+                message: 'Admin access required, please login as admin' 
             });
         }
         next();
@@ -51,7 +51,7 @@ const admin = async (req, res, next) => {
         logger.error('Admin Middleware Error:', error);
         res.status(403).json({ 
             success: false, 
-            message: 'Admin access required' 
+            message: `Admin access required, ${error.message}` 
         });
     }
 };

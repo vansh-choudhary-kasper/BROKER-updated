@@ -16,7 +16,7 @@ class UserController {
         } catch (error) {
             logger.error('Get User Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError('Failed to get user')
+                ApiResponse.serverError('Failed to get user ' + error.message)
             );
         }
     }
@@ -87,7 +87,7 @@ class UserController {
         } catch (error) {
             logger.error('Update User Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError('Failed to update user')
+                ApiResponse.serverError('Failed to update user ' + error.message)
             );
         }
     }
