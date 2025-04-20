@@ -7,7 +7,7 @@ import StatementUpload from '../components/StatementUpload';
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const Statements = () => {
-  const { token } = useAuth();
+  const { token, checkAuth } = useAuth();
   const [statements, setStatements] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -86,6 +86,7 @@ const Statements = () => {
         // Add a small delay before fetching to ensure the backend has completed processing
         setTimeout(() => {
           fetchStatements();
+          checkAuth();
         }, 500);
       }
     } catch (error) {

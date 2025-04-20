@@ -149,7 +149,7 @@ const Dashboard = () => {
       isMounted = false;
       controller.abort();
     };
-  }, [token, fetchCompanies, fetchBanks, fetchExpenses]);
+  }, [expenses]);
 
   // Calculate account statistics
   const accountStats = Array.isArray(banks) ? banks.reduce((acc, bank) => {

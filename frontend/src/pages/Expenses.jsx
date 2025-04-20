@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useData } from '../context/DataContext';
 import { debounce } from 'lodash';
+import { useAuth } from '../context/AuthContext';
 
 const Expenses = () => {
   const {
@@ -16,6 +17,8 @@ const Expenses = () => {
     deleteExpense,
     totalExpenses
   } = useData();
+
+  const { checkAuth } = useAuth();
 
   const initialFormState = {
     title: '',
@@ -66,7 +69,7 @@ const Expenses = () => {
       page: filters.page,
       limit: filters.limit
     });
-    fetchCompanies();
+    fetchCompanies(); 
   }, [fetchExpenses, fetchCompanies, filters]);
 
   const handleChange = (e) => {
@@ -89,6 +92,7 @@ const Expenses = () => {
       setEditingExpense(null);
       setShowForm(false);
       fetchExpenses(filters);
+      checkAuth();
     } catch (err) {
       console.error('Failed to save expense:', err);
       alert(`Failed to save expense: ${err}`);
@@ -468,12 +472,14 @@ const Expenses = () => {
                     >
                       Edit
                     </button>
-                    <button
-                      onClick={() => handleDelete(expense._id)}
-                      className="text-red-600 hover:text-red-900"
+                    {(expense.status === 'pending' || expense.status === 'rejected') && (
+                      <button
+                        onClick={() => handleDelete(expense._id)}
+                        className="text-red-600 hover:text-red-900"
                     >
                       Delete
                     </button>
+                    )}
                   </td>
                 </tr>
               ))}

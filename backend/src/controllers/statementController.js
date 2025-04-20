@@ -6,7 +6,6 @@ const validateTransaction = (transaction) => {
   const requiredFields = ['date', 'companyName', 'bankName', 'accountNo', 'creditAmount'];
   const missingFields = requiredFields.filter(field => !transaction[field]);
 
-  console.log("missingFields", missingFields);
   if (missingFields.length > 0) {
     throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
   }
@@ -15,7 +14,9 @@ const validateTransaction = (transaction) => {
     throw new Error('Credit amount must be a positive number');
   }
 
-  const date = new Date(transaction.date);
+  const [day, month, year] = transaction.date.split('-');
+  const date = new Date(`${year}-${month}-${day}`);
+
   if (isNaN(date.getTime())) {
     throw new Error('Invalid date format');
   }
@@ -181,8 +182,15 @@ const uploadStatement = async (req, res) => {
     // Save back the year map
     user.totalAmount.set(statementYear, yearData);
 
-    console.log("user.totalAmount", user.totalAmount);
+    function convertMapToObject(map) {
+      const obj = {};
+      for (const [key, val] of map.entries()) {
+        obj[key] = val instanceof Map ? convertMapToObject(val) : val;
+      }
+      return obj;
+    }
 
+    user.totalAmount = convertMapToObject(user.totalAmount);
     await user.save();
 
     // Return the populated statement

@@ -55,43 +55,42 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(!!getStoredToken());
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Check authentication status on mount
-  useEffect(() => {
-    const checkAuth = async () => {
-      console.error("isAuthenticated", isAuthenticated);
-      const storedToken = getStoredToken();
-      if (storedToken) {
-        setLoading(true);
-        try {
-          const response = await axios.get(`${backendUrl}/api/auth/me`);
-          setUser(response.data);
+  const checkAuth = async () => {
+    console.error("isAuthenticated", isAuthenticated);
+    const storedToken = getStoredToken();
+    if (storedToken) {
+      setLoading(true);
+      try {
+        const response = await axios.get(`${backendUrl}/api/auth/me`);
+        setUser(response.data);
+        setToken(storedToken);
+        setIsAuthenticated(true);
+        setIsAdmin(response.data.role === 'admin');
+      } catch (error) {
+        // If the endpoint doesn't exist (404), we'll still consider the user authenticated
+        // as long as they have a valid token
+        if (error.response && error.response.status === 404) {
+          setUser({ id: 'user-from-token' });
           setToken(storedToken);
           setIsAuthenticated(true);
-          setIsAdmin(response.data.role === 'admin');
-        } catch (error) {
-          // If the endpoint doesn't exist (404), we'll still consider the user authenticated
-          // as long as they have a valid token
-          if (error.response && error.response.status === 404) {
-            setUser({ id: 'user-from-token' });
-            setToken(storedToken);
-            setIsAuthenticated(true);
-            // Default to admin for development purposes
-            setIsAdmin(true);
-          } else {
-            console.error('Auth check failed:', error);
-            setStoredToken(null);
-            setUser(null);
-            logout();
-            setToken(null);
-            setIsAuthenticated(false);
-            setIsAdmin(false);
-          }
-        } finally {
-          setLoading(false);
+          // Default to admin for development purposes
+          setIsAdmin(true);
+        } else {
+          console.error('Auth check failed:', error);
+          setStoredToken(null);
+          setUser(null);
+          logout();
+          setToken(null);
+          setIsAuthenticated(false);
+          setIsAdmin(false);
         }
+      } finally {
+        setLoading(false);
       }
-    };
-
+    }
+  };
+  // Check authentication status on mount
+  useEffect(() => {
     checkAuth();
   }, [isAuthenticated]);
 
@@ -151,6 +150,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         user,
+        checkAuth,
         token,
         loading,
         error,

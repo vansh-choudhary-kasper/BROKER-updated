@@ -55,22 +55,45 @@ class ExpenseController {
             }
 
             // Update total amount for the month
-            const month = date.getMonth();
-            const year = date.getFullYear();
+            // const month = date.getMonth();
+            // const year = date.getFullYear();
+            // const expenseAmount = parseFloat(amount);
+
+            // if (!user.totalAmount[year]) {
+            //     user.totalAmount[year] = {};
+            // }
+
+            // if (!user.totalAmount[year][month]) {   
+            //     user.totalAmount[year][month] = 0;
+            // }
+
+            // if(status === 'approved') {
+            //     user.totalAmount[year][month] -= expenseAmount;
+            // }
+            // await user.save(); 
+            
+            const numMonth = new Date(date).getMonth();
+            const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+            const month = months[numMonth];
+            const year = new Date(date).getFullYear().toString();
             const expenseAmount = parseFloat(amount);
+            console.log(numMonth, month, year, expenseAmount);
 
-            if (!user.totalAmount[year]) {
-                user.totalAmount[year] = {};
+            if (!user.totalAmount.has(year)) {
+                user.totalAmount.set(year, new Map());
             }
-
-            if (!user.totalAmount[year][month]) {   
-                user.totalAmount[year][month] = 0;
+            
+            const yearMap = user.totalAmount.get(year);
+            
+            if (!yearMap.has(month)) {
+                yearMap.set(month, 0);
             }
-
-            if(status === 'approved') {
-                user.totalAmount[year][month] -= expenseAmount;
+            
+            if (status === 'approved') {
+                yearMap.set(month, (yearMap.get(month) || 0) - (expenseAmount || 0));
             }
-            await user.save();      
+            
+           await User.findByIdAndUpdate(user._id, { totalAmount: user.totalAmount }, { new: true });
 
             return res.status(201).json(
                 ApiResponse.created('Expense created successfully', expense)
@@ -190,17 +213,36 @@ class ExpenseController {
             const numMonth = new Date(date).getMonth();
             const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
             const month = months[numMonth];
-            const year = new Date(date).getFullYear();
+            const year = new Date(date).getFullYear().toString();
             const expenseAmount = parseFloat(amount);
             console.log(numMonth, month, year, expenseAmount);
 
-            if(status === 'approved' && expense.status !== 'approved') {
-                user.totalAmount[year][month] -= expenseAmount;
-            } else if(status !== 'approved' && expense.status === 'approved') {
-                user.totalAmount[year][month] += expense.amount;
-            }   
+            if (!user.totalAmount.has(year)) {
+                user.totalAmount.set(year, new Map());
+            }
+            
+            const yearMap = user.totalAmount.get(year);
+            
+            if (!yearMap.has(month)) {
+                yearMap.set(month, 0);
+            }
 
-            await user.save();
+            if (status === 'approved' && expense.status !== 'approved') {
+                // When approving a new expense, subtract it from total earnings
+                yearMap.set(month, (yearMap.get(month) || 0) - (expenseAmount || 0));
+            } else if (status !== 'approved' && expense.status === 'approved') {
+                // When un-approving an expense, add back to total earnings
+                yearMap.set(month, (yearMap.get(month) || 0) + (expense.amount || 0));
+            } else if (status === 'approved' && expense.status === 'approved') {
+                // When modifying an approved expense, adjust the difference
+                // If new amount is higher, subtract more from earnings
+                // If new amount is lower, add back the difference to earnings
+                const currentEarnings = yearMap.get(month) || 0;
+                const expenseDiff = (expenseAmount || 0) - (expense.amount || 0);
+                yearMap.set(month, currentEarnings - expenseDiff);
+            }
+            
+           await User.findByIdAndUpdate(user._id, { totalAmount: user.totalAmount }, { new: true });
 
             // Update expense details
             Object.assign(expense, {

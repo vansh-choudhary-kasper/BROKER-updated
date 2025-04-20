@@ -93,7 +93,9 @@ const TodoList = () => {
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update todo');
-      fetchTodos();
+      setTimeout(() => {
+        fetchTodos();
+      }, 3000);
     }
   };
 
