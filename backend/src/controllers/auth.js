@@ -33,6 +33,7 @@ exports.login = async (req, res) => {
                 role: user.role
             }
         });
+        // res user can access in frontend using re
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });

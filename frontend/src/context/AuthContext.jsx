@@ -36,7 +36,7 @@ axios.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       // Token expired or invalid
       setStoredToken(null);
-      console.error('Authentication error detected. Token may be expired or invalid.');
+      console.error('Authentication error detected. Token may be expired or invalid. try logging in again');
     } else if (error.response && error.response.status === 403) {
       // Admin access required
       console.error('Admin access required. You do not have sufficient permissions.');
@@ -77,6 +77,7 @@ export const AuthProvider = ({ children }) => {
           setIsAdmin(true);
         } else {
           console.error('Auth check failed:', error);
+          alert('Authentication error detected. Token may be expired or invalid. try logging in again');
           setStoredToken(null);
           setUser(null);
           logout();
@@ -104,6 +105,7 @@ export const AuthProvider = ({ children }) => {
       setToken(response.data.token);
       setIsAuthenticated(true);
       setIsAdmin(response.data.user.role === 'admin');
+      console.log('login response', response);
       return response.data;
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Login failed';

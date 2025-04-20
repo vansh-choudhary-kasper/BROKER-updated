@@ -19,8 +19,6 @@ const Banks = () => {
     companies,
   } = useData();
 
-  const { token } = useAuth();
-
   const initialFormState = {
     accountHolderName: '',
     accountHolderPan: '',
@@ -46,24 +44,12 @@ const Banks = () => {
   });
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-
-  // New state for bank statements
-  const [selectedBank, setSelectedBank] = useState(null);
-
-  // New state for transactions
-  const [showTransactionsModal, setShowTransactionsModal] = useState(false);
-  const [transactions, setTransactions] = useState([]);
-  const [transactionLoading, setTransactionLoading] = useState(false);
-  const [transactionFilters, setTransactionFilters] = useState({
-    startDate: '',
-    endDate: '',
-    type: '',
-    page: 1,
-    limit: 10
-  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formError, setFormError] = useState(null);
   const formErrorRef = useRef(null);
+  const [apiError, setApiError] = useState(null);
+  const apiErrorRef = useRef(null);
 
   // Debounced search function
   const debouncedSearch = useCallback(
@@ -100,6 +86,18 @@ const Banks = () => {
     }
   }, [formError]);
 
+  // Add useEffect to scroll to API error when it appears
+  useEffect(() => {
+    if (apiError && apiErrorRef.current) {
+      apiErrorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [apiError]);
+
+  // Clear errors when component unmounts or when filters change
+  useEffect(() => {
+    setApiError(null);
+  }, [filters]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -134,7 +132,8 @@ const Banks = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setFormError(null); // Clear any previous form errors
+    setFormError(null);
+    setIsSubmitting(true);
     try {
       if (editingAccount) {
         await updateBank(editingAccount._id, formData);
@@ -147,7 +146,10 @@ const Banks = () => {
       fetchBanks(filters);
     } catch (err) {
       console.error('Failed to save bank account:', err);
-      setFormError(`Failed to save bank account: ${err.message || err}`);
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to save bank account';
+      setFormError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -166,6 +168,8 @@ const Banks = () => {
     });
     setEditingAccount(account);
     setShowForm(true);
+    setFormError(null);
+    setApiError(null)
   };
 
   const handleDelete = async (id) => {
@@ -175,7 +179,8 @@ const Banks = () => {
         fetchBanks(filters);
       } catch (err) {
         console.error('Failed to delete bank account:', err);
-        alert(`Failed to delete bank account: ${err.message || err}`);
+        const errorMessage = err.response?.data?.message || err.message || 'Failed to delete bank account';
+        setApiError(errorMessage);
       }
     }
   };
@@ -199,52 +204,6 @@ const Banks = () => {
 
   const bankAccountsList = Array.isArray(banks) ? banks : [];
 
-  // New handlers for bank transactions
-  const handleViewTransactions = async (bank) => {
-    setSelectedBank(bank);
-    await fetchTransactions(bank._id);
-    setShowTransactionsModal(true);
-  };
-
-  const fetchTransactions = async (bankId) => {
-    try {
-      setTransactionLoading(true);
-      const queryParams = new URLSearchParams({
-        ...transactionFilters
-      }).toString();
-      
-      const response = await axios.get(
-        `${backendUrl}/api/banks/${bankId}/transactions?${queryParams}`,
-        {
-          headers: { 
-            Authorization: `Bearer ${token}`,
-            Accept: 'application/json'
-          }
-        }
-      );
-      
-      if (response.data && response.data.data) {
-        setTransactions(response.data.data.transactions);
-      } else {
-        setTransactions([]);
-      }
-    } catch (err) {
-      console.error('Failed to fetch transactions:', err.response?.data || err.message);
-      setTransactions([]);
-    } finally {
-      setTransactionLoading(false);
-    }
-  };
-
-  const handleTransactionFilterChange = (e) => {
-    const { name, value } = e.target;
-    setTransactionFilters(prev => ({
-      ...prev,
-      [name]: value,
-      page: 1 // Reset page when filters change
-    }));
-  };
-
   // Add function to get company name by ID
   const getCompanyNameById = (companyId) => {
     if (!companyId) return 'Other';
@@ -262,15 +221,45 @@ const Banks = () => {
             setEditingAccount(null);
             setShowForm(true);
           }}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors duration-200 flex items-center gap-2"
         >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+          </svg>
           Add Bank Account
         </button>
       </div>
 
-      {error && error.message && (
-        <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4" role="alert">
-          <p className="text-red-700">{typeof error === 'string' ? error : 'An error occurred'}</p>
+      {/* API Error Display */}
+      {apiError && (
+        <div 
+          ref={apiErrorRef}
+          className="bg-red-50 border-l-4 border-red-500 p-4 mb-4 rounded-md animate-shake" 
+          role="alert"
+        >
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-700">{apiError}</p>
+            </div>
+            <div className="ml-auto pl-3">
+              <div className="-mx-1.5 -my-1.5">
+                <button
+                  onClick={() => setApiError(null)}
+                  className="inline-flex rounded-md p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                >
+                  <span className="sr-only">Dismiss</span>
+                  <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -287,6 +276,7 @@ const Banks = () => {
                   setShowForm(false);
                   setFormData(initialFormState);
                   setEditingAccount(null);
+                  setFormError(null);
                 }}
                 className="text-gray-400 hover:text-gray-500"
               >
@@ -300,11 +290,19 @@ const Banks = () => {
               {formError && (
                 <div 
                   ref={formErrorRef}
-                  className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" 
+                  className="bg-red-50 border-l-4 border-red-500 p-4 mb-4 rounded-md animate-shake" 
                   role="alert"
                 >
-                  <strong className="font-bold">Error: </strong>
-                  <span className="block sm:inline">{formError}</span>
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-red-700">{formError}</p>
+                    </div>
+                  </div>
                 </div>
               )}
               
@@ -518,9 +516,22 @@ const Banks = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  disabled={isSubmitting}
+                  className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
+                    isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
+                  }`}
                 >
-                  {editingAccount ? 'Update Account' : 'Add Account'}
+                  {isSubmitting ? (
+                    <div className="flex items-center">
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Saving...
+                    </div>
+                  ) : (
+                    editingAccount ? 'Update Account' : 'Add Account'
+                  )}
                 </button>
               </div>
             </form>
@@ -644,12 +655,6 @@ const Banks = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
-                      onClick={() => handleViewTransactions(account)}
-                      className="text-indigo-600 hover:text-indigo-900 mr-3"
-                    >
-                      Transactions
-                    </button>
-                    <button
                       onClick={() => handleEdit(account)}
                       className="text-indigo-600 hover:text-indigo-900 mr-3"
                     >
@@ -691,123 +696,6 @@ const Banks = () => {
           </div>
         </div>
       </div>
-
-      {/* Transactions Modal */}
-      {showTransactionsModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-4/5 shadow-lg rounded-md bg-white">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">
-                Bank Transactions - {selectedBank?.bankName} ({selectedBank?.accountNumber})
-              </h2>
-              <button
-                onClick={() => setShowTransactionsModal(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Transaction Filters */}
-            <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                <input
-                  type="date"
-                  name="startDate"
-                  value={transactionFilters.startDate}
-                  onChange={handleTransactionFilterChange}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                <input
-                  type="date"
-                  name="endDate"
-                  value={transactionFilters.endDate}
-                  onChange={handleTransactionFilterChange}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                <select
-                  name="type"
-                  value={transactionFilters.type}
-                  onChange={handleTransactionFilterChange}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                >
-                  <option value="">All</option>
-                  <option value="credit">Credit</option>
-                  <option value="debit">Debit</option>
-                </select>
-              </div>
-              <div className="flex items-end">
-                <button
-                  onClick={() => fetchTransactions(selectedBank._id)}
-                  className="w-full bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200"
-                >
-                  Apply Filters
-                </button>
-              </div>
-            </div>
-
-            {/* Transactions Table */}
-            {transactionLoading ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company Name</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {transactions.map((transaction, index) => (
-                      <tr key={index}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {new Date(transaction.date).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            transaction.type === 'credit' 
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}>
-                            {transaction.type}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          ₹{transaction.amount.toLocaleString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {getCompanyNameById(transaction.companyName)}
-                        </td>
-                      </tr>
-                    ))}
-                    {transactions.length === 0 && (
-                      <tr>
-                        <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
-                          No transactions found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

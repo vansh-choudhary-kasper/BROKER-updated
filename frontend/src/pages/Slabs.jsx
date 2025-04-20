@@ -31,7 +31,7 @@ const Slabs = ({ slabs, onSlabsChange }) => {
       setUserData(response.data);
       return response.data;
     } catch (err) {
-      setError('Failed to fetch user data');
+      setError('Failed to fetch user data ' + err.message);
       return null;
     }
   };
