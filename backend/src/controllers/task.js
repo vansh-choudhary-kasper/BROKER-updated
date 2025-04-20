@@ -27,7 +27,7 @@ class TaskController {
 
             if (!latestTask || !latestTask.taskNumber) {
                 // If no tasks exist, start with TASK-0001
-                return 'TASK-0001';
+                return 'DEAL-0001';
             }
 
             // Extract the number part and increment it
@@ -35,7 +35,7 @@ class TaskController {
             const nextNumber = currentNumber + 1;
 
             // Format the new task number with leading zeros
-            return `TASK-${nextNumber.toString().padStart(4, '0')}`;
+            return `DEAL-${nextNumber.toString().padStart(4, '0')}`;
         } catch (error) {
             logger.error('Generate Task Number Error:', error);
             throw error;

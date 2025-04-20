@@ -54,7 +54,7 @@ const MainLayout = () => {
     },
     {
       path: '/tasks',
-      name: 'Tasks',
+      name: 'Deals',
       icon: (
         <path
           strokeLinecap="round"

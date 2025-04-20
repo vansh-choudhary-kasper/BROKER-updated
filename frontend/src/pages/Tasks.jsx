@@ -200,12 +200,12 @@ const Tasks = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-gray-900">Tasks</h1>
+        <h1 className="text-2xl font-semibold text-gray-900">Deals</h1>
         <button
           onClick={() => setShowForm(true)}
           className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
         >
-          Add Task
+          Add Deal
         </button>
       </div>
 
@@ -225,7 +225,7 @@ const Tasks = () => {
                 type="text"
                 value={searchTerm}
                 onChange={handleSearchChange}
-                placeholder="Search by title, task number, or helper broker..."
+                placeholder="Search by title, deal number, or helper broker..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-md pl-10"
               />
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -235,7 +235,7 @@ const Tasks = () => {
               </div>
             </div>
             <p className="mt-1 text-sm text-gray-500">
-              Search by task title, task number, or helper broker name
+              Search by deal title, deal number, or helper broker name
             </p>
           </div>
         </div>
@@ -247,7 +247,7 @@ const Tasks = () => {
           <div className="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold text-gray-900">
-                {editingTask ? 'Edit Task' : 'Add New Task'}
+                {editingTask ? 'Edit Deal' : 'Add New Deal'}
               </h2>
               <button
                 onClick={() => {
@@ -269,7 +269,7 @@ const Tasks = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-                      Task Title *
+                      Deal Title *
                     </label>
                     <input
                       type="text"
@@ -476,7 +476,7 @@ const Tasks = () => {
                   type="submit"
                   className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
-                  {editingTask ? 'Update Task' : 'Add Task'}
+                  {editingTask ? 'Update Deal' : 'Add Deal'}
                 </button>
               </div>
             </form>
@@ -487,14 +487,14 @@ const Tasks = () => {
       {/* Task List */}
       <div className="bg-white shadow rounded-lg overflow-hidden">
         <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
-          <h2 className="text-lg font-medium text-gray-900">Task List</h2>
+          <h2 className="text-lg font-medium text-gray-900">Deal List</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Task Number
+                  Deal Number
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Title
@@ -512,7 +512,7 @@ const Tasks = () => {
                   Helper Commission
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Task Date
+                  Deal Date
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Payment Amount
@@ -581,7 +581,7 @@ const Tasks = () => {
         {/* Pagination */}
         <div className="flex justify-between items-center mt-4 p-4">
           <div className="text-sm text-gray-700">
-            Showing {tasks.length} of {totalTasks || tasks.length} tasks
+            Showing {tasks.length} of {totalTasks || tasks.length} deals
           </div>
           <div className="flex space-x-2">
             <button
