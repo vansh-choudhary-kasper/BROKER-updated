@@ -25,7 +25,7 @@ const brokerValidation = [
   body('address.country').optional(),
   body('address.pincode').optional(),
   body('gstNumber').optional(),
-  body('panNumber').optional().matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/).withMessage('Please enter a valid PAN number'),
+  body('panNumber').optional({ checkFalsy: true }).matches(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/).withMessage('Please enter a valid PAN number'),
   body('company').optional().isMongoId().withMessage('Invalid company ID'),
   body('bankAccounts').optional().isArray().withMessage('Bank accounts must be an array').notEmpty().withMessage('At least one bank account is required'),
   body('bankAccounts.*').optional().isMongoId().withMessage('Invalid bank account ID'),

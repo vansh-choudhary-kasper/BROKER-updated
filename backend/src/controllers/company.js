@@ -65,8 +65,13 @@ class CompanyController {
             const bankDetails = [];
             for (const bank of companyData.bankDetails) {
                 try {
-                    const newBank = new Bank(bank);
-                    await newBank.save();
+                    let newBank = await Bank.findOne({accountNumber: bank.accountNumber}); 
+                    if(!newBank) {
+                        newBank = new Bank(bank);
+                    } else {
+                        Object.assign(newBank, bank);
+                    }
+                    await newBank.save();   
                     bankDetails.push({_id: newBank._id});
                 } catch (error) {
                     logger.error('Create Bank Error:', error);
