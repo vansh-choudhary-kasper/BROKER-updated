@@ -93,7 +93,7 @@ export const DataProvider = ({ children }) => {
     } finally {
       setLoading(prev => ({ ...prev, companies: false }));
     }
-  }, [token, lastFetchTime.companies]);
+  }, [token]);
 
   // Fetch tasks with debounce
   const fetchTasks = useCallback(async (filters = {}) => {
@@ -144,7 +144,7 @@ export const DataProvider = ({ children }) => {
     } finally {
       setLoading(prev => ({ ...prev, tasks: false }));
     }
-  }, [token, lastFetchTime.tasks]);
+  }, [token]);
 
   // Fetch banks with debounce
   const fetchBanks = useCallback(async (filters = {}) => {
@@ -192,7 +192,7 @@ export const DataProvider = ({ children }) => {
     } finally {
       setLoading(prev => ({ ...prev, banks: false }));
     }
-  }, [token, lastFetchTime.banks]);
+  }, [token]);
 
   // Fetch expenses with debounce
   const fetchExpenses = useCallback(async (filters = {}) => {
@@ -240,7 +240,7 @@ export const DataProvider = ({ children }) => {
     } finally {
       setLoading(prev => ({ ...prev, expenses: false }));
     }
-  }, [token, lastFetchTime.expenses]);
+  }, [token]);
 
   // Fetch brokers with debounce
   const fetchBrokers = useCallback(async (filters = {}) => {
@@ -291,7 +291,7 @@ export const DataProvider = ({ children }) => {
     } finally {
       setLoading(prev => ({ ...prev, brokers: false }));
     }
-  }, [token, lastFetchTime.brokers]);
+  }, [token]);
 
   // Add company
   const addCompany = async (companyData) => {
@@ -679,7 +679,7 @@ export const DataProvider = ({ children }) => {
       };
       fetchAllData();
     }
-  }, [token]); // Only re-run when token changes
+  }, [token, fetchCompanies, fetchTasks, fetchBanks, fetchExpenses, fetchBrokers]);
 
   // Add broker
   const addBroker = async (brokerData) => {
