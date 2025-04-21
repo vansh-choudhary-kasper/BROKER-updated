@@ -664,33 +664,22 @@ export const DataProvider = ({ children }) => {
   // Fetch all data when token changes
   useEffect(() => {
     if (token) {
-      fetchCompanies();
-      fetchTasks();
-      fetchBanks();
-      fetchExpenses();
-      fetchBrokers();
+      const fetchAllData = async () => {
+        try {
+          await Promise.all([
+            fetchCompanies(),
+            fetchTasks(),
+            fetchBanks(),
+            fetchExpenses(),
+            fetchBrokers()
+          ]);
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      };
+      fetchAllData();
     }
-  }, [token]);
-
-  useEffect(() => {
-    fetchCompanies();
-  }, [fetchCompanies]);
-
-  useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
-
-  useEffect(() => {
-    fetchBanks();
-  }, [fetchBanks]);
-
-  useEffect(() => {
-    fetchExpenses();
-  }, [fetchExpenses]);
-
-  useEffect(() => {
-    fetchBrokers();
-  }, [fetchBrokers]);
+  }, [token]); // Only re-run when token changes
 
   // Add broker
   const addBroker = async (brokerData) => {
