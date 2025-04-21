@@ -95,9 +95,15 @@ const Expenses = () => {
     setIsSubmitting(true);
     try {
       if (editingExpense) {
-        await updateExpense(editingExpense._id, formData);
+        const result = await updateExpense(editingExpense._id, formData);
+        if(!result.success) {
+          throw new Error(result.message);
+        }
       } else {
-        await addExpense(formData);
+        const result = await addExpense(formData);
+        if(!result.success) {
+          throw new Error(result.message);
+        }
       }
       setFormData(initialFormState);
       setEditingExpense(null);

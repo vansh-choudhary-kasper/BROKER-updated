@@ -146,8 +146,8 @@ const Broker = () => {
             branchName: selectedBank.branchName,
             accountType: selectedBank.accountType || 'savings',
             accountHolderName: selectedBank.accountHolderName,
-            accountHolderPan: selectedBank.accountHolderPan || '',
-            accountHolderAadhar: selectedBank.accountHolderAadhar || '',
+            accountHolderPan: selectedBank.accountHolderPan,
+            accountHolderAadhar: selectedBank.accountHolderAadhar,
           }]
         }));
       }
@@ -162,9 +162,15 @@ const Broker = () => {
     setIsSubmitting(true);
     try {
       if (editingBroker) {
-        await updateBroker(editingBroker._id, formData);
+        const result = await updateBroker(editingBroker._id, formData);
+        if(!result.success) {
+          throw new Error(result.message);
+        }
       } else {
-        await addBroker(formData);
+        const result = await addBroker(formData);
+        if(!result.success) {
+          throw new Error(result.message);
+        }
       }
       setFormData(initialFormState);
       setEditingBroker(null);
@@ -191,8 +197,8 @@ const Broker = () => {
         country: '',
         pincode: ''
       },
-      gstNumber: broker.gstNumber || '',
-      panNumber: broker.panNumber || '',
+      gstNumber: broker.gstNumber,
+      panNumber: broker.panNumber,
       company: broker.company,
       bankDetails: broker.bankDetails || [{
         accountNumber: '',

@@ -52,11 +52,11 @@ const uploadToStorage = async (file) => {
     });
     
     // Delete the local file after uploading to Cloudinary
-    // try {
-    //   await fs.unlink(file.path);
-    // } catch (error) {
-    //   logger.warn(`Failed to delete local file ${file.path}:`, error);
-    // }
+    try {
+      await fs.unlink(file.path);
+    } catch (error) {
+      logger.warn(`Failed to delete local file ${file.path}:`, error);
+    }
     
     return {
       url: result.secure_url,

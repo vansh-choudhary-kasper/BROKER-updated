@@ -27,14 +27,14 @@ const Tasks = () => {
     clientCompany: '',
     providerCompany: '',
     helperBroker: {
-      broker: '',
+      broker: undefined,
       commission: 0,
       status: 'pending',
       paymentDate: ''
     },
     payment: {
       amount: 0,
-      currency: 'USD'
+      currency: 'INR'
     }
   };
 
@@ -155,9 +155,15 @@ const Tasks = () => {
       };
       
       if (editingTask) {
-        await updateTask(editingTask._id, taskData);
+        const result = await updateTask(editingTask._id, taskData);
+        if(!result.success) {
+          throw new Error(result.message);
+        }
       } else {
-        await addTask(taskData);
+        const result = await addTask(taskData);
+        if(!result.success) {
+          throw new Error(result.message);
+        }
       }
       setFormData(initialFormState);
       setEditingTask(null);
@@ -195,7 +201,7 @@ const Tasks = () => {
       clientCompany: task.clientCompany || '',
       providerCompany: task.providerCompany || '',
       helperBroker: {
-        broker: task.helperBroker?.broker || '',
+        broker: task.helperBroker?.broker,
         commission: task.helperBroker?.commission || 0,
         status: task.helperBroker?.status || 'pending',
         paymentDate: formattedPaymentDate
@@ -408,7 +414,7 @@ const Tasks = () => {
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     >
-                      <option value="">Select a helper broker</option>
+                      <option value={undefined}>Select a helper broker</option>
                       {brokersList.map((broker) => (
                         <option key={broker._id} value={broker._id}>
                           {broker.name}

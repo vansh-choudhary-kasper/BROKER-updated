@@ -146,9 +146,15 @@ const Banks = () => {
     setIsSubmitting(true);
     try {
       if (editingAccount) {
-        await updateBank(editingAccount._id, formData);
+        const result = await updateBank(editingAccount._id, formData);
+        if(!result.success) {
+          throw new Error(result.message);
+        }
       } else {
-        await addBank(formData);
+        const result = await addBank(formData);
+        if(!result.success) {
+          throw new Error(result.message);
+        }
       }
       setFormData(initialFormState);
       setEditingAccount(null);

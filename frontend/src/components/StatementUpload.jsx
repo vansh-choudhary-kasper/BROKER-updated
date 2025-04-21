@@ -12,6 +12,7 @@ const StatementUpload = ({ onUpload }) => {
   const [error, setError] = useState(null);
   const [preview, setPreview] = useState(null);
   const [companySlabs, setCompanySlabs] = useState({});
+  const [formError, setFormError] = useState(null);
 
   const {
     companies,
@@ -66,39 +67,85 @@ const StatementUpload = ({ onUpload }) => {
     setFile(selectedFile);
     setError(null);
     setPreview(null);
+    setFormError(null);
 
     try {
+      // Check file size (limit to 5MB)
+      if (selectedFile.size > 5 * 1024 * 1024) {
+        throw new Error('File size exceeds 5MB limit');
+      }
+
       if (selectedFile.name.endsWith('.csv')) {
         // Handle CSV file
         PapaParse.parse(selectedFile, {
           complete: (results) => {
-            // Filter out empty rows and validate data
-            const data = results.data
-              .slice(1)
-              .filter(row => 
-                row.length === 5 && // Ensure all columns are present
-                row.every(cell => cell !== null && cell !== undefined && cell.toString().trim() !== '')
-              )
-              .map(row => ({
-                date: row[0],
-                companyName: row[1],
-                bankName: row[2],
-                accountNo: row[3],
-                creditAmount: parseFloat(row[4])
-              }))
-              .filter(transaction => 
-                !isNaN(transaction.creditAmount) && 
-                transaction.creditAmount > 0
+            try {
+              // Check if file has headers
+              if (results.data.length < 2) {
+                throw new Error('CSV file must contain headers and at least one row of data');
+              }
+
+              // Validate headers
+              const headers = results.data[0];
+              const requiredHeaders = ['date', 'company', 'bank', 'account', 'amount'];
+              const headerCheck = requiredHeaders.every(header => 
+                headers.some(h => h.toLowerCase().includes(header.toLowerCase()))
               );
-            
-            if (data.length === 0) {
-              throw new Error('No valid transactions found in the file');
+              
+              if (!headerCheck) {
+                throw new Error('CSV file is missing required headers. Please ensure your file has date, company, bank, account, and amount columns.');
+              }
+
+              // Filter out empty rows and validate data
+              const data = results.data
+                .slice(1)
+                .filter(row => 
+                  row.length === headers.length && // Ensure all columns are present
+                  row.every(cell => cell !== null && cell !== undefined && cell.toString().trim() !== '')
+                )
+                .map(row => ({
+                  date: row[0],
+                  companyName: row[1],
+                  bankName: row[2],
+                  accountNo: row[3],
+                  creditAmount: parseFloat(row[4])
+                }))
+                .filter(transaction => 
+                  !isNaN(transaction.creditAmount) && 
+                  transaction.creditAmount > 0
+                );
+              
+              if (data.length === 0) {
+                throw new Error('No valid transactions found in the file');
+              }
+              
+              // Check if companies exist in our system
+              const unknownCompanies = data
+                .map(t => t.companyName)
+                .filter((name, index, self) => self.indexOf(name) === index) // Get unique company names
+                .filter(name => !companySlabs[name]);
+                
+              if (unknownCompanies.length > 0) {
+                setFormError(`Warning: The following companies are not recognized: ${unknownCompanies.join(', ')}`);
+              }
+
+              const slabNotDefined = data.filter(transaction => {
+                const applicableSlab = getApplicableSlabs(transaction.companyName, transaction.creditAmount);
+                return !applicableSlab;
+              }).map(t => t.companyName)
+              .filter((name, index, self) => self.indexOf(name) === index);
+
+              if (slabNotDefined.length > 0) {
+                setFormError(`Warning: The following companies have no slabs defined: ${slabNotDefined.join(', ')}`);
+              } 
+              
+              processTransactions(data);
+            } catch (error) {
+              setError(error.message);
             }
-            
-            processTransactions(data);
           },
           error: (error) => {
-            throw new Error('Error parsing CSV file: ' + error.message);
+            setError('Error parsing CSV file: ' + error.message);
           }
         });
       } else if (selectedFile.name.endsWith('.xml')) {
@@ -108,7 +155,18 @@ const StatementUpload = ({ onUpload }) => {
           try {
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
+            
+            // Check for XML parsing errors
+            const parseError = xmlDoc.getElementsByTagName('parsererror');
+            if (parseError.length > 0) {
+              throw new Error('Invalid XML format: ' + parseError[0].textContent);
+            }
+            
             const transactions = Array.from(xmlDoc.getElementsByTagName('transaction'));
+            
+            if (transactions.length === 0) {
+              throw new Error('No transaction elements found in XML file');
+            }
             
             const data = transactions
               .map(transaction => {
@@ -136,6 +194,16 @@ const StatementUpload = ({ onUpload }) => {
               throw new Error('No valid transactions found in the file');
             }
 
+            // Check if companies exist in our system
+            const unknownCompanies = data
+              .map(t => t.companyName)
+              .filter((name, index, self) => self.indexOf(name) === index) // Get unique company names
+              .filter(name => !companySlabs[name]);
+              
+            if (unknownCompanies.length > 0) {
+              setFormError(`Warning: The following companies are not recognized: ${unknownCompanies.join(', ')}`);
+            }
+
             processTransactions(data);
           } catch (error) {
             setError('Error parsing XML file: ' + error.message);
@@ -148,6 +216,7 @@ const StatementUpload = ({ onUpload }) => {
       } else {
         throw new Error('Unsupported file format. Please upload a CSV or XML file.');
       }
+      setFormError(null);
     } catch (error) {
       setError(error.message);
     }
@@ -285,6 +354,15 @@ const StatementUpload = ({ onUpload }) => {
             </div>
           </div>
         )}
+        {formError && (
+          <div className="rounded-md bg-red-50 p-4">
+            <div className="flex">
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">{formError}</h3>
+              </div>  
+            </div>
+          </div>
+        )}  
 
         {preview && (
           <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -357,7 +435,7 @@ const StatementUpload = ({ onUpload }) => {
             type="submit"
             disabled={loading || !selectedDate || !file || !preview}
             className={`inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white 
-              ${loading || !selectedDate || !file || !preview
+              ${loading || !selectedDate || !file || !preview || formError
                 ? 'bg-indigo-300 cursor-not-allowed'
                 : 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
               }`}
