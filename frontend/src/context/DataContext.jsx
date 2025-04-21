@@ -65,7 +65,6 @@ export const DataProvider = ({ children }) => {
         }
       });
 
-
       const response = await axios.get(`${backendUrl}/api/companies?${queryParams.toString()}`);
       // Handle both array response and paginated response
       if (response.data && typeof response.data === 'object') {
@@ -89,6 +88,8 @@ export const DataProvider = ({ children }) => {
       // Set empty array on error to prevent undefined errors
       setCompanies([]);
       setTotalCompanies(0);
+      // Clear lastFetchTime on error to allow manual retry
+      setLastFetchTime(prev => ({ ...prev, companies: 0 }));
     } finally {
       setLoading(prev => ({ ...prev, companies: false }));
     }
@@ -138,6 +139,8 @@ export const DataProvider = ({ children }) => {
       // Set empty array on error to prevent undefined errors
       setTasks([]);
       setTotalTasks(0);
+      // Clear lastFetchTime on error to allow manual retry
+      setLastFetchTime(prev => ({ ...prev, tasks: 0 }));
     } finally {
       setLoading(prev => ({ ...prev, tasks: false }));
     }
@@ -184,6 +187,8 @@ export const DataProvider = ({ children }) => {
       // Set empty array on error to prevent undefined errors
       setBanks([]);
       setTotalBanks(0);
+      // Clear lastFetchTime on error to allow manual retry
+      setLastFetchTime(prev => ({ ...prev, banks: 0 }));
     } finally {
       setLoading(prev => ({ ...prev, banks: false }));
     }
@@ -230,6 +235,8 @@ export const DataProvider = ({ children }) => {
       // Set empty array on error to prevent undefined errors
       setExpenses([]);
       setTotalExpenses(0);
+      // Clear lastFetchTime on error to allow manual retry
+      setLastFetchTime(prev => ({ ...prev, expenses: 0 }));
     } finally {
       setLoading(prev => ({ ...prev, expenses: false }));
     }
@@ -279,6 +286,8 @@ export const DataProvider = ({ children }) => {
       // Set empty array on error to prevent undefined errors
       setBrokers([]);
       setTotalBrokers(0);
+      // Clear lastFetchTime on error to allow manual retry
+      setLastFetchTime(prev => ({ ...prev, brokers: 0 }));
     } finally {
       setLoading(prev => ({ ...prev, brokers: false }));
     }
