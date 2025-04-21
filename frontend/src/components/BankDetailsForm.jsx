@@ -5,6 +5,7 @@ const BankDetailsForm = ({ bankDetails, onChange, onFileChange, onAdd, onRemove,
 
   const handleAddCustomField = (bankIndex) => {
     if (newCustomField.name && newCustomField.value) {
+      if (!bankDetails[bankIndex]) return;
       const updatedBank = { ...bankDetails[bankIndex] };
       updatedBank.customFields = {
         ...updatedBank.customFields,
@@ -211,7 +212,7 @@ const BankDetailsForm = ({ bankDetails, onChange, onFileChange, onAdd, onRemove,
             </div>
 
             {/* Display Custom Fields */}
-            {bank.customFields && Object.entries(bank.customFields).length > 0 && (
+            {bank?.customFields && Object.entries(bank?.customFields || {}).length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Object.entries(bank.customFields).map(([fieldName, fieldValue]) => (
                   <div key={fieldName} className="flex items-center gap-2 p-2 bg-gray-50 rounded">

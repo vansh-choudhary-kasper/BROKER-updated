@@ -68,11 +68,16 @@ const Banks = () => {
 
   // Handle filter changes
   const handleFilterChange = (filterName, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterName]: value,
-      page: 1 // Reset to first page when filters change
-    }));
+    if (!filterName || typeof filterName !== 'string') return;
+    
+    setFilters(prev => {
+      if (!prev) return { [filterName]: value, page: 1 };
+      return {
+        ...prev,
+        [filterName]: value,
+        page: 1
+      };
+    });
   };
 
   useEffect(() => {
@@ -107,21 +112,26 @@ const Banks = () => {
   };
 
   const handleAddCustomField = () => {
-    if (newCustomField.name && newCustomField.value) {
-      setFormData(prev => ({
-        ...prev,
-        customFields: {
-          ...prev.customFields,
-          [newCustomField.name]: newCustomField.value
-        }
-      }));
-      setNewCustomField({ name: '', value: '' });
+    if (newCustomField?.name && newCustomField?.value) {
+      setFormData(prev => {
+        const currentCustomFields = prev?.customFields || {};
+        return {
+          ...prev,
+          customFields: {
+            ...currentCustomFields,
+            [newCustomField.name]: newCustomField.value
+          }
+        };
+      });
     }
   };
 
   const handleRemoveCustomField = (fieldName) => {
+    if (!fieldName) return;
+    
     setFormData(prev => {
-      const updatedCustomFields = { ...prev.customFields };
+      const currentCustomFields = prev?.customFields || {};
+      const updatedCustomFields = { ...currentCustomFields };
       delete updatedCustomFields[fieldName];
       return {
         ...prev,
@@ -154,22 +164,28 @@ const Banks = () => {
   };
 
   const handleEdit = (account) => {
+    if (!account) {
+      console.error('Invalid account data');
+      return;
+    }
+    
     setFormData({
-      accountHolderName: account.accountHolderName || '',
-      accountHolderPan: account.accountHolderPan || '',
-      accountHolderAadhar: account.accountHolderAadhar || '',
-      accountNumber: account.accountNumber || '',
-      ifscCode: account.ifscCode || '',
-      bankName: account.bankName || '',
-      branchName: account.branchName || '',
-      accountType: account.accountType || 'savings',
-      isActive: account.isActive ?? true,
-      customFields: account.customFields || {}
+      accountHolderName: account?.accountHolderName || '',
+      accountHolderPan: account?.accountHolderPan || '',
+      accountHolderAadhar: account?.accountHolderAadhar || '',
+      accountNumber: account?.accountNumber || '',
+      ifscCode: account?.ifscCode || '',
+      bankName: account?.bankName || '',
+      branchName: account?.branchName || '',
+      accountType: account?.accountType || 'savings',
+      isActive: account?.isActive ?? true,
+      customFields: account?.customFields || {}
     });
+    
     setEditingAccount(account);
     setShowForm(true);
     setFormError(null);
-    setApiError(null)
+    setApiError(null);
   };
 
   const handleDelete = async (id) => {

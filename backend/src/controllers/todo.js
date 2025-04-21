@@ -12,7 +12,7 @@ class TodoController {
                 );
             }
             // Sort todos by priority and status
-            const sortedTodos = user.todos.sort((a, b) => {
+            const sortedTodos = user.todos?.sort((a, b) => {
                 const priorityOrder = { high: 0, medium: 1, low: 2 };
                 const statusOrder = { pending: 0, in_progress: 1, completed: 2 };
                 

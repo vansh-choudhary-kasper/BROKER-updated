@@ -4,14 +4,14 @@ import axios from 'axios';
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 // Helper function to get token from localStorage
-const getStoredToken = () => localStorage.getItem('token');
+const getStoredToken = () => localStorage?.getItem('token');
 
 // Helper function to set token in localStorage
 const setStoredToken = (token) => {
   if (token) {
-    localStorage.setItem('token', token);
+    localStorage?.setItem('token', token);
   } else {
-    localStorage.removeItem('token');
+    localStorage?.removeItem('token');
   }
 };
 
@@ -62,10 +62,10 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       try {
         const response = await axios.get(`${backendUrl}/api/auth/me`);
-        setUser(response.data);
+        setUser(response?.data);
         setToken(storedToken);
         setIsAuthenticated(true);
-        setIsAdmin(response.data.role === 'admin');
+        setIsAdmin(response?.data?.role === 'admin');
       } catch (error) {
         // If the endpoint doesn't exist (404), we'll still consider the user authenticated
         // as long as they have a valid token
@@ -108,7 +108,7 @@ export const AuthProvider = ({ children }) => {
       console.log('login response', response);
       return response.data;
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Login failed';
+      const errorMessage = error?.response?.data?.message || 'Login failed';
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {

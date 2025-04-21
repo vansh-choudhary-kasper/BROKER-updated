@@ -89,16 +89,21 @@ const Tasks = () => {
       const [parent, child, grandChild] = name.split('.');
       
       if (grandChild) {
-        setFormData(prev => ({
-          ...prev,
-          [parent]: {
-            ...prev[parent],
-            [child]: {
-              ...prev[parent][child],
-              [grandChild]: value,
-            },
-          },
-        }));
+        setFormData(prev => {
+          const currentParent = prev[parent] || {};
+          const currentChild = currentParent[child] || {};
+          
+          return {
+            ...prev,
+            [parent]: {
+              ...currentParent,
+              [child]: grandChild ? {
+                ...currentChild,
+                [grandChild]: value
+              } : value
+            }
+          };
+        });
       } else {
         setFormData(prev => ({
           ...prev,
@@ -169,9 +174,20 @@ const Tasks = () => {
 
   const handleEdit = (task) => {
     // Format the payment date to YYYY-MM-DD if it exists
-    const formattedPaymentDate = task.helperBroker?.paymentDate 
-      ? new Date(task.helperBroker.paymentDate).toISOString().split('T')[0]
-      : '';
+    const formatPaymentDate = (date) => {
+      if (!date) return '';
+      
+      try {
+        const parsedDate = new Date(date);
+        if (isNaN(parsedDate.getTime())) return '';
+        
+        return parsedDate.toISOString().split('T')[0];
+      } catch (error) {
+        return '';
+      }
+    };
+
+    const formattedPaymentDate = formatPaymentDate(task.helperBroker?.paymentDate);
 
     setFormData({
       title: task.title || '',

@@ -156,7 +156,7 @@ const StatementUpload = ({ onUpload }) => {
   const processTransactions = (data) => {
     try {
       // Group transactions by company
-      const companyTransactions = data.reduce((acc, transaction) => {
+      const companyTransactions = data?.reduce((acc, transaction) => {
         const company = transaction.companyName?.trim();
         if (!company) return acc; // Skip transactions with empty company names
 
@@ -167,7 +167,7 @@ const StatementUpload = ({ onUpload }) => {
           };
         }
         acc[company].transactions.push(transaction);
-        acc[company].totalAmount += transaction.creditAmount;
+        acc[company].totalAmount += Number(transaction.creditAmount);
         return acc;
       }, {});
 

@@ -121,7 +121,7 @@ const Companies = () => {
     const status = searchParams.get('status');
     const search = searchParams.get('search');
     const page = searchParams.get('page');
-    
+
     setLoaded(false);
     setTimeout(() => {
       setFilters(prev => ({
@@ -144,30 +144,39 @@ const Companies = () => {
     const { name, value } = e.target;
     if (name.includes('.')) {
       const [section, field, subfield] = name.split('.');
-      setFormData(prev => ({
-        ...prev,
-        [section]: {
-          ...prev[section],
-          [field]: subfield ? {
-            ...prev[section][field],
-            [subfield]: value
-          } : value
-        }
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
+      setFormData(prev => {
+        const currentSection = prev[section] || {};
+        const currentField = currentSection[field] || {};
+
+        return {
+          ...prev,
+          [section]: {
+            ...currentSection,
+            [field]: subfield ? {
+              ...currentField,
+              [subfield]: value
+            } : value
+          }
+        };
+      });
     }
   };
 
   const handleFileChange = (e) => {
     const { name, files } = e.target;
-    
+    if (!files || files.length === 0) return;
+
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    const file = files[0];
+
+    if (file.size > MAX_FILE_SIZE) {
+      setFormError('File size exceeds 5MB limit');
+      return;
+    }
+
     if (name.includes('.')) {
       const [section, field, subfield] = name.split('.');
-      
+
       // Special handling for otherDocuments which can have multiple files
       if (field === 'otherDocuments') {
         // Convert FileList to Array and append to existing files
@@ -250,7 +259,7 @@ const Companies = () => {
       ...company,
       businessDetails: {
         ...company.businessDetails,
-        registrationDate: company.businessDetails?.registrationDate 
+        registrationDate: company.businessDetails?.registrationDate
           ? new Date(company.businessDetails.registrationDate).toISOString().split('T')[0]
           : ''
       }
@@ -441,7 +450,7 @@ const Companies = () => {
                         <option value="both">Both</option>
                       </select>
                     </div>
-                    
+
                     <div>
                       <label htmlFor="status" className="block text-sm font-medium text-gray-700">
                         Status *
@@ -813,52 +822,52 @@ const Companies = () => {
                 </div>
 
                 {/* Bank Details */}
-                  <BankDetailsForm
-                    bankDetails={formData.bankDetails}
-                    onChange={(index, field, value) => {
-                      const newBankDetails = [...formData.bankDetails];
-                      newBankDetails[index] = {
-                        ...newBankDetails[index],
-                        [field]: value
-                      };
-                      setFormData(prev => ({
-                        ...prev,
-                        bankDetails: newBankDetails
-                      }));
-                    }}
-                    onFileChange={(index, field, file) => {
-                      const newBankDetails = [...formData.bankDetails];
-                      newBankDetails[index] = {
-                        ...newBankDetails[index],
-                        [field]: file
-                      };
-                      setFormData(prev => ({
-                        ...prev,
-                        bankDetails: newBankDetails
-                      }));
-                    }}
-                    onAdd={() => {
-                      setFormData(prev => ({
-                        ...prev,
-                        bankDetails: [...prev.bankDetails, {
-                          accountNumber: '',
-                          ifscCode: '',
-                          bankName: '',
-                          branchName: '',
-                          accountType: '',
-                          accountHolderName: '',
-                          accountHolderPan: '',
-                          accountHolderAadhar: ''
-                        }]
-                      }));
-                    }}
-                    onRemove={(index) => {
-                      setFormData(prev => ({
-                        ...prev,
-                        bankDetails: prev.bankDetails.filter((_, i) => i !== index)
-                      }));
-                    }}
-                  />
+                <BankDetailsForm
+                  bankDetails={formData.bankDetails}
+                  onChange={(index, field, value) => {
+                    const newBankDetails = [...formData.bankDetails];
+                    newBankDetails[index] = {
+                      ...newBankDetails[index],
+                      [field]: value
+                    };
+                    setFormData(prev => ({
+                      ...prev,
+                      bankDetails: newBankDetails
+                    }));
+                  }}
+                  onFileChange={(index, field, file) => {
+                    const newBankDetails = [...formData.bankDetails];
+                    newBankDetails[index] = {
+                      ...newBankDetails[index],
+                      [field]: file
+                    };
+                    setFormData(prev => ({
+                      ...prev,
+                      bankDetails: newBankDetails
+                    }));
+                  }}
+                  onAdd={() => {
+                    setFormData(prev => ({
+                      ...prev,
+                      bankDetails: [...prev.bankDetails, {
+                        accountNumber: '',
+                        ifscCode: '',
+                        bankName: '',
+                        branchName: '',
+                        accountType: '',
+                        accountHolderName: '',
+                        accountHolderPan: '',
+                        accountHolderAadhar: ''
+                      }]
+                    }));
+                  }}
+                  onRemove={(index) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      bankDetails: prev.bankDetails.filter((_, i) => i !== index)
+                    }));
+                  }}
+                />
                 <div onClick={(e) => e.preventDefault()}>
                   <Slabs slabs={formData.slabs} onSlabsChange={handleSlabsChange} />
                 </div>
@@ -975,7 +984,7 @@ const Companies = () => {
                           hover:file:bg-indigo-100"
                       />
                       <p className="mt-1 text-xs text-gray-500">You can select multiple files</p>
-                      
+
                       {/* Display selected files with remove button */}
                       {formData.documents.otherDocuments && formData.documents.otherDocuments.length > 0 && (
                         <div className="mt-2">
@@ -1023,9 +1032,8 @@ const Companies = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
-                      isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
-                    }`}
+                    className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
+                      }`}
                   >
                     {isSubmitting ? (
                       <div className="flex items-center">
@@ -1095,11 +1103,10 @@ const Companies = () => {
                       {company.businessDetails?.gstNumber}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        company.status === 'active' ? 'bg-green-100 text-green-800' :
-                        company.status === 'inactive' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${company.status === 'active' ? 'bg-green-100 text-green-800' :
+                          company.status === 'inactive' ? 'bg-red-100 text-red-800' :
+                            'bg-yellow-100 text-yellow-800'
+                        }`}>
                         {company.status}
                       </span>
                     </td>
@@ -1193,11 +1200,10 @@ const Companies = () => {
                     <div className="bg-white p-4 rounded-md shadow-sm">
                       <label className="block text-sm font-medium text-gray-500">Status</label>
                       <p className="mt-1">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                          selectedCompany.status === 'active' ? 'bg-green-100 text-green-800' :
-                          selectedCompany.status === 'inactive' ? 'bg-red-100 text-red-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
+                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${selectedCompany.status === 'active' ? 'bg-green-100 text-green-800' :
+                            selectedCompany.status === 'inactive' ? 'bg-red-100 text-red-800' :
+                              'bg-yellow-100 text-yellow-800'
+                          }`}>
                           {selectedCompany.status}
                         </span>
                       </p>
@@ -1304,9 +1310,9 @@ const Companies = () => {
                         <div className="text-lg font-medium text-gray-500">Custom Fields</div>
                         <div>
                           {Object.entries(bank.customFields || {}).map(([key, value]) => (
-                              <div className="flex items-center gap-2"><label className="text-sm font-medium text-gray-900 capitalize">{key}:</label><p className="text-lg font-medium text-gray-500">{value}</p></div>
+                            <div className="flex items-center gap-2"><label className="text-sm font-medium text-gray-900 capitalize">{key}:</label><p className="text-lg font-medium text-gray-500">{value}</p></div>
                           ))}
-                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -1365,9 +1371,9 @@ const Companies = () => {
                         <div>
                           <label className="block text-sm font-medium text-gray-500">Incorporation Certificate</label>
                           <div className="mt-1 flex items-center">
-                            <a 
-                              href={selectedCompany.documents.incorporationCertificate.url} 
-                              target="_blank" 
+                            <a
+                              href={selectedCompany.documents.incorporationCertificate.url}
+                              target="_blank"
                               rel="noopener noreferrer"
                               className="text-indigo-600 hover:text-indigo-900 flex items-center"
                             >
@@ -1379,14 +1385,14 @@ const Companies = () => {
                           </div>
                         </div>
                       )}
-                      
+
                       {selectedCompany.documents?.memorandumOfAssociation && (
                         <div>
                           <label className="block text-sm font-medium text-gray-500">Memorandum of Association</label>
                           <div className="mt-1 flex items-center">
-                            <a 
-                              href={selectedCompany.documents.memorandumOfAssociation.url} 
-                              target="_blank" 
+                            <a
+                              href={selectedCompany.documents.memorandumOfAssociation.url}
+                              target="_blank"
                               rel="noopener noreferrer"
                               className="text-indigo-600 hover:text-indigo-900 flex items-center"
                             >
@@ -1398,14 +1404,14 @@ const Companies = () => {
                           </div>
                         </div>
                       )}
-                      
+
                       {selectedCompany.documents?.articlesOfAssociation && (
                         <div>
                           <label className="block text-sm font-medium text-gray-500">Articles of Association</label>
                           <div className="mt-1 flex items-center">
-                            <a 
-                              href={selectedCompany.documents.articlesOfAssociation.url} 
-                              target="_blank" 
+                            <a
+                              href={selectedCompany.documents.articlesOfAssociation.url}
+                              target="_blank"
                               rel="noopener noreferrer"
                               className="text-indigo-600 hover:text-indigo-900 flex items-center"
                             >
@@ -1417,14 +1423,14 @@ const Companies = () => {
                           </div>
                         </div>
                       )}
-                      
+
                       {selectedCompany.documents?.boardResolution && (
                         <div>
                           <label className="block text-sm font-medium text-gray-500">Board Resolution</label>
                           <div className="mt-1 flex items-center">
-                            <a 
-                              href={selectedCompany.documents.boardResolution.url} 
-                              target="_blank" 
+                            <a
+                              href={selectedCompany.documents.boardResolution.url}
+                              target="_blank"
                               rel="noopener noreferrer"
                               className="text-indigo-600 hover:text-indigo-900 flex items-center"
                             >
@@ -1436,14 +1442,14 @@ const Companies = () => {
                           </div>
                         </div>
                       )}
-                      
+
                       {selectedCompany.documents?.taxRegistration && (
                         <div>
                           <label className="block text-sm font-medium text-gray-500">Tax Registration</label>
                           <div className="mt-1 flex items-center">
-                            <a 
-                              href={selectedCompany.documents.taxRegistration.url} 
-                              target="_blank" 
+                            <a
+                              href={selectedCompany.documents.taxRegistration.url}
+                              target="_blank"
                               rel="noopener noreferrer"
                               className="text-indigo-600 hover:text-indigo-900 flex items-center"
                             >
@@ -1455,16 +1461,16 @@ const Companies = () => {
                           </div>
                         </div>
                       )}
-                      
+
                       {selectedCompany.documents?.otherDocuments && selectedCompany.documents.otherDocuments.length > 0 && (
                         <div className="md:col-span-2">
                           <label className="block text-sm font-medium text-gray-500">Other Documents</label>
                           <div className="mt-1 grid grid-cols-1 md:grid-cols-2 gap-4">
                             {selectedCompany.documents.otherDocuments.map((doc, index) => (
                               <div key={index} className="flex items-center">
-                                <a 
-                                  href={doc.url} 
-                                  target="_blank" 
+                                <a
+                                  href={doc.url}
+                                  target="_blank"
                                   rel="noopener noreferrer"
                                   className="text-indigo-600 hover:text-indigo-900 flex items-center"
                                 >
@@ -1478,17 +1484,17 @@ const Companies = () => {
                           </div>
                         </div>
                       )}
-                      
-                      {(!selectedCompany.documents?.incorporationCertificate && 
-                        !selectedCompany.documents?.memorandumOfAssociation && 
-                        !selectedCompany.documents?.articlesOfAssociation && 
-                        !selectedCompany.documents?.boardResolution && 
-                        !selectedCompany.documents?.taxRegistration && 
+
+                      {(!selectedCompany.documents?.incorporationCertificate &&
+                        !selectedCompany.documents?.memorandumOfAssociation &&
+                        !selectedCompany.documents?.articlesOfAssociation &&
+                        !selectedCompany.documents?.boardResolution &&
+                        !selectedCompany.documents?.taxRegistration &&
                         (!selectedCompany.documents?.otherDocuments || selectedCompany.documents.otherDocuments.length === 0)) && (
-                        <div className="md:col-span-2 text-center py-4 text-gray-500">
-                          No documents uploaded
-                        </div>
-                      )}
+                          <div className="md:col-span-2 text-center py-4 text-gray-500">
+                            No documents uploaded
+                          </div>
+                        )}
                     </div>
                   </div>
                 </div>

@@ -32,15 +32,7 @@ const TodoList = () => {
       const response = await axios.get(`${backendUrl}/api/todos`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const sortedTodos = response.data.sort((a, b) => {
-        const priorityOrder = { high: 0, medium: 1, low: 2 };
-        const statusOrder = { pending: 0, in_progress: 1, completed: 2 };
-
-        if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
-          return priorityOrder[a.priority] - priorityOrder[b.priority];
-        }
-        return statusOrder[a.status] - statusOrder[b.status];
-      });
+      const sortedTodos = response?.data || [];
       setTodos(sortedTodos);
       setLoading(false);
     } catch (err) {

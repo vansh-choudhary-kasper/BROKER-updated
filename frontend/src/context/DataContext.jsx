@@ -118,9 +118,12 @@ export const DataProvider = ({ children }) => {
 
       const response = await axios.get(`${backendUrl}/api/tasks?${queryParams.toString()}`);
 
-      if (response.data && response.data.data) {
-        setTasks(response.data.data.tasks || []);
-        setTotalTasks(response.data.data.total || 0);
+      if (response?.data?.data) {
+        const tasksData = response.data.data.tasks || [];
+        const total = response.data.data.total || tasksData.length;
+        
+        setTasks(tasksData);
+        setTotalTasks(total);
       } else {
         setTasks([]);
         setTotalTasks(0);

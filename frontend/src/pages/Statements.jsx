@@ -33,11 +33,13 @@ const Statements = () => {
       
       // Group statements by company
       const groupedByCompany = response.data.reduce((groups, statement) => {
-        statement.companySummaries.forEach(summary => {
+        statement.companySummaries?.forEach(summary => {
+          if(!summary.company?._id) return;
+
           const companyId = summary.company._id;
           if (!groups[companyId]) {
             groups[companyId] = {
-              companyName: summary.company.name,
+              companyName: summary.company?.name || 'Unknown Company',
               statements: []
             };
           }
@@ -100,10 +102,19 @@ const Statements = () => {
   };
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-IN', {
-      year: 'numeric',
-      month: 'long'
-    });
+    if (!date) return 'N/A';
+    
+    try {
+      const parsedDate = new Date(date);
+      if (isNaN(parsedDate.getTime())) return 'Invalid Date';
+      
+      return parsedDate.toLocaleDateString('en-IN', {
+        year: 'numeric',
+        month: 'long'
+      });
+    } catch (error) {
+      return 'Invalid Date';
+    }
   };
 
   const formatCurrency = (amount) => {
