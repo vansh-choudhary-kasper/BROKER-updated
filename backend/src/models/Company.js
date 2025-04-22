@@ -104,7 +104,8 @@ const companySchema = new mongoose.Schema({
   // Financial account information
   bankDetails: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Bank'
+    ref: 'Bank',
+    _id: false
   }],
 
   documents: {

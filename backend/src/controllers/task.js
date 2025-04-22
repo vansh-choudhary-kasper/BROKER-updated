@@ -351,6 +351,20 @@ class TaskController {
                     // Update financial summary
                     brokerDoc.financialSummary.pendingCommission += commission;
                     brokerDoc.financialSummary.totalTasks++;
+                } 
+                // If task payment exists, status is pending, and amount or commission changed
+                else if (existingTaskPayment && helperBroker.status === 'pending' && 
+                        existingTaskPayment.status === 'pending') {
+                    // Calculate new commission amount
+                    let newCommission = payment.amount * (helperBroker.commission / 100);
+                    
+                    // Update financial summary - adjust pending commission
+                    brokerDoc.financialSummary.pendingCommission -= existingTaskPayment.amount;
+                    brokerDoc.financialSummary.pendingCommission += newCommission;
+                    
+                    // Update task payment record
+                    existingTaskPayment.amount = newCommission;
+                    existingTaskPayment.commission = helperBroker.commission;
                 }
 
                 await brokerDoc.save();

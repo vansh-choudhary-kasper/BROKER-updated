@@ -168,6 +168,7 @@ class CompanyController {
                 currentPage: page,
                 totalPages: 0
             };
+            console.log(companies[0].bankDetails);
     
             return res.status(200).json(
                 ApiResponse.success('Companies retrieved successfully', {
@@ -258,17 +259,20 @@ class CompanyController {
                 return res.status(400).json({ message: validationResult.errors });
             }
 
+            const bankDetails = [];
             // Update bank details if provided
             if (companyData.bankDetails) {
                 for (const bankData of companyData.bankDetails) {
-                    if (bankData._id) {
-                        // Update existing bank record
-                        await Bank.findByIdAndUpdate(bankData._id, bankData);
+                    let bank = await Bank.findOne({accountNumber: bankData.accountNumber}); 
+                    if(bank) {
+                        Object.assign(bank, bankData);
+                        await bank.save();
+                        bankDetails.push({_id: bank._id});
                     } else {
                         // Create new bank record and link to company
                         const newBank = new Bank(bankData);
                         await newBank.save();
-                        company.bankDetails.push(newBank._id);
+                        bankDetails.push({_id: newBank._id});
                     }
                 }
             }
@@ -277,6 +281,7 @@ class CompanyController {
             if(companyData.slabs) {
                 companyData.slabs = Object.values(companyData.slabs);
             }
+            companyData.bankDetails = bankDetails;
             // Update other company data
             Object.assign(company, companyData);
             

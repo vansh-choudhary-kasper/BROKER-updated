@@ -742,8 +742,8 @@ const Broker = () => {
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Financial Summary</h3>
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-500">Total Tasks</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.financialSummary?.totalTasks || 0}</p>
+                    <label className="block text-sm font-medium text-gray-500">Total Deals</label>
+                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.financialSummary?.totalDeals || 0}</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-500">Total Commission</label>
@@ -843,7 +843,7 @@ const Broker = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm">
-                        <div>Tasks: {broker.financialSummary?.totalTasks || 0}</div>
+                        <div>Deals: {broker.financialSummary?.totalTasks || 0}</div>
                         <div>Commission: ₹{broker.financialSummary?.totalCommission || 0}</div>
                         <div>Pending: ₹{broker.financialSummary?.pendingCommission || 0}</div>
                       </div>
