@@ -11,6 +11,12 @@ class CompanyController {
     async createCompany(req, res) {
         try {
             const companyData = buildNestedObject(req.body); // Flattened form parsing
+
+            // Validate company data
+            const validationResult = validateCompanyData(companyData);
+            if (!validationResult.isValid) {
+                return res.status(400).json({ message: validationResult.errors });
+            }
     
             // Handle file uploads
             if (req.files && Object.keys(req.files).length > 0) {
@@ -53,12 +59,6 @@ class CompanyController {
                         }
                     }
                 }
-            }
-    
-            // Validate company data
-            const validationResult = validateCompanyData(companyData);
-            if (!validationResult.isValid) {
-                return res.status(400).json({ message: validationResult.errors });
             }
     
             // Create and save new company
@@ -168,7 +168,6 @@ class CompanyController {
                 currentPage: page,
                 totalPages: 0
             };
-            console.log(companies[0].bankDetails);
     
             return res.status(200).json(
                 ApiResponse.success('Companies retrieved successfully', {
@@ -213,6 +212,11 @@ class CompanyController {
             if (!company) {
                 return res.status(404).json({ message: 'Company not found' });
             }
+
+            const validationResult = validateCompanyData(companyData);
+            if (!validationResult.isValid) {
+                return res.status(400).json({ message: validationResult.errors });
+            }
     
             if (req.files && Object.keys(req.files).length > 0) {
     
@@ -252,11 +256,6 @@ class CompanyController {
                         }
                     }
                 }
-            }
-    
-            const validationResult = validateCompanyData(companyData);
-            if (!validationResult.isValid) {
-                return res.status(400).json({ message: validationResult.errors });
             }
 
             const bankDetails = [];

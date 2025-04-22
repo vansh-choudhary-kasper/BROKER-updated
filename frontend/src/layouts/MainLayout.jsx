@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -7,6 +7,7 @@ const MainLayout = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [key, setKey] = useState(0);
 
   const handleLogout = () => {
     logout();
@@ -19,6 +20,18 @@ const MainLayout = () => {
 
   const isActive = (path) => {
     return location.pathname === path;
+  };
+
+  // Force re-render of the Outlet component when navigating to the same route
+  useEffect(() => {
+    setKey(prevKey => prevKey + 1);
+  }, [location.pathname, location.search]);
+
+  const handleNavigation = (path) => {
+    if (location.pathname === path) {
+      // If already on the same path, force a reload of the component
+      setKey(prevKey => prevKey + 1);
+    }
   };
 
   const navItems = [
@@ -167,6 +180,7 @@ const MainLayout = () => {
                       className={`nav-link ${
                         isActive(item.path) ? 'active' : ''
                       }`}
+                      onClick={() => handleNavigation(item.path)}
                     >
                       <svg
                         className="w-6 h-6"
@@ -202,6 +216,7 @@ const MainLayout = () => {
                           key={dropdownItem.path}
                           to={dropdownItem.path}
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150 border-l-4 border-transparent hover:border-blue-200"
+                          onClick={() => handleNavigation(dropdownItem.path)}
                         >
                           {dropdownItem.name}
                         </Link>
@@ -214,6 +229,7 @@ const MainLayout = () => {
                     className={`nav-link ${
                       isActive(item.path) ? 'active' : ''
                     }`}
+                    onClick={() => handleNavigation(item.path)}
                   >
                     <svg
                       className="w-6 h-6"
@@ -254,7 +270,7 @@ const MainLayout = () => {
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-4">
-          <Outlet />
+          <Outlet key={key} />
         </main>
       </div>
     </div>

@@ -265,7 +265,7 @@ const Dashboard = () => {
     '#FFCC99', // Peach
     '#CC99FF', // Lavender
     '#99CCFF', // Light Blue
-    '#FFFF99',  // Light Yellow
+    '#FF8800',  // Light Yellow
     '#0088FE', // Royal Blue
     '#00C49F', // Teal Green
     '#FFBB28', // Golden Yellow

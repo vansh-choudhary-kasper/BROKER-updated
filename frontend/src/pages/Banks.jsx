@@ -346,7 +346,7 @@ const Banks = () => {
 
                 <div>
                   <label htmlFor="accountHolderPan" className="block text-sm font-medium text-gray-700">
-                    Account Holder PAN
+                    Account Holder PAN *
                   </label>
                   <input
                     type="text"
@@ -354,13 +354,16 @@ const Banks = () => {
                     name="accountHolderPan"
                     value={formData.accountHolderPan}
                     onChange={handleChange}
+                    required
+                    pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}"
+                    title="Invalid PAN format, PAN format should be like ABCDE12345"
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   />
                 </div>
 
                 <div>
                   <label htmlFor="accountHolderAadhar" className="block text-sm font-medium text-gray-700">
-                    Account Holder Aadhar
+                    Account Holder Aadhar *
                   </label>
                   <input
                     type="text"
@@ -368,6 +371,9 @@ const Banks = () => {
                     name="accountHolderAadhar"
                     value={formData.accountHolderAadhar}
                     onChange={handleChange}
+                    required
+                    pattern="[0-9]{12}"
+                    title="Invalid Aadhar format, Aadhar format should be like 123456789012"
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                   />
                 </div>

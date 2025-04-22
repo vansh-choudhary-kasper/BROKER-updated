@@ -76,7 +76,7 @@ const validateCompanyData = (data) => {
       if (!bank.ifscCode) {
         errors.push(`IFSC code is required for account #${index + 1}`);
       } else if (!isValidIFSC(bank.ifscCode)) {
-        errors.push(`Invalid IFSC code format for account #${index + 1}`);
+        errors.push(`Invalid IFSC code format for account #${index + 1}, IFSC format should be like ABCD0123456`);
       }
       if (!bank.bankName) {
         errors.push(`Bank name is required for account #${index + 1}`);
@@ -93,7 +93,12 @@ const validateCompanyData = (data) => {
       if (!bank.accountHolderPan) {
         errors.push(`Account holder PAN is required for account #${index + 1}`);
       } else if (!isValidPAN(bank.accountHolderPan)) {
-        errors.push(`Invalid account holder PAN format for account #${index + 1}`);
+        errors.push(`Invalid account holder PAN format for account #${index + 1}, PAN format should be like ABCDE12345`);
+      }
+      if (!bank.accountHolderAadhar) {
+        errors.push(`Account holder Aadhar is required for account #${index + 1}`);
+      } else if (!isValidAadhar(bank.accountHolderAadhar)) {
+        errors.push(`Invalid account holder Aadhar format for account #${index + 1}, Aadhar format should be like 123456789012`);
       }
     });
   }

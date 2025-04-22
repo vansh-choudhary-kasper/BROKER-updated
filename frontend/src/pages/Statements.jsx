@@ -554,7 +554,7 @@ const Statements = () => {
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {statement.companySummaries.map((summary, idx) => (
                       <div key={idx} className="mb-2">
-                        <div className="font-medium text-gray-900">{summary.company.name}</div>
+                        <div className="font-medium text-gray-900">{summary?.company?.name}</div>
                         <div className="mt-1">
                           {summary.applicableSlab && (
                             <div className="flex items-center space-x-2">
