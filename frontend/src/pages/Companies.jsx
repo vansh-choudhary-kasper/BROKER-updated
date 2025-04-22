@@ -227,7 +227,6 @@ const Companies = () => {
     setIsSubmitting(true);
     try {
       if (editingCompany) {
-        console.log(formData);
         await updateCompany(editingCompany._id, formData);
       } else {
         await addCompany(formData);

@@ -26,8 +26,8 @@ const StatementUpload = ({ onUpload }) => {
   const fetchCompanySlabs = async () => {
     try {
       const slabsMap = {};
-      companies.forEach(company => {
-        slabsMap[company.name] = company.slabs || [];
+      companies?.forEach(company => {
+        slabsMap[company?.name] = company?.slabs || [];
       });
       setCompanySlabs(slabsMap);
     } catch (error) {
@@ -36,24 +36,24 @@ const StatementUpload = ({ onUpload }) => {
   };
 
   const formatSlabRange = (slab) => {
-    if (slab.maxAmount === 0) {
-      return `Above ₹${(slab.minAmount).toLocaleString('en-IN')}`;
+    if (slab?.maxAmount === 0) {
+      return `Above ₹${(slab?.minAmount).toLocaleString('en-IN')}`;
     }
-    return `₹${(slab.minAmount).toLocaleString('en-IN')} - ₹${(slab.maxAmount).toLocaleString('en-IN')}`;
+    return `₹${(slab?.minAmount).toLocaleString('en-IN')} - ₹${(slab?.maxAmount).toLocaleString('en-IN')}`;
   };
 
   const getApplicableSlabs = (companyName, amount) => {
     const slabs = companySlabs[companyName] || [];
     // Find the single applicable slab where amount falls within the range
     return slabs.find(slab => 
-      amount >= slab.minAmount && 
-      (slab.maxAmount === 0 || amount < slab.maxAmount)
+      amount >= slab?.minAmount && 
+      (slab?.maxAmount === 0 || amount < slab?.maxAmount)
     );
   };
 
   const calculateCommission = (amount, slab) => {
     if (!slab) return 0;
-    return (amount * slab.commission) / 100;
+    return (amount * slab?.commission) / 100;
   };
 
   const handleDateChange = (e) => {
@@ -61,7 +61,7 @@ const StatementUpload = ({ onUpload }) => {
   };
 
   const handleFileChange = async (e) => {
-    const selectedFile = e.target.files[0];
+    const selectedFile = e?.target?.files?.[0] || null;
     if (!selectedFile) return;
 
     setFile(selectedFile);
@@ -71,25 +71,25 @@ const StatementUpload = ({ onUpload }) => {
 
     try {
       // Check file size (limit to 5MB)
-      if (selectedFile.size > 5 * 1024 * 1024) {
+      if (selectedFile?.size > 5 * 1024 * 1024) {
         throw new Error('File size exceeds 5MB limit');
       }
 
-      if (selectedFile.name.endsWith('.csv')) {
+      if (selectedFile?.name?.endsWith('.csv')) {
         // Handle CSV file
         PapaParse.parse(selectedFile, {
           complete: (results) => {
             try {
               // Check if file has headers
-              if (results.data.length < 2) {
+              if (results?.data?.length < 2) {
                 throw new Error('CSV file must contain headers and at least one row of data');
               }
 
               // Validate headers
-              const headers = results.data[0];
+              const headers = results?.data?.[0];
               const requiredHeaders = ['date', 'company', 'bank', 'account', 'amount'];
-              const headerCheck = requiredHeaders.every(header => 
-                headers.some(h => h.toLowerCase().includes(header.toLowerCase()))
+              const headerCheck = requiredHeaders?.every(header => 
+                headers?.some(h => h?.toLowerCase()?.includes(header?.toLowerCase()))
               );
               
               if (!headerCheck) {
@@ -97,46 +97,46 @@ const StatementUpload = ({ onUpload }) => {
               }
 
               // Filter out empty rows and validate data
-              const data = results.data
-                .slice(1)
-                .filter(row => 
-                  row.length === headers.length && // Ensure all columns are present
-                  row.every(cell => cell !== null && cell !== undefined && cell.toString().trim() !== '')
+              const data = results?.data
+                ?.slice(1)
+                ?.filter(row => 
+                  row?.length === headers?.length && // Ensure all columns are present
+                  row?.every(cell => cell !== null && cell !== undefined && cell?.toString()?.trim() !== '')
                 )
-                .map(row => ({
+                ?.map(row => ({
                   date: row[0],
                   companyName: row[1],
                   bankName: row[2],
                   accountNo: row[3],
                   creditAmount: parseFloat(row[4])
                 }))
-                .filter(transaction => 
-                  !isNaN(transaction.creditAmount) && 
-                  transaction.creditAmount > 0
+                ?.filter(transaction => 
+                  !isNaN(transaction?.creditAmount) && 
+                  transaction?.creditAmount > 0
                 );
               
-              if (data.length === 0) {
+              if (data?.length === 0) {
                 throw new Error('No valid transactions found in the file');
               }
               
               // Check if companies exist in our system
               const unknownCompanies = data
-                .map(t => t.companyName)
-                .filter((name, index, self) => self.indexOf(name) === index) // Get unique company names
-                .filter(name => !companySlabs[name]);
+                ?.map(t => t?.companyName)
+                ?.filter((name, index, self) => self?.indexOf(name) === index) // Get unique company names
+                ?.filter(name => !companySlabs[name]);
                 
-              if (unknownCompanies.length > 0) {
-                setFormError(`Warning: The following companies are not recognized: ${unknownCompanies.join(', ')}`);
+              if (unknownCompanies?.length > 0) {
+                setFormError(`Warning: The following companies are not recognized: ${unknownCompanies?.join(', ')}`);
               }
 
-              const slabNotDefined = data.filter(transaction => {
-                const applicableSlab = getApplicableSlabs(transaction.companyName, transaction.creditAmount);
+              const slabNotDefined = data?.filter(transaction => {
+                const applicableSlab = getApplicableSlabs(transaction?.companyName, transaction?.creditAmount);
                 return !applicableSlab;
-              }).map(t => t.companyName)
-              .filter((name, index, self) => self.indexOf(name) === index);
+              })?.map(t => t?.companyName)
+              ?.filter((name, index, self) => self?.indexOf(name) === index);
 
-              if (slabNotDefined.length > 0) {
-                setFormError(`Warning: The following companies have no slabs defined: ${slabNotDefined.join(', ')}`);
+              if (slabNotDefined?.length > 0) {
+                setFormError(`Warning: The following companies have no slabs defined: ${slabNotDefined?.join(', ')}`);
               } 
               
               processTransactions(data);
@@ -148,33 +148,33 @@ const StatementUpload = ({ onUpload }) => {
             setError('Error parsing CSV file: ' + error.message);
           }
         });
-      } else if (selectedFile.name.endsWith('.xml')) {
+      } else if (selectedFile?.name?.endsWith('.xml')) {
         // Handle XML file
         const reader = new FileReader();
         reader.onload = (e) => {
           try {
             const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(e.target.result, "text/xml");
+            const xmlDoc = parser.parseFromString(e?.target?.result, "text/xml");
             
             // Check for XML parsing errors
-            const parseError = xmlDoc.getElementsByTagName('parsererror');
-            if (parseError.length > 0) {
-              throw new Error('Invalid XML format: ' + parseError[0].textContent);
+            const parseError = xmlDoc?.getElementsByTagName('parsererror');
+            if (parseError?.length > 0) {
+              throw new Error('Invalid XML format: ' + parseError[0]?.textContent);
             }
             
-            const transactions = Array.from(xmlDoc.getElementsByTagName('transaction'));
+            const transactions = Array.from(xmlDoc?.getElementsByTagName('transaction'));
             
-            if (transactions.length === 0) {
+            if (transactions?.length === 0) {
               throw new Error('No transaction elements found in XML file');
             }
             
             const data = transactions
-              .map(transaction => {
-                const date = transaction.getElementsByTagName('date')[0]?.textContent;
-                const companyName = transaction.getElementsByTagName('companyName')[0]?.textContent;
-                const bankName = transaction.getElementsByTagName('bankName')[0]?.textContent;
-                const accountNo = transaction.getElementsByTagName('accountNo')[0]?.textContent;
-                const creditAmount = parseFloat(transaction.getElementsByTagName('creditAmount')[0]?.textContent);
+              ?.map(transaction => {
+                const date = transaction?.getElementsByTagName('date')[0]?.textContent;
+                const companyName = transaction?.getElementsByTagName('companyName')[0]?.textContent;
+                const bankName = transaction?.getElementsByTagName('bankName')[0]?.textContent;
+                const accountNo = transaction?.getElementsByTagName('accountNo')[0]?.textContent;
+                const creditAmount = parseFloat(transaction?.getElementsByTagName('creditAmount')[0]?.textContent);
 
                 // Only return transaction if all required fields are present and valid
                 if (date && companyName && bankName && accountNo && !isNaN(creditAmount) && creditAmount > 0) {
@@ -188,20 +188,20 @@ const StatementUpload = ({ onUpload }) => {
                 }
                 return null;
               })
-              .filter(transaction => transaction !== null); // Remove invalid transactions
+              ?.filter(transaction => transaction !== null); // Remove invalid transactions
 
-            if (data.length === 0) {
+            if (data?.length === 0) {
               throw new Error('No valid transactions found in the file');
             }
 
             // Check if companies exist in our system
             const unknownCompanies = data
-              .map(t => t.companyName)
-              .filter((name, index, self) => self.indexOf(name) === index) // Get unique company names
-              .filter(name => !companySlabs[name]);
+              ?.map(t => t?.companyName)
+              ?.filter((name, index, self) => self?.indexOf(name) === index) // Get unique company names
+              ?.filter(name => !companySlabs[name]);
               
-            if (unknownCompanies.length > 0) {
-              setFormError(`Warning: The following companies are not recognized: ${unknownCompanies.join(', ')}`);
+            if (unknownCompanies?.length > 0) {
+              setFormError(`Warning: The following companies are not recognized: ${unknownCompanies?.join(', ')}`);
             }
 
             processTransactions(data);
@@ -226,7 +226,7 @@ const StatementUpload = ({ onUpload }) => {
     try {
       // Group transactions by company
       const companyTransactions = data?.reduce((acc, transaction) => {
-        const company = transaction.companyName?.trim();
+        const company = transaction?.companyName?.trim();
         if (!company) return acc; // Skip transactions with empty company names
 
         if (!acc[company]) {
@@ -235,28 +235,28 @@ const StatementUpload = ({ onUpload }) => {
             totalAmount: 0
           };
         }
-        acc[company].transactions.push(transaction);
-        acc[company].totalAmount += Number(transaction.creditAmount);
+        acc[company]?.transactions?.push(transaction);
+        acc[company].totalAmount += Number(transaction?.creditAmount || 0);
         return acc;
       }, {});
 
       // Create preview data with slab information
       const previewData = Object.entries(companyTransactions)
-        .filter(([company]) => company && company.trim() !== '') // Filter out empty company names
-        .map(([company, data]) => {
-          const applicableSlab = getApplicableSlabs(company, data.totalAmount);
-          const commission = calculateCommission(data.totalAmount, applicableSlab);
+        ?.filter(([company]) => company && company?.trim() !== '') // Filter out empty company names
+        ?.map(([company, data]) => {
+          const applicableSlab = getApplicableSlabs(company, data?.totalAmount);
+          const commission = calculateCommission(data?.totalAmount, applicableSlab);
           
           return {
             companyName: company,
-            transactionCount: data.transactions.length,
-            totalAmount: data.totalAmount,
+            transactionCount: data?.transactions?.length,
+            totalAmount: data?.totalAmount,
             applicableSlab,
             commission
           };
         });
 
-      if (previewData.length === 0) {
+      if (previewData?.length === 0) {
         throw new Error('No valid company transactions found');
       }
 
@@ -391,24 +391,24 @@ const StatementUpload = ({ onUpload }) => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {preview.summary.map((company, index) => (
+                      {preview?.summary?.map((company, index) => (
                         <tr key={index}>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {company.companyName}
+                            {company?.companyName}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {company.transactionCount}
+                            {company?.transactionCount}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {new Intl.NumberFormat('en-IN', {
                               style: 'currency',
                               currency: 'INR'
-                            }).format(company.totalAmount)}
+                            }).format(company?.totalAmount)}
                           </td>
                           <td className="px-6 py-4 text-sm text-gray-500">
-                            {company.applicableSlab ? (
+                            {company?.applicableSlab ? (
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {formatSlabRange(company.applicableSlab)} @ {company.applicableSlab.commission}%
+                                {formatSlabRange(company?.applicableSlab)} @ {company?.applicableSlab?.commission}%
                               </span>
                             ) : (
                               <span className="text-yellow-600">No slabs defined</span>
@@ -418,7 +418,7 @@ const StatementUpload = ({ onUpload }) => {
                             {new Intl.NumberFormat('en-IN', {
                               style: 'currency',
                               currency: 'INR'
-                            }).format(company.commission)}
+                            }).format(company?.commission)}
                           </td>
                         </tr>
                       ))}

@@ -105,7 +105,6 @@ export const AuthProvider = ({ children }) => {
       setToken(response.data.token);
       setIsAuthenticated(true);
       setIsAdmin(response.data.user.role === 'admin');
-      console.log('login response', response);
       return response.data;
     } catch (error) {
       const errorMessage = error?.response?.data?.message || 'Login failed';

@@ -10,7 +10,7 @@ function buildNestedObject(flatObj) {
             // Handle array notation [0], [1], etc.
             if (part.includes('[') && part.includes(']')) {
                 const arrayPart = part.split('[');
-                const arrayName = arrayPart[0];
+                const arrayName = arrayPart[0] || '';
                 const arrayIndex = parseInt(arrayPart[1]);
                 
                 if (!current[arrayName]) {

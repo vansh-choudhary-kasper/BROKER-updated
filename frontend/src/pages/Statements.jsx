@@ -33,21 +33,21 @@ const Statements = () => {
       
       // Group statements by company
       const groupedByCompany = response.data.reduce((groups, statement) => {
-        statement.companySummaries?.forEach(summary => {
-          if(!summary.company?._id) return;
+        statement?.companySummaries?.forEach(summary => {
+          if(!summary?.company?._id) return;
 
-          const companyId = summary.company._id;
+          const companyId = summary?.company?._id;
           if (!groups[companyId]) {
             groups[companyId] = {
-              companyName: summary.company?.name || 'Unknown Company',
+              companyName: summary?.company?.name || 'Unknown Company',
               statements: []
             };
           }
-          groups[companyId].statements.push({
-            date: statement.uploadDate,
-            totalAmount: summary.totalAmount,
-            commission: summary.commission,
-            applicableSlab: summary.applicableSlab // Updated to use single slab
+          groups[companyId]?.statements?.push({
+            date: statement?.uploadDate,
+            totalAmount: summary?.totalAmount,
+            commission: summary?.commission,
+            applicableSlab: summary?.applicableSlab // Updated to use single slab
           });
         });
         return groups;
@@ -55,7 +55,7 @@ const Statements = () => {
 
       setCompanyStatements(groupedByCompany);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch statements');
+      setError(err?.response?.data?.message || 'Failed to fetch statements');
     } finally {
       setLoading(false);
     }
@@ -69,10 +69,10 @@ const Statements = () => {
       const response = await axios.post(
         `${backendUrl}/api/statements/upload`,
         {
-          transactions: uploadData.fileData.data,
-          fileType: uploadData.fileData.file?.name?.split('.')?.pop()?.toLowerCase() || 'csv',
-          fileName: uploadData.fileData.file?.name || 'statement.csv',
-          statementDate: uploadData.date
+          transactions: uploadData?.fileData?.data,
+          fileType: uploadData?.fileData?.file?.name?.split('.')?.pop()?.toLowerCase() || 'csv',
+          fileName: uploadData?.fileData?.file?.name || 'statement.csv',
+          statementDate: uploadData?.date
         },
         {
           headers: {
@@ -125,10 +125,10 @@ const Statements = () => {
   };
 
   const formatSlabRange = (slab) => {
-    if (slab.maxAmount === 0) {
-      return `Above ₹${(slab.minAmount).toLocaleString('en-IN')}`;
+    if (slab?.maxAmount === 0) {
+      return `Above ₹${(slab?.minAmount).toLocaleString('en-IN')}`;
     }
-    return `₹${(slab.minAmount).toLocaleString('en-IN')} - ₹${(slab.maxAmount).toLocaleString('en-IN')}`;
+    return `₹${(slab?.minAmount).toLocaleString('en-IN')} - ₹${(slab?.maxAmount).toLocaleString('en-IN')}`;
   };
 
   const handleViewDetails = async (statement, companyId = null) => {
@@ -143,7 +143,7 @@ const Statements = () => {
 
   // Filter transactions for selected company
   const getCompanyTransactions = (transactions, companyName) => {
-    return transactions.filter(t => t.companyName === companyName);
+    return transactions?.filter(t => t?.companyName === companyName);
   };
 
   return (
@@ -191,7 +191,7 @@ const Statements = () => {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">
                 {selectedCompanyId 
-                  ? `${selectedStatement.companySummaries.find(s => s.company._id === selectedCompanyId)?.company.name} - Statement Details`
+                  ? `${selectedStatement?.companySummaries?.find(s => s?.company?._id === selectedCompanyId)?.company?.name} - Statement Details`
                   : 'Statement Details'
                 }
               </h2>
@@ -224,17 +224,17 @@ const Statements = () => {
                   </div>
                   {selectedCompanyId ? (
                     <>
-                      {selectedStatement.companySummaries
-                        .filter(summary => summary.company._id === selectedCompanyId)
-                        .map(summary => (
-                          <React.Fragment key={summary.company._id}>
+                      {selectedStatement?.companySummaries
+                        ?.filter(summary => summary?.company?._id === selectedCompanyId)
+                        ?.map(summary => (
+                          <React.Fragment key={summary?.company?._id}>
                             <div>
                               <p className="text-sm text-gray-500">Total Amount</p>
-                              <p className="text-base font-medium">{formatCurrency(summary.totalAmount)}</p>
+                              <p className="text-base font-medium">{formatCurrency(summary?.totalAmount)}</p>
                             </div>
                             <div>
                               <p className="text-sm text-gray-500">Commission</p>
-                              <p className="text-base font-medium">{formatCurrency(summary.commission)}</p>
+                              <p className="text-base font-medium">{formatCurrency(summary?.commission)}</p>
                             </div>
                           </React.Fragment>
                         ))
@@ -244,24 +244,24 @@ const Statements = () => {
                     <>
                       <div>
                         <p className="text-sm text-gray-500">Total Amount</p>
-                        <p className="text-base font-medium">{formatCurrency(selectedStatement.totalAmount)}</p>
+                        <p className="text-base font-medium">{formatCurrency(selectedStatement?.totalAmount)}</p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">Total Commission</p>
-                        <p className="text-base font-medium">{formatCurrency(selectedStatement.totalCommission)}</p>
+                        <p className="text-base font-medium">{formatCurrency(selectedStatement?.totalCommission)}</p>
                       </div>
                     </>
                   )}
                   <div>
                     <p className="text-sm text-gray-500">Status</p>
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      selectedStatement.status === 'processed' 
+                      selectedStatement?.status === 'processed' 
                         ? 'bg-green-100 text-green-800'
-                        : selectedStatement.status === 'error'
+                        : selectedStatement?.status === 'error'
                         ? 'bg-red-100 text-red-800'
                         : 'bg-yellow-100 text-yellow-800'
                     }`}>
-                      {selectedStatement.status}
+                      {selectedStatement?.status}
                     </span>
                   </div>
                 </div>
@@ -292,21 +292,21 @@ const Statements = () => {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {selectedStatement.companySummaries.map((summary, idx) => (
+                        {selectedStatement?.companySummaries?.map((summary, idx) => (
                           <tr key={idx}>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                              {summary.company.name}
+                              {summary?.company?.name}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {formatCurrency(summary.totalAmount)}
+                              {formatCurrency(summary?.totalAmount)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {formatCurrency(summary.commission)}
+                              {formatCurrency(summary?.commission)}
                             </td>
                             <td className="px-6 py-4 text-sm text-gray-500">
-                              {summary.applicableSlab && (
+                              {summary?.applicableSlab && (
                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                  {formatSlabRange(summary.applicableSlab)} @ {summary.applicableSlab.commission}%
+                                  {formatSlabRange(summary?.applicableSlab)} @ {summary?.applicableSlab?.commission}%
                                 </span>
                               )}
                             </td>
@@ -348,29 +348,29 @@ const Statements = () => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {(selectedCompanyId 
-                        ? selectedStatement.originalTransactions.filter(t => {
-                            const companySummary = selectedStatement.companySummaries.find(s => s.company._id === selectedCompanyId);
-                            return t.companyName === companySummary?.company.name;
+                        ? selectedStatement?.originalTransactions?.filter(t => {
+                            const companySummary = selectedStatement?.companySummaries?.find(s => s?.company?._id === selectedCompanyId);
+                            return t?.companyName === companySummary?.company?.name;
                           })
-                        : selectedStatement.originalTransactions
+                        : selectedStatement?.originalTransactions
                       ).map((transaction, idx) => (
                         <tr key={idx}>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {new Date(transaction.date).toLocaleDateString('en-IN')}
+                            {new Date(transaction?.date)?.toLocaleDateString('en-IN')}
                           </td>
                           {!selectedCompanyId && (
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {transaction.companyName}
+                              {transaction?.companyName}
                             </td>
                           )}
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {transaction.bankName}
+                            {transaction?.bankName}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {transaction.accountNo}
+                            {transaction?.accountNo}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {formatCurrency(transaction.creditAmount)}
+                            {formatCurrency(transaction?.creditAmount)}
                           </td>
                         </tr>
                       ))}
@@ -384,28 +384,28 @@ const Statements = () => {
                 <button
                   onClick={() => {
                     const transactions = selectedCompanyId 
-                      ? selectedStatement.originalTransactions.filter(t => {
-                          const companySummary = selectedStatement.companySummaries.find(s => s.company._id === selectedCompanyId);
-                          return t.companyName === companySummary?.company.name;
+                      ? selectedStatement?.originalTransactions?.filter(t => {
+                          const companySummary = selectedStatement?.companySummaries?.find(s => s?.company?._id === selectedCompanyId);
+                          return t?.companyName === companySummary?.company?.name;
                         })
-                      : selectedStatement.originalTransactions;
+                      : selectedStatement?.originalTransactions;
 
                     const csvContent = "data:text/csv;charset=utf-8," + 
                       (selectedCompanyId 
                         ? "Date,Bank Name,Account No,Amount\n" +
-                          transactions.map(t => 
-                            `${t.date},${t.bankName},${t.accountNo},${t.creditAmount}`
+                          transactions?.map(t => 
+                            `${t?.date},${t?.bankName},${t?.accountNo},${t?.creditAmount}`
                           ).join("\n")
                         : "Date,Company,Bank Name,Account No,Amount\n" +
-                          transactions.map(t => 
-                            `${t.date},${t.companyName},${t.bankName},${t.accountNo},${t.creditAmount}`
+                          transactions?.map(t => 
+                            `${t?.date},${t?.companyName},${t?.bankName},${t?.accountNo},${t?.creditAmount}`
                           ).join("\n")
                       );
                     
                     const encodedUri = encodeURI(csvContent);
                     const link = document.createElement("a");
                     link.setAttribute("href", encodedUri);
-                    link.setAttribute("download", `${selectedStatement.fileName}_${selectedCompanyId ? 'company_' : ''}export.csv`);
+                    link.setAttribute("download", `${selectedStatement?.fileName}_${selectedCompanyId ? 'company_' : ''}export.csv`);
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
@@ -424,7 +424,7 @@ const Statements = () => {
       {Object.entries(companyStatements).map(([companyId, company]) => (
         <div key={companyId} className="bg-white shadow rounded-lg overflow-hidden">
           <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
-            <h2 className="text-lg font-medium text-gray-900">{company.companyName}</h2>
+            <h2 className="text-lg font-medium text-gray-900">{company?.companyName}</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -448,30 +448,30 @@ const Statements = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {company.statements.map((statement, index) => {
-                  const fullStatement = statements.find(s => 
-                    s.uploadDate === statement.date && 
-                    s.companySummaries.some(summary => 
-                      summary.company._id === companyId && 
-                      summary.totalAmount === statement.totalAmount
+                {company?.statements?.map((statement, index) => {
+                  const fullStatement = statements?.find(s => 
+                    s?.uploadDate === statement?.date && 
+                    s?.companySummaries?.some(summary => 
+                      summary?.company?._id === companyId && 
+                      summary?.totalAmount === statement?.totalAmount
                     )
                   );
                   
                   return (
                     <tr key={index}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {formatDate(statement.date)}
+                        {formatDate(statement?.date)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatCurrency(statement.totalAmount)}
+                        {formatCurrency(statement?.totalAmount)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {formatCurrency(statement.commission)}
+                        {formatCurrency(statement?.commission)}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
-                        {statement.applicableSlab && (
+                        {statement?.applicableSlab && (
                           <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            {formatSlabRange(statement.applicableSlab)} @ {statement.applicableSlab.commission}%
+                            {formatSlabRange(statement?.applicableSlab)} @ {statement?.applicableSlab?.commission}%
                           </div>
                         )}
                       </td>
@@ -526,40 +526,40 @@ const Statements = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {statements.map((statement) => (
-                <tr key={statement._id}>
+              {statements?.map((statement) => (
+                <tr key={statement?._id}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {statement.fileName}
+                    {statement?.fileName}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(statement.uploadDate)}
+                    {formatDate(statement?.uploadDate)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatCurrency(statement.totalAmount)}
+                    {formatCurrency(statement?.totalAmount)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatCurrency(statement.totalCommission)}
+                    {formatCurrency(statement?.totalCommission)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      statement.status === 'processed' 
+                      statement?.status === 'processed' 
                         ? 'bg-green-100 text-green-800'
-                        : statement.status === 'error'
+                        : statement?.status === 'error'
                         ? 'bg-red-100 text-red-800'
                         : 'bg-yellow-100 text-yellow-800'
                     }`}>
-                      {statement.status}
+                      {statement?.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
-                    {statement.companySummaries.map((summary, idx) => (
+                    {statement?.companySummaries?.map((summary, idx) => (
                       <div key={idx} className="mb-2">
                         <div className="font-medium text-gray-900">{summary?.company?.name}</div>
                         <div className="mt-1">
-                          {summary.applicableSlab && (
+                          {summary?.applicableSlab && (
                             <div className="flex items-center space-x-2">
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {formatSlabRange(summary.applicableSlab)} @ {summary.applicableSlab.commission}%
+                                {formatSlabRange(summary?.applicableSlab)} @ {summary?.applicableSlab?.commission}%
                               </span>
                             </div>
                           )}
