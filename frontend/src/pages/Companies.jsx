@@ -982,6 +982,10 @@ const Companies = () => {
                   </div>
                 </div>
 
+                <div onClick={(e) => e.preventDefault()}>
+                   <Slabs slabs={formData.slabs} onSlabsChange={handleSlabsChange} />
+                </div>
+
                 {/* Documents */}
                 <div className="border-t border-gray-200 pt-4">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Company Documents (Optional)</h3>
