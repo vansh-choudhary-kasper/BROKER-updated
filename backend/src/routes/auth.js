@@ -23,16 +23,38 @@ const registerValidation = [
     // body('role').isIn(['admin']).withMessage('Invalid role')
 ];
 
+// OTP validation middleware
+const otpValidation = [
+    body('email').isEmail().withMessage('Please enter a valid email'),
+    body('otp').isLength({ min: 6, max: 6 }).withMessage('OTP must be 6 digits')
+];
+
 // Routes
 router.post('/login', loginValidation, validateRequest, authController.login);
 router.post('/register', registerValidation, validateRequest, authController.register);
 router.post('/logout', protect, authController.logout);
 router.post('/refresh-token', authController.refreshToken);
+
+// OTP routes
+router.post('/send-otp', 
+    body('email').isEmail().withMessage('Please enter a valid email'),
+    validateRequest,
+    authController.sendOTP
+);
+router.post('/verify-otp', otpValidation, validateRequest, authController.verifyOTP);
+router.post('/resend-otp',
+    body('email').isEmail().withMessage('Please enter a valid email'),
+    validateRequest,
+    authController.resendOTP
+);
+
 router.post('/forgot-password', 
     body('email').isEmail().withMessage('Please enter a valid email'),
     validateRequest,
     authController.forgotPassword
 );
+
+router.get('/verify-reset-token/:token', authController.verifyResetToken);
 router.post('/reset-password',
     [
         body('token').notEmpty().withMessage('Token is required'),

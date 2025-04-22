@@ -903,34 +903,7 @@ const Companies = () => {
                     </div>
                   )}
 
-                  {/* Add New Bank Account Section */}
-                  <div className="mt-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-lg font-medium text-gray-900">Add New Bank Account</h4>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setFormData(prev => ({
-                            ...prev,
-                            bankDetails: [...prev.bankDetails, {
-                              accountNumber: '',
-                              ifscCode: '',
-                              bankName: '',
-                              branchName: '',
-                              accountType: '',
-                              accountHolderName: '',
-                              accountHolderPan: '',
-                              accountHolderAadhar: '',
-                              customFields: {}
-                            }]
-                          }));
-                        }}
-                        className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors duration-200"
-                      >
-                        Add Bank Account
-                      </button>
-                    </div>
-
+                  <div>
                     <BankDetailsForm
                       bankDetails={formData.bankDetails}
                       onChange={(index, field, value) => {

@@ -193,6 +193,9 @@ const Login = () => {
         </form>
 
         <div className="mt-6 text-center animate-fade-in animation-delay-600">
+          <Link to="/forgot-password" className="text-sm text-blue-600 hover:text-purple-500 transition-colors duration-300">
+            Forgot Password?
+          </Link>
           <p className="text-sm text-gray-600">
             Don't have an account?{' '}
             <Link to="/register" className="font-medium text-purple-600 hover:text-purple-500 transition-colors duration-300" onClick={() => clearError()}>

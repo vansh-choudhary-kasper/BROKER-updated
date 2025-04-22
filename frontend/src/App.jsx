@@ -2,6 +2,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import MainLayout from './layouts/MainLayout';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import ForgetPass from './pages/auth/ForgetPass';
+import ResetPass from './pages/auth/ResetPass';
+import VerifyOTP from './pages/auth/VerifyOTP';
 import Dashboard from './pages/Dashboard';
 import Companies from './pages/Companies';
 import Tasks from './pages/Tasks';
@@ -81,6 +84,21 @@ function App() {
           <Route path="/register" element={
             <PublicRoute>
               <Register />
+            </PublicRoute>
+          } />
+          <Route path="/forgot-password" element={
+            <PublicRoute>
+              <ForgetPass />
+            </PublicRoute>
+          } />
+          <Route path="/reset-password/:token" element={
+            <PublicRoute>
+              <ResetPass />
+            </PublicRoute>
+          } />
+          <Route path="/verify-otp" element={
+            <PublicRoute>
+              <VerifyOTP />
             </PublicRoute>
           } />
 

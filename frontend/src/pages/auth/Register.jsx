@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -87,11 +90,23 @@ const Register = () => {
     setIsSubmitting(true);
 
     try {
-      await register(formData);
-      navigate('/', { replace: true });
+      // First send OTP to verify email
+      await axios.post(`${backendUrl}/api/auth/send-otp`, {
+        email: formData.email,
+      });
+      
+      // Navigate to OTP verification with form data
+      navigate('/verify-otp', { 
+        state: { 
+          email: formData.email,
+          name: formData.name,
+          password: formData.password,
+        },
+        replace: true 
+      });
     } catch (err) {
-      console.error('Registration error:', err);
-      setError(err.message || 'Failed to register. Please try again.');
+      console.error('OTP sending error:', err);
+      setError(err.response?.data?.message || 'Failed to send OTP. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
