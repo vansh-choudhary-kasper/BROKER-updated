@@ -15,7 +15,8 @@ const Companies = () => {
     addCompany,
     updateCompany,
     deleteCompany,
-    totalCompanies
+    totalCompanies,
+    banks
   } = useData();
 
   const initialFormState = {
@@ -290,6 +291,31 @@ const Companies = () => {
       formErrorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, [formError]);
+
+  const handleBankAccountChange = (e) => {
+    const selectedBankId = e.target.value;
+    if (selectedBankId && selectedBankId !== 'undefined') {
+      // Find the selected bank from the banks array
+      const selectedBank = banks.find(bank => bank._id === selectedBankId);
+      if (selectedBank) {
+        setFormData(prev => ({
+          ...prev,
+          bankDetails: [...(prev.bankDetails || []), {
+            accountNumber: selectedBank.accountNumber,
+            ifscCode: selectedBank.ifscCode,
+            bankName: selectedBank.bankName,
+            branchName: selectedBank.branchName,
+            accountType: selectedBank.accountType || 'savings',
+            accountHolderName: selectedBank.accountHolderName,
+            accountHolderPan: selectedBank.accountHolderPan,
+            accountHolderAadhar: selectedBank.accountHolderAadhar,
+          }]
+        }));
+      }
+      // Reset the select value after adding
+      e.target.value = '';
+    }
+  };
 
   return (
     <>
@@ -819,54 +845,140 @@ const Companies = () => {
                 </div>
 
                 {/* Bank Details */}
-                  <BankDetailsForm
-                    bankDetails={formData.bankDetails}
-                    onChange={(index, field, value) => {
-                      const newBankDetails = [...formData.bankDetails];
-                      newBankDetails[index] = {
-                        ...newBankDetails[index],
-                        [field]: value
-                      };
-                      setFormData(prev => ({
-                        ...prev,
-                        bankDetails: newBankDetails
-                      }));
-                    }}
-                    onFileChange={(index, field, file) => {
-                      const newBankDetails = [...formData.bankDetails];
-                      newBankDetails[index] = {
-                        ...newBankDetails[index],
-                        [field]: file
-                      };
-                      setFormData(prev => ({
-                        ...prev,
-                        bankDetails: newBankDetails
-                      }));
-                    }}
-                    onAdd={() => {
-                      setFormData(prev => ({
-                        ...prev,
-                        bankDetails: [...prev.bankDetails, {
-                          accountNumber: '',
-                          ifscCode: '',
-                          bankName: '',
-                          branchName: '',
-                          accountType: '',
-                          accountHolderName: '',
-                          accountHolderPan: '',
-                          accountHolderAadhar: ''
-                        }]
-                      }));
-                    }}
-                    onRemove={(index) => {
-                      setFormData(prev => ({
-                        ...prev,
-                        bankDetails: prev.bankDetails.filter((_, i) => i !== index)
-                      }));
-                    }}
-                  />
-                <div onClick={(e) => e.preventDefault()}>
-                  <Slabs slabs={formData.slabs} onSlabsChange={handleSlabsChange} />
+                <div className="border-t border-gray-200 pt-4">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Bank Details</h3>
+                  <div>
+                    <label htmlFor="bankDetails" className="block text-sm font-medium text-gray-700">Select Existing Bank Account</label>
+                    <select
+                      id="bankDetails"
+                      name="bankDetails"
+                      onChange={handleBankAccountChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      value=""
+                    >
+                      <option value="">Select a bank account</option>
+                      {banks && banks.map(bank => {
+                        // Only show banks that haven't been selected yet
+                        if (!formData.bankDetails?.some(b => b.accountNumber === bank.accountNumber)) {
+                          return (
+                            <option key={bank._id} value={bank._id}>
+                              {bank.bankName} - {bank.accountNumber}
+                            </option>
+                          );
+                        }
+                        return null;
+                      })}
+                    </select>
+                    <p className="mt-1 text-sm text-gray-500">
+                      Select accounts to add them to the list (optional)
+                    </p>
+                  </div>
+
+                  {/* Selected Bank Accounts List */}
+                  {formData.bankDetails?.length > 0 && (
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700">Selected Bank Accounts</label>
+                      <div className="mt-2 space-y-2">
+                        {formData.bankDetails.map((bank, index) => (
+                          <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border border-gray-200">
+                            <div>
+                              <span className="font-medium">{bank.bankName}</span>
+                              <span className="text-gray-500 ml-2">- {bank.accountNumber}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  bankDetails: prev.bankDetails.filter((_, i) => i !== index)
+                                }));
+                              }}
+                              className="text-red-600 hover:text-red-800 font-medium"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Add New Bank Account Section */}
+                  <div className="mt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-lg font-medium text-gray-900">Add New Bank Account</h4>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData(prev => ({
+                            ...prev,
+                            bankDetails: [...prev.bankDetails, {
+                              accountNumber: '',
+                              ifscCode: '',
+                              bankName: '',
+                              branchName: '',
+                              accountType: '',
+                              accountHolderName: '',
+                              accountHolderPan: '',
+                              accountHolderAadhar: '',
+                              customFields: {}
+                            }]
+                          }));
+                        }}
+                        className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors duration-200"
+                      >
+                        Add Bank Account
+                      </button>
+                    </div>
+
+                    <BankDetailsForm
+                      bankDetails={formData.bankDetails}
+                      onChange={(index, field, value) => {
+                        const newBankDetails = [...formData.bankDetails];
+                        newBankDetails[index] = {
+                          ...newBankDetails[index],
+                          [field]: value
+                        };
+                        setFormData(prev => ({
+                          ...prev,
+                          bankDetails: newBankDetails
+                        }));
+                      }}
+                      onFileChange={(index, field, file) => {
+                        const newBankDetails = [...formData.bankDetails];
+                        newBankDetails[index] = {
+                          ...newBankDetails[index],
+                          [field]: file
+                        };
+                        setFormData(prev => ({
+                          ...prev,
+                          bankDetails: newBankDetails
+                        }));
+                      }}
+                      onAdd={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          bankDetails: [...prev.bankDetails, {
+                            accountNumber: '',
+                            ifscCode: '',
+                            bankName: '',
+                            branchName: '',
+                            accountType: '',
+                            accountHolderName: '',
+                            accountHolderPan: '',
+                            accountHolderAadhar: '',
+                            customFields: {}
+                          }]
+                        }));
+                      }}
+                      onRemove={(index) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          bankDetails: prev.bankDetails.filter((_, i) => i !== index)
+                        }));
+                      }}
+                    />
+                  </div>
                 </div>
 
                 {/* Documents */}

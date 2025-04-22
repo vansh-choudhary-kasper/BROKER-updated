@@ -18,7 +18,7 @@ class BankController {
         } catch (error) {
             logger.error('Create Bank Error:', error);
             return res.status(500).json(
-                ApiResponse.serverError()
+                ApiResponse.serverError(error.message)
             );
         }
     }

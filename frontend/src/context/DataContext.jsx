@@ -368,7 +368,7 @@ export const DataProvider = ({ children }) => {
       });
 
       setCompanies(prev => [...prev, response.data]);
-      return response.data;
+      return response?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to add company';
       setError(prev => ({ ...prev, companies: errorMessage }));
@@ -388,7 +388,7 @@ export const DataProvider = ({ children }) => {
       const response = await axios.post(`${backendUrl}/api/tasks`, taskData);
       setTasks(prev => [...prev, response?.data?.data]);
       setError('');
-      return response?.data?.data;
+      return response?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to add task';
       setError(prev => ({ ...prev, tasks: errorMessage }));
@@ -406,7 +406,7 @@ export const DataProvider = ({ children }) => {
     try {
       const response = await axios.post(`${backendUrl}/api/banks`, bankData);
       setBanks(prev => [...prev, response?.data?.data]);
-      return response?.data?.data;
+      return response?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to add bank';
       setError(prev => ({ ...prev, banks: errorMessage }));
@@ -424,7 +424,7 @@ export const DataProvider = ({ children }) => {
     try {
       const response = await axios.post(`${backendUrl}/api/expenses`, expenseData);
       setExpenses(prev => [...prev, response?.data?.data]);
-      return response?.data?.data;
+      return response?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to add expense';
       setError(prev => ({ ...prev, expenses: errorMessage }));
@@ -518,7 +518,7 @@ export const DataProvider = ({ children }) => {
       setCompanies(prev =>
         prev.map(company => company._id === id ? response.data : company)
       );
-      return response.data;
+      return response?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to update company';
       setError(prev => ({ ...prev, companies: errorMessage }));
@@ -538,7 +538,7 @@ export const DataProvider = ({ children }) => {
       setTasks(prev =>
         prev.map(task => task._id === id ? response?.data?.data : task)
       );
-      return response?.data?.data;
+      return response?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to update task';
       setError(prev => ({ ...prev, tasks: errorMessage }));
@@ -558,7 +558,7 @@ export const DataProvider = ({ children }) => {
       setBanks(prev =>
         prev.map(bank => bank._id === id ? response?.data?.data : bank)
       );
-      return response?.data?.data;
+      return response?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to update bank';
       setError(prev => ({ ...prev, banks: errorMessage }));
@@ -578,7 +578,7 @@ export const DataProvider = ({ children }) => {
       setExpenses(prev =>
         prev.map(expense => expense._id === id ? response?.data?.data : expense)
       );
-      return response?.data?.data;
+      return response?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to update expense';
       setError(prev => ({ ...prev, expenses: errorMessage }));
