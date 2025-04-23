@@ -78,10 +78,25 @@ const Tasks = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    setFormError(null);
     
     // Prevent changing payment status from paid to pending
     if (name === 'helperBroker.status' && formData.helperBroker.status === 'paid' && value === 'pending') {
       return; // Don't allow the change
+    }
+
+    if (name === 'clientCompany') {
+      // both should not be same
+      if (value === formData.providerCompany) {
+        setFormError('Client and Provider Company cannot be the same');
+        return;
+      }
+    } else if (name === 'providerCompany') {
+      // both should not be same
+      if (value === formData.clientCompany) {
+        setFormError('Client and Provider Company cannot be the same');
+        return;
+      }
     }
     
     // Handle nested objects
