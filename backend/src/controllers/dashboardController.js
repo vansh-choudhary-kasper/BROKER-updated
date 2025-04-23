@@ -1,7 +1,7 @@
 const Company = require('../models/Company');
 const Bank = require('../models/Bank');
 const Expense = require('../models/Expense');
-const User = require('../models/User');
+const Broker = require('../models/Broker');
 
 const getDashboardStats = async (req, res) => {
     try {
@@ -20,7 +20,7 @@ const getDashboardStats = async (req, res) => {
                     }
                 }
             ]),
-            User.countDocuments({ role: 'broker' }),
+            Broker.countDocuments(),
             Bank.countDocuments(),
             Bank.aggregate([
                 {

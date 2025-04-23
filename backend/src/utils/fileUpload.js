@@ -1,25 +1,9 @@
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs').promises;
 const cloudinary = require('../config/cloudinary');
 const logger = require('./logger');
 
-// Configure multer for file upload
-const storage = multer.diskStorage({
-  destination: async (req, file, cb) => {
-    const uploadDir = path.join(__dirname, '../../uploads');
-    try {
-      await fs.mkdir(uploadDir, { recursive: true });
-      cb(null, uploadDir);
-    } catch (error) {
-      cb(error);
-    }
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
+// Configure multer to use memory storage
+const storage = multer.memoryStorage();
 
 // File filter
 const fileFilter = (req, file, cb) => {
@@ -43,25 +27,21 @@ const upload = multer({
 // Function to upload file to Cloudinary and return URL
 const uploadToStorage = async (file) => {
   try {
+    // Convert buffer to base64
+    const base64Data = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+    
     // Upload to Cloudinary
-    const result = await cloudinary.uploader.upload(file.path, {
+    const result = await cloudinary.uploader.upload(base64Data, {
       folder: 'broker-management',
       resource_type: 'auto',
       use_filename: true,
       unique_filename: true
     });
     
-    // Delete the local file after uploading to Cloudinary
-    try {
-      await fs.unlink(file.path);
-    } catch (error) {
-      logger.warn(`Failed to delete local file ${file.path}:`, error);
-    }
-    
     return {
       url: result.secure_url,
       originalName: file.originalname,
-      filename: file.filename,
+      filename: file.originalname,
       mimetype: file.mimetype,
       size: file.size,
       publicId: result.public_id
