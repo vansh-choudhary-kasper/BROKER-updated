@@ -340,7 +340,7 @@ const Dashboard = () => {
       <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
 
       {/* Stats Overview Section - All cards in one row */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* Profit Card */}
         <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
           <div className="flex justify-between items-center mb-2">
@@ -370,15 +370,6 @@ const Dashboard = () => {
           <p className="text-xs text-gray-500 mt-1">
             vs. {viewType === 'monthly' ? 'Last Month' : 'Last Year'}: ₹{viewType === 'monthly' ? lastMonthValue.toLocaleString() : lastYearTotal.toLocaleString()}
           </p>
-        </div>
-
-        {/* Total Brokers Card */}
-        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-indigo-500">
-          <h3 className="text-sm font-medium text-gray-500">Total Brokers</h3>
-          <div className="mt-2">
-            <p className="text-2xl font-bold text-gray-900">{dashboardStats.totalBrokers}</p>
-            <p className="text-xs text-gray-500 mt-1">Active Brokers in System</p>
-          </div>
         </div>
 
         {/* Total Companies Card */}
@@ -509,7 +500,11 @@ const Dashboard = () => {
       </div>
 
       {/* Company Types Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+          <h3 className="text-sm font-medium text-gray-500">Total Brokers</h3>
+          <p className="text-2xl font-bold mt-2">{dashboardStats.totalBrokers}</p>
+        </div>
         {typeOrder.map((type) => {
           const count = dashboardStats.companyTypes[type] || 0;
           const typeName = type.charAt(0).toUpperCase() + type.slice(1);
