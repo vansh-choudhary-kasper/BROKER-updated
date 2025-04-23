@@ -372,7 +372,7 @@ const Tasks = () => {
                       required
                     >
                       <option value="">Select a client company</option>
-                      {companiesList.filter(company => company._id !== formData.providerCompany).map((company) => (
+                      {companiesList.filter(company => company._id !== formData.providerCompany && (company.type === 'client' || company.type === 'both')).map((company) => (
                         <option key={company._id} value={company._id}>
                           {company.name}
                         </option>
@@ -393,7 +393,7 @@ const Tasks = () => {
                       required
                     >
                       <option value="">Select a provider company</option>
-                      {companiesList.filter(company => company._id !== formData.clientCompany).map((company) => (
+                      {companiesList.filter(company => company._id !== formData.clientCompany && (company.type === 'provider' || company.type === 'both')).map((company) => (
                         <option key={company._id} value={company._id}>
                           {company.name}
                         </option>
