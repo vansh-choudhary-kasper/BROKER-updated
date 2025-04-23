@@ -22,6 +22,7 @@ const Tasks = () => {
   const { user } = useAuth();
 
   const initialFormState = {
+    taskNumber: undefined,
     title: '',
     description: '',
     clientCompany: '',
@@ -50,6 +51,10 @@ const Tasks = () => {
   const [formError, setFormError] = useState(null);
   const formErrorRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  console.log("tasks", tasks);
+  const statusPaid = tasks.filter(task => task.helperBroker.status.includes('paid')).map(task => task.taskNumber);
+  console.log("statusPaid", statusPaid);
+  console.log(statusPaid.includes('DEAL-0001'));
 
   // Debounced search function
   const debouncedSearch = useCallback(
@@ -74,30 +79,11 @@ const Tasks = () => {
     });
     fetchCompanies();
     fetchBrokers();
+    // we store deal numbers in statusPaid array if status is paid  
   }, [fetchTasks, fetchCompanies, fetchBrokers, filters]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormError(null);
-    
-    // Prevent changing payment status from paid to pending
-    if (name === 'helperBroker.status' && formData.helperBroker.status === 'paid' && value === 'pending') {
-      return; // Don't allow the change
-    }
-
-    if (name === 'clientCompany') {
-      // both should not be same
-      if (value === formData.providerCompany) {
-        setFormError('Client and Provider Company cannot be the same');
-        return;
-      }
-    } else if (name === 'providerCompany') {
-      // both should not be same
-      if (value === formData.clientCompany) {
-        setFormError('Client and Provider Company cannot be the same');
-        return;
-      }
-    }
     
     // Handle nested objects
     if (name.includes('.')) {
@@ -158,6 +144,11 @@ const Tasks = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // if status is paid, then payment date should be present
+    if (formData.helperBroker.status === 'paid' && !formData.helperBroker.paymentDate) {
+      setFormError('Payment Date is required');
+      return;
+    }
     setFormError(null);
     setIsSubmitting(true);
     try {
@@ -211,6 +202,7 @@ const Tasks = () => {
     const formattedPaymentDate = formatPaymentDate(task.helperBroker?.paymentDate);
 
     setFormData({
+      taskNumber: task.taskNumber,
       title: task.title || '',
       description: task.description || '',
       clientCompany: task.clientCompany || '',
@@ -383,7 +375,7 @@ const Tasks = () => {
                       required
                     >
                       <option value="">Select a client company</option>
-                      {companiesList.map((company) => (
+                      {companiesList.filter(company => company._id !== formData.providerCompany).map((company) => (
                         <option key={company._id} value={company._id}>
                           {company.name}
                         </option>
@@ -404,7 +396,7 @@ const Tasks = () => {
                       required
                     >
                       <option value="">Select a provider company</option>
-                      {companiesList.map((company) => (
+                      {companiesList.filter(company => company._id !== formData.clientCompany).map((company) => (
                         <option key={company._id} value={company._id}>
                           {company.name}
                         </option>
@@ -452,7 +444,7 @@ const Tasks = () => {
                       min="0"
                       max="100"
                       step="0.01"
-                      disabled={formData.helperBroker.status === 'paid'}
+                      disabled={statusPaid.includes(formData.taskNumber)}
                     />
                   </div>
 
@@ -466,12 +458,13 @@ const Tasks = () => {
                       value={formData.helperBroker.status}
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      disabled={formData.helperBroker.status === 'paid'}
+                      disabled={statusPaid.includes(formData.taskNumber)}
                     >
                       <option value="pending">Pending</option>
                       <option value="paid">Paid</option>
                     </select>
                   </div>
+
 
                   <div>
                     <label htmlFor="helperBroker.paymentDate" className="block text-sm font-medium text-gray-700">
@@ -484,7 +477,7 @@ const Tasks = () => {
                       value={formData.helperBroker.paymentDate}
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                      disabled={formData.helperBroker.status === 'paid'}
+                      disabled={statusPaid.includes(formData.taskNumber)}
                     />
                   </div>
                 </div>
@@ -508,7 +501,7 @@ const Tasks = () => {
                       required
                       min="0"
                       step="0.01"
-                      disabled={formData.helperBroker.status === 'paid'}
+                      disabled={statusPaid.includes(formData.taskNumber)}
                     />
                   </div>
                   <div>
