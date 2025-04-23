@@ -42,11 +42,6 @@ app.use(cors({
 app.use(rateLimiter);
 app.use(securityMiddleware);
 
-app.use('/', (req, res, next) => {
-    console.log(req.originalUrl);
-    next();
-});
-
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/companies', companyRoutes);

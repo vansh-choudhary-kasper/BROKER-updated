@@ -143,7 +143,6 @@ const Companies = () => {
 
   const handleChange = (e) => {
     let { name, value } = e.target;
-    console.log("name = ", name);
     setFormError(null);
 
     if (name === 'businessDetails.registrationDate') {

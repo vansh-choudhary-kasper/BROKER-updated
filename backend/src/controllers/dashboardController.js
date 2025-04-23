@@ -5,7 +5,6 @@ const Broker = require('../models/Broker');
 
 const getDashboardStats = async (req, res) => {
     try {
-        console.log("fetching dashboard stats");
         // Get total companies count, type-wise counts, total brokers, and total accounts
         const [totalCompanies, companyTypeCounts, totalBrokers, totalAccounts, accountTypeCounts] = await Promise.all([
             Company.countDocuments({ name: { $ne: 'other' } }),
@@ -102,8 +101,6 @@ const getDashboardStats = async (req, res) => {
         const totalMonthlyExpenses = Object.values(monthlyExpenseCategories).reduce((sum, amount) => sum + amount, 0);
         const totalYearlyExpenses = Object.values(yearlyExpenseCategories).reduce((sum, amount) => sum + amount, 0);
 
-        console.log("successfully fetched dashboard stats");
-        console.log(accountTypes);
         res.json({
             success: true,
             totalCompanies,

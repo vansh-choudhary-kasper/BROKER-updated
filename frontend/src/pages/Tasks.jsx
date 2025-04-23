@@ -51,10 +51,7 @@ const Tasks = () => {
   const [formError, setFormError] = useState(null);
   const formErrorRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  console.log("tasks", tasks);
   const statusPaid = tasks.filter(task => task.helperBroker.status.includes('paid')).map(task => task.taskNumber);
-  console.log("statusPaid", statusPaid);
-  console.log(statusPaid.includes('DEAL-0001'));
 
   // Debounced search function
   const debouncedSearch = useCallback(

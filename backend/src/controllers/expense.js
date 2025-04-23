@@ -89,7 +89,7 @@ class ExpenseController {
 
     async getExpenses(req, res) {
         try {
-            const { page = 1, limit = 10, startDate, endDate, category, company, search } = req.query;
+            const { page = 1, limit = 10, startDate, endDate, category, company, search, status } = req.query;
             const query = {};
 
             if (startDate && endDate) {
@@ -100,7 +100,7 @@ class ExpenseController {
             }
             if (category) query.category = category;
             if (company) query.company = company;
-            
+            if (status) query.status = status;
             // Add search functionality
             if (search) {
                 query.$or = [
