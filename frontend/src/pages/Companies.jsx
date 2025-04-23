@@ -142,7 +142,29 @@ const Companies = () => {
   }, [fetchCompanies, filters]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    let { name, value } = e.target;
+    console.log("name = ", name);
+    setFormError(null);
+
+    if (name === 'businessDetails.registrationDate') {
+      const inputDate = new Date(value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // normalize to midnight
+      inputDate.setHours(0, 0, 0, 0); // normalize input date too
+    
+      // If input date is in the future, set error and clear value
+      if (inputDate > today) {
+        setFormError("Registration date cannot be in the future");
+        value = "";
+        // Scroll to error message
+        if (formErrorRef.current) {
+          formErrorRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        value = inputDate.toISOString().split('T')[0];
+      }
+    }
+
     if (name.includes('.')) {
       const [section, field, subfield] = name.split('.');
       setFormData(prev => {

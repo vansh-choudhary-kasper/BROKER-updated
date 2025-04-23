@@ -96,6 +96,7 @@ const Statements = () => {
       const errorMessage = error.response?.data?.message || 'Failed to upload statement';
       setError(errorMessage);
       // Don't close the modal if there's an error
+      throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -356,7 +357,7 @@ const Statements = () => {
                       ).map((transaction, idx) => (
                         <tr key={idx}>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {new Date(transaction?.date)?.toLocaleDateString('en-IN')}
+                            {transaction?.date}
                           </td>
                           {!selectedCompanyId && (
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

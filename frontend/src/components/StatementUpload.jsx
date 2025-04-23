@@ -139,7 +139,7 @@ const StatementUpload = ({ onUpload }) => {
                 setFormError(`Warning: The following companies have no slabs defined: ${slabNotDefined?.join(', ')}`);
               } 
               
-              processTransactions(data);
+              processTransactions(data, selectedFile);
             } catch (error) {
               setError(error.message);
             }
@@ -204,7 +204,7 @@ const StatementUpload = ({ onUpload }) => {
               setFormError(`Warning: The following companies are not recognized: ${unknownCompanies?.join(', ')}`);
             }
 
-            processTransactions(data);
+            processTransactions(data, selectedFile);
           } catch (error) {
             setError('Error parsing XML file: ' + error.message);
           }
@@ -222,7 +222,7 @@ const StatementUpload = ({ onUpload }) => {
     }
   };
 
-  const processTransactions = (data) => {
+  const processTransactions = (data, selectedFile) => {
     try {
       // Group transactions by company
       const companyTransactions = data?.reduce((acc, transaction) => {
@@ -261,7 +261,7 @@ const StatementUpload = ({ onUpload }) => {
       }
 
       setPreview({
-        file,
+        file: selectedFile,
         data,
         summary: previewData
       });

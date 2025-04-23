@@ -87,6 +87,11 @@ const Register = () => {
       return;
     }
 
+    //uppercase email should be convert to lowercase
+    if (formData.email) {
+      formData.email = formData.email.toLowerCase();
+    }
+
     setIsSubmitting(true);
 
     try {

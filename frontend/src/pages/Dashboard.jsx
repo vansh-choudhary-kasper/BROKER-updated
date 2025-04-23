@@ -85,6 +85,10 @@ const Dashboard = () => {
       provider: 0,
       both: 0
     },
+    accountTypes: {
+      true: 0,
+      false: 0
+    },
     monthlyExpenses: {
       total: 0,
       categories: {}
@@ -121,6 +125,10 @@ const Dashboard = () => {
                 provider: 0,
                 both: 0
               },
+              accountTypes: statsResponse.data.accountTypes || {
+                true: 0,
+                false: 0
+              },
               monthlyExpenses: statsResponse.data.monthlyExpenses || { total: 0, categories: {} },
               yearlyExpenses: statsResponse.data.yearlyExpenses || { total: 0, categories: {} },
               loading: false,
@@ -148,17 +156,6 @@ const Dashboard = () => {
       controller.abort();
     };
   }, [expenses]);
-
-  // Calculate account statistics
-  const accountStats = Array.isArray(banks) ? banks.reduce((acc, bank) => {
-    const status = bank.status?.toLowerCase() || 'active';
-    if (!acc[status]) {
-      acc[status] = 0;
-    }
-    acc[status]++;
-    acc.total++;
-    return acc;
-  }, { total: 0, active: 0, inactive: 0, blacklisted: 0 }) : { total: 0, active: 0, inactive: 0, blacklisted: 0 };
 
   // Check if any data is still loading
   const isLoading = loading.companies || loading.banks || loading.expenses || dashboardStats.loading;
@@ -403,8 +400,8 @@ const Dashboard = () => {
               className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Accounts</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
               <option value="blacklisted">Blacklisted</option>
             </select>
           </div>
@@ -412,7 +409,7 @@ const Dashboard = () => {
             <p className="text-2xl font-bold text-gray-900">
               {accountFilter === 'all' 
                 ? dashboardStats.totalAccounts 
-                : accountStats[accountFilter] || 0}
+                : dashboardStats.accountTypes[accountFilter] || 0}
             </p>
             <p className="text-xs text-gray-500 mt-1">
               {accountFilter === 'all' 
