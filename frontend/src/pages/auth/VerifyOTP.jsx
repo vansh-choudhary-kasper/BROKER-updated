@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
+import AuthLayout from './layout/AuthLayout';
+
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -177,7 +179,7 @@ const VerifyOTP = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
       <div 
-        className={`max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-lg transform transition-all duration-500 ease-in-out ${
+        className={`max-w-md w-full space-y-8 bg-transparent p-4 rounded-lg transform transition-all duration-500 ease-in-out ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}
       >
@@ -284,4 +286,12 @@ const VerifyOTP = () => {
   );
 };
 
-export default VerifyOTP; 
+const VerifyOTPWithLayout = () => {
+  return (
+    <AuthLayout>
+      <VerifyOTP />
+    </AuthLayout>
+  );
+};
+
+export default VerifyOTPWithLayout; 

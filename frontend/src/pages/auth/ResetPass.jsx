@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
+import AuthLayout from './layout/AuthLayout';
+
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -133,7 +135,7 @@ const ResetPass = () => {
   if (!tokenValid && error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-lg">
+        <div className="max-w-md w-full space-y-8 bg-transparent p-4 rounded-lg transform transition-all duration-500 ease-in-out">
           <div className="text-center">
             <h2 className="mt-6 text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">
               Invalid Reset Link
@@ -158,7 +160,7 @@ const ResetPass = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
       <div 
-        className={`max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-lg transform transition-all duration-500 ease-in-out ${
+        className={`max-w-md w-full space-y-8 bg-transparent p-4 rounded-lg transform transition-all duration-500 ease-in-out ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
         }`}
       >
@@ -283,4 +285,12 @@ const ResetPass = () => {
   );
 };
 
-export default ResetPass;
+const ResetPassWithLayout = () => {
+  return (
+    <AuthLayout>
+      <ResetPass />
+    </AuthLayout>
+  );
+};
+
+export default ResetPassWithLayout;

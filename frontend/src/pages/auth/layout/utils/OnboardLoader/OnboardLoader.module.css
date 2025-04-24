@@ -1,0 +1,21 @@
+.Animateimg {
+  animation: scaleDown 1.5s ease forwards;
+  display: inline-block;
+  cursor: none;
+}
+
+.Animateimg:hover {
+  animation: scaleDown 1s ease forwards;
+}
+
+@keyframes scaleDown {
+  0% {
+    transform: scale(1); 
+  }
+  50% {
+    transform: scale(15);
+  }
+  100% {
+    transform: scale(0);
+  }
+}

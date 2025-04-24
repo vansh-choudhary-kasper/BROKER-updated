@@ -1,0 +1,36 @@
+.imagePossition {
+  position: absolute;
+}
+
+@media (min-width: 768px) {
+  .form {
+    width: 100%;
+    background: "#none";
+  }
+  .imagePossition {
+    position: relative;
+  }
+}
+
+@media (min-width: 992px) {
+  .form {
+    width: 100%;
+    background: "none";
+  }
+  .imagePossition {
+    position: relative;
+  }
+}
+
+
+@media (max-width: 800px) {
+  .login-mobile-bg {
+    background-image: url('../../img/AuthPage/LoginPage.jpeg');
+    background-size: cover;
+    background-position: center;
+  }
+
+  .login-left-panel {
+    display: none !important;
+  }
+}
