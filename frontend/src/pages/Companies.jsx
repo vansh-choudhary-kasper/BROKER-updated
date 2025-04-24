@@ -37,8 +37,8 @@ const Companies = () => {
     businessDetails: {
       gstNumber: '',
       panNumber: '',
-      cinNumber: '',
-      tdsNumber: '',
+      cinNumber: undefined,
+      tdsNumber: undefined,
       registrationDate: '',
     },
     legalDetails: {
@@ -246,6 +246,12 @@ const Companies = () => {
     e.preventDefault();
     setFormError(null);
     setIsSubmitting(true);
+    if(formData.businessDetails.cinNumber === '') {
+      formData.businessDetails.cinNumber = undefined;
+    }
+    if(formData.businessDetails.tdsNumber === '') {
+      formData.businessDetails.tdsNumber = undefined;
+    }
     try {
       if (editingCompany) {
         await updateCompany(editingCompany._id, formData);

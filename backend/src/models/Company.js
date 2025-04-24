@@ -44,8 +44,8 @@ const companySchema = new mongoose.Schema({
   businessDetails: {
     gstNumber: { type: String, required: true, unique: true }, // Required for tax compliance and invoicing
     panNumber: { type: String, required: true, unique: true }, // Required for financial transactions and tax filing
-    cinNumber: { type: String }, // Company registration number for legal verification
-    tdsNumber: { type: String }, // Tax Deduction and Collection Account Number
+    cinNumber: { type: String, unique: true }, // Company registration number for legal verification
+    tdsNumber: { type: String, unique: true }, // Tax Deduction and Collection Account Number
     registrationDate: Date, // When the company was registered
     // businessType: String, // Nature of business operations
     // industry: String, // Sector classification
@@ -170,8 +170,10 @@ const companySchema = new mongoose.Schema({
 });
 
 // Indexes for better query performance
-companySchema.index({ 'businessDetails.gstNumber': 1 });
-companySchema.index({ 'businessDetails.panNumber': 1 });
+companySchema.index({ 'businessDetails.gstNumber': 1 }, { unique: true , sparse: true});
+companySchema.index({ 'businessDetails.panNumber': 1 }, { unique: true , sparse: true});
+companySchema.index({ 'businessDetails.cinNumber': 1 }, { unique: true , sparse: true});
+companySchema.index({ 'businessDetails.tdsNumber': 1 }, { unique: true , sparse: true});
 companySchema.index({ name: 1 });
 companySchema.index({ 'verificationStatus.gstVerified': 1 });
 companySchema.index({ 'verificationStatus.panVerified': 1 });

@@ -37,7 +37,7 @@ const Dashboard = () => {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear().toString();
     const lastYear = (currentDate.getFullYear() - 1).toString();
-    
+
     const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
     const currentMonth = months[currentDate.getMonth()];
     const lastMonth = months[(currentDate.getMonth() - 1 + 12) % 12];
@@ -58,10 +58,10 @@ const Dashboard = () => {
     }
 
     // Calculate yearly totals
-    const currentYearTotal = currentYearMap ? 
+    const currentYearTotal = currentYearMap ?
       Object.values(currentYearMap).reduce((sum, val) => sum + (Number(val) || 0), 0) : 0;
-    
-    const lastYearTotal = lastYearMap ? 
+
+    const lastYearTotal = lastYearMap ?
       Object.values(lastYearMap).reduce((sum, val) => sum + (Number(val) || 0), 0) : 0;
 
     return {
@@ -182,10 +182,10 @@ const Dashboard = () => {
   // Prepare monthly and yearly data for charts from totalAmount
   const getMonthlyData = () => {
     if (!user?.totalAmount) return [];
-    
+
     const currentYear = new Date().getFullYear().toString();
     const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
-    
+
     return months.map(month => ({
       month: month.charAt(0).toUpperCase() + month.slice(1, 3),
       profit: user.totalAmount[currentYear]?.[month] || 0
@@ -194,7 +194,7 @@ const Dashboard = () => {
 
   const getYearlyData = () => {
     if (!user?.totalAmount) return [];
-    
+
     return Object.entries(user.totalAmount).map(([year, data]) => ({
       year,
       profit: Object.values(data).reduce((sum, val) => sum + (Number(val) || 0), 0)
@@ -398,13 +398,13 @@ const Dashboard = () => {
           </div>
           <div className="mt-2">
             <p className="text-2xl font-bold text-gray-900">
-              {accountFilter === 'all' 
-                ? dashboardStats.totalAccounts 
+              {accountFilter === 'all'
+                ? dashboardStats.totalAccounts
                 : dashboardStats.accountTypes[accountFilter] || 0}
             </p>
             <p className="text-xs text-gray-500 mt-1">
-              {accountFilter === 'all' 
-                ? 'Total Bank Accounts' 
+              {accountFilter === 'all'
+                ? 'Total Bank Accounts'
                 : `${accountFilter.charAt(0).toUpperCase() + accountFilter.slice(1)} Accounts`}
             </p>
           </div>
@@ -501,8 +501,12 @@ const Dashboard = () => {
 
       {/* Company Types Section */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
-          <h3 className="text-sm font-medium text-gray-500">Total Brokers</h3>
+        <div
+          key="broker"
+          className={`bg-white rounded-lg shadow p-4 border-l-4 border-orange-500 cursor-pointer hover:shadow-md transition-shadow duration-200`}
+          onClick={() => window.location.href = `/brokers`}
+        >
+          <h3 className="text-sm font-medium text-gray-500">Brokers</h3>
           <p className="text-2xl font-bold mt-2">{dashboardStats.totalBrokers}</p>
         </div>
         {typeOrder.map((type) => {

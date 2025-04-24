@@ -171,10 +171,6 @@ const TodoList = () => {
     return <div className="animate-pulse">Loading todos...</div>;
   }
 
-  if (error) {
-    return <div className="text-red-500">{error}</div>;
-  }
-
   const priorityOrder = ['high', 'medium', 'low'];
   const priorityTitles = {
     high: 'High Priority',
@@ -240,13 +236,26 @@ const TodoList = () => {
             </button>
           </div>
 
+          {error && (
+            <div className="mb-4 text-red-500">
+              {error}
+            </div>
+          )}
+
           {showAddForm && (
             <form onSubmit={handleAddTodo} className="mb-6 space-y-4">
               <input
                 type="text"
                 placeholder="Task title"
                 value={newTodo.title}
-                onChange={(e) => setNewTodo({ ...newTodo, title: e.target.value })}
+                onChange={(e) => {
+                  setError(null);
+                  setNewTodo({ ...newTodo, title: e.target.value });
+                  if (todos.some(todo => todo.title.trim().toLowerCase() === e.target.value.trim().toLowerCase())) {
+                    // set warning but can still add
+                    setError('Warning: Task already exists with this title');
+                  }
+                }}
                 className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />

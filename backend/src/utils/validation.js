@@ -35,12 +35,12 @@ const validateCompanyData = (data) => {
     if (!data.businessDetails.gstNumber) {
       errors.push('GST number is required');
     } else if (!isValidGST(data.businessDetails.gstNumber)) {
-      errors.push('Invalid GST number format');
+      errors.push('Invalid GST number format, GST number should be like 01ABCDE123456Z9');
     }
     if (!data.businessDetails.panNumber) {
       errors.push('PAN number is required');
     } else if (!isValidPAN(data.businessDetails.panNumber)) {
-      errors.push('Invalid PAN number format');
+      errors.push('Invalid PAN number format, PAN number should be like ABCDE12345');
     }
   }
 
@@ -63,7 +63,7 @@ const validateCompanyData = (data) => {
     if (!data.address.pincode) {
       errors.push('Pincode is required');
     } else if (!isValidPincode(data.address.pincode)) {
-      errors.push('Invalid pincode format');
+      errors.push('Invalid pincode format, pincode should be like 123456');
     }
   }
 
