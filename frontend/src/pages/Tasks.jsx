@@ -18,7 +18,7 @@ const Tasks = () => {
     fetchBrokers,
     totalTasks
   } = useData();
-  
+
   const { user } = useAuth();
 
   const initialFormState = {
@@ -81,16 +81,16 @@ const Tasks = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Handle nested objects
     if (name.includes('.')) {
       const [parent, child, grandChild] = name.split('.');
-      
+
       if (grandChild) {
         setFormData(prev => {
           const currentParent = prev[parent] || {};
           const currentChild = currentParent[child] || {};
-          
+
           return {
             ...prev,
             [parent]: {
@@ -156,15 +156,15 @@ const Tasks = () => {
           amount: parseFloat(formData.payment.amount) || 0
         }
       };
-      
+
       if (editingTask) {
         const result = await updateTask(editingTask._id, taskData);
-        if(!result.success) {
+        if (!result.success) {
           throw new Error(result.message);
         }
       } else {
         const result = await addTask(taskData);
-        if(!result.success) {
+        if (!result.success) {
           throw new Error(result.message);
         }
       }
@@ -185,11 +185,11 @@ const Tasks = () => {
     // Format the payment date to YYYY-MM-DD if it exists
     const formatPaymentDate = (date) => {
       if (!date) return '';
-      
+
       try {
         const parsedDate = new Date(date);
         if (isNaN(parsedDate.getTime())) return '';
-        
+
         return parsedDate.toISOString().split('T')[0];
       } catch (error) {
         return '';
@@ -511,6 +511,8 @@ const Tasks = () => {
                       name="payment.currency"
                       value={formData.payment.currency}
                       onChange={handleChange}
+                      pattern="[A-Za-z$€¥£]*"
+                      title="Only letters and currency symbols ($, €, ¥, £) are allowed, without spaces"
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     />
                   </div>
@@ -533,9 +535,8 @@ const Tasks = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
-                    isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
-                  }`}
+                  className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
+                    }`}
                 >
                   {isSubmitting ? (
                     <div className="flex items-center">
@@ -595,13 +596,12 @@ const Tasks = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {tasksList.map((task) => (
-                <tr 
+                <tr
                   key={task._id}
-                  className={`${
-                    task.helperBroker?.status === 'paid' 
-                      ? 'bg-green-50' 
-                      : 'bg-red-50'
-                  }`}
+                  className={`${task.helperBroker?.status === 'paid'
+                    ? 'bg-green-50'
+                    : 'bg-red-50'
+                    }`}
                 >
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {task.taskNumber}
@@ -625,8 +625,8 @@ const Tasks = () => {
                     {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {task.payment?.amount ? 
-                      `${task.payment.currency} ${task.payment.amount}` : 
+                    {task.payment?.amount ?
+                      `${task.payment.currency} ${task.payment.amount}` :
                       '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

@@ -30,10 +30,14 @@ const uploadToStorage = async (file) => {
     // Convert buffer to base64
     const base64Data = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
     
+    // Determine resource type
+    const isPDF = file.mimetype === 'application/pdf';
+    const resourceType = isPDF ? 'raw' : 'auto';
+
     // Upload to Cloudinary
     const result = await cloudinary.uploader.upload(base64Data, {
       folder: 'broker-management',
-      resource_type: 'auto',
+      resource_type: resourceType,
       use_filename: true,
       unique_filename: true
     });
