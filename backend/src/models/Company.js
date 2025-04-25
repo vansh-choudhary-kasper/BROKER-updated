@@ -16,6 +16,7 @@ const companySchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    unique: true,
     trim: true
     // Required for legal identification and documentation
   },

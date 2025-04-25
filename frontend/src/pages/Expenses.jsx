@@ -26,6 +26,7 @@ const Expenses = () => {
     amount: '',
     date: new Date().toISOString().split('T')[0],
     category: 'travel',
+    customCategory: '',
     company: '',
     bank: '',
     status: 'pending',
@@ -86,6 +87,8 @@ const Expenses = () => {
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
+      // Reset customCategory when category changes
+      ...(name === 'category' && value !== 'other' && { customCategory: '' })
     }));
   };
 
@@ -94,13 +97,20 @@ const Expenses = () => {
     setFormError(null);
     setIsSubmitting(true);
     try {
+      // Prepare the expense data
+      const expenseData = {
+        ...formData,
+        // If category is 'other', use the customCategory value
+        category: formData.category === 'other' ? formData.customCategory : formData.category
+      };
+
       if (editingExpense) {
-        const result = await updateExpense(editingExpense._id, formData);
+        const result = await updateExpense(editingExpense._id, expenseData);
         if(!result.success) {
           throw new Error(result.message);
         }
       } else {
-        const result = await addExpense(formData);
+        const result = await addExpense(expenseData);
         if(!result.success) {
           throw new Error(result.message);
         }
@@ -126,6 +136,7 @@ const Expenses = () => {
       amount: expense.amount || '',
       date: expense.date ? new Date(expense.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       category: expense.category || 'travel',
+      customCategory: expense.category || '',
       company: expense.company?._id || '',
       bank: expense.bank?._id || '',
       status: expense.status || 'pending',
@@ -368,6 +379,24 @@ const Expenses = () => {
                     <option value="other">Other</option>
                   </select>
                 </div>
+
+                {formData.category === 'other' && (
+                  <div>
+                    <label htmlFor="customCategory" className="block text-sm font-medium text-gray-700">
+                      Custom Category Name *
+                    </label>
+                    <input
+                      type="text"
+                      id="customCategory"
+                      name="customCategory"
+                      value={formData.customCategory}
+                      onChange={handleChange}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      required
+                      placeholder="Enter your custom category name"
+                    />
+                  </div>
+                )}
 
                 <div>
                   <label htmlFor="company" className="block text-sm font-medium text-gray-700">

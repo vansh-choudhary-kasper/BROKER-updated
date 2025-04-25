@@ -206,15 +206,25 @@ const Dashboard = () => {
 
   const expenseCategories = Array.isArray(expenses)
     ? expenses.reduce((acc, expense) => {
-      acc[expense.category] = (acc[expense.category] || 0) + (expense.amount || 0);
+      // Handle both predefined and custom categories
+      const categoryName = expense.category;
+      // Format the category name for display
+      const displayName = categoryName === 'other' ? expense.customCategory || 'Other' : 
+        categoryName.charAt(0).toUpperCase() + categoryName.slice(1).replace('_', ' ');
+      acc[displayName] = (acc[displayName] || 0) + (Number(expense.amount) || 0);
       return acc;
     }, {})
     : {};
 
-  const expenseCategoryData = Object.entries(expenseCategories).map(([name, value]) => ({
-    name: name.charAt(0).toUpperCase() + name.slice(1).replace('_', ' '),
-    value
-  }));
+  const expenseCategoryData = Object.entries(expenseCategories)
+    .map(([name, value]) => ({
+      name,
+      value: Number(value)
+    }))
+    .filter(item => item.value > 0); // Only include categories with values > 0
+
+  // Calculate total for percentage calculations
+  const totalExpenseAmount = expenseCategoryData.reduce((sum, item) => sum + item.value, 0);
 
   let unorderedCompanyTypes = Array.isArray(companies)
     ? companies.reduce((acc, company) => {
@@ -274,14 +284,24 @@ const Dashboard = () => {
 
   // Function to generate consistent color based on category name
   const getCategoryColor = (categoryName) => {
-    // Convert category name to ASCII sum
+    // Predefined colors for standard categories
+    const categoryColors = {
+      'Travel': '#00CCCC',
+      'Entertainment': '#FF9933',
+      'Client gift': '#9966FF',
+      'Office Supplies': '#99CC33',
+      'Utilities': '#66CCFF',
+      'Marketing': '#FFCC99',
+      'Other': '#CC99FF'
+    };
+
+    // If it's a predefined category, return its color
+    if (categoryColors[categoryName]) {
+      return categoryColors[categoryName];
+    }
+
+    // For custom categories, generate a color based on the name
     const asciiSum = categoryName.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
-
-    // Generate RGB values using ASCII sum
-    const r = (asciiSum * 37) % 200 + 55; // Range: 55-255
-    const g = (asciiSum * 73) % 200 + 55; // Range: 55-255
-    const b = (asciiSum * 101) % 200 + 55; // Range: 55-255
-
     return COLORS[asciiSum % COLORS.length];
   };
 
@@ -461,9 +481,7 @@ const Dashboard = () => {
                 <option value="yearly">Yearly</option>
               </select>
               <div className="text-sm font-medium text-gray-600">
-                Total: ₹{expenseViewType === 'monthly'
-                  ? dashboardStats.monthlyExpenses.total.toLocaleString()
-                  : dashboardStats.yearlyExpenses.total.toLocaleString()}
+                Total: ₹{totalExpenseAmount.toLocaleString()}
               </div>
             </div>
           </div>
@@ -471,28 +489,36 @@ const Dashboard = () => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={Object.entries(expenseViewType === 'monthly'
-                    ? dashboardStats.monthlyExpenses.categories
-                    : dashboardStats.yearlyExpenses.categories).map(([name, value]) => ({
-                      name: name.charAt(0).toUpperCase() + name.slice(1).replace('_', ' '),
-                      value
-                    }))}
+                  data={expenseCategoryData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  label={false}
                 >
-                  {Object.entries(expenseViewType === 'monthly'
-                    ? dashboardStats.monthlyExpenses.categories
-                    : dashboardStats.yearlyExpenses.categories).map(([name], index) => (
-                      <Cell key={`cell-${index}`} fill={getCategoryColor(name)} />
-                    ))}
+                  {expenseCategoryData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={getCategoryColor(entry.name)} />
+                  ))}
                 </Pie>
-                <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
-                <Legend />
+                <Tooltip 
+                  formatter={(value) => `₹${Number(value).toLocaleString()}`}
+                  labelFormatter={(label) => label}
+                />
+                <Legend
+                  layout="vertical"
+                  align="right"
+                  verticalAlign="middle"
+                  formatter={(value, entry) => {
+                    const { payload } = entry;
+                    // Use the calculated total
+                    const percentage = totalExpenseAmount > 0 
+                      ? ((payload.value / totalExpenseAmount) * 100).toFixed(1)
+                      : '0.0';
+                    return `${value} (${percentage}%)`;
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>

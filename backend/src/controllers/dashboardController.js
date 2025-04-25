@@ -69,7 +69,10 @@ const getDashboardStats = async (req, res) => {
             },
             {
                 $group: {
-                    _id: '$category',
+                    _id: {
+                        category: '$category',
+                        customCategory: '$customCategory'
+                    },
                     total: { $sum: '$amount' }
                 }
             }
@@ -85,7 +88,10 @@ const getDashboardStats = async (req, res) => {
             },
             {
                 $group: {
-                    _id: '$category',
+                    _id: {
+                        category: '$category',
+                        customCategory: '$customCategory'
+                    },
                     total: { $sum: '$amount' }
                 }
             }
@@ -93,12 +99,20 @@ const getDashboardStats = async (req, res) => {
 
         // Convert expenses arrays to object format
         const monthlyExpenseCategories = monthlyExpenses.reduce((acc, curr) => {
-            acc[curr._id] = curr.total;
+            // Handle both predefined and custom categories
+            const categoryName = curr._id.category === 'other' && curr._id.customCategory
+                ? curr._id.customCategory
+                : curr._id.category.charAt(0).toUpperCase() + curr._id.category.slice(1).replace('_', ' ');
+            acc[categoryName] = curr.total;
             return acc;
         }, {});
 
         const yearlyExpenseCategories = yearlyExpenses.reduce((acc, curr) => {
-            acc[curr._id] = curr.total;
+            // Handle both predefined and custom categories
+            const categoryName = curr._id.category === 'other' && curr._id.customCategory
+                ? curr._id.customCategory
+                : curr._id.category.charAt(0).toUpperCase() + curr._id.category.slice(1).replace('_', ' ');
+            acc[categoryName] = curr.total;
             return acc;
         }, {});
 

@@ -12,15 +12,7 @@ const expenseValidation = [
     body('title').notEmpty().withMessage('Expense title is required'),
     body('amount').isNumeric().withMessage('Amount must be a number'),
     body('date').isISO8601().withMessage('Invalid date'),
-    body('category').isIn([
-        'travel',
-        'entertainment',
-        'client_gift',
-        'office_supplies',
-        'utilities',
-        'marketing',
-        'other'
-    ]).withMessage('Invalid category'),
+    body('category').notEmpty().withMessage('Category is required'),
     body('description').optional(),
     body('company').isMongoId().withMessage('Invalid company ID'),
     body('status').optional().isIn(['pending', 'approved', 'rejected']).withMessage('Invalid status')
