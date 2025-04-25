@@ -18,13 +18,12 @@ class ExpenseController {
             } = req.body;
 
             // Verify company exists
-            const companyExists = await Company.findById(company);
+            const companyExists = await Company.findById(company, { createdBy: req.user.userId });
             if (!companyExists) {
                 return res.status(404).json(
                     ApiResponse.notFound('Company not found')
                 );
             }
-
 
             // Create expense with receipts
             const receipts = req.files ? req.files.map(file => ({
@@ -109,6 +108,8 @@ class ExpenseController {
                 ];
             }
 
+            query.createdBy = req.user.userId;  
+
             const expenses = await Expense.find(query)
                 .populate('company', 'name')
                 .limit(limit * 1)
@@ -127,28 +128,6 @@ class ExpenseController {
             );
         } catch (error) {
             logger.error('Get Expenses Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError(error.message)
-            );
-        }
-    }
-
-    async getExpense(req, res) {
-        try {
-            const expense = await Expense.findById(req.params.id)
-                .populate('company', 'name');
-
-            if (!expense) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Expense not found')
-                );
-            }
-
-            return res.status(200).json(
-                ApiResponse.success('Expense retrieved successfully', expense)
-            );
-        } catch (error) {
-            logger.error('Get Expense Error:', error);
             return res.status(500).json(
                 ApiResponse.serverError(error.message)
             );
@@ -174,8 +153,14 @@ class ExpenseController {
                 );
             }
 
+            if (expense.createdBy.toString() !== req.user.userId) {
+                return res.status(403).json(
+                    ApiResponse.error('Unauthorized, you are not allowed to update this expense')
+                );
+            }
+
             // Verify company exists
-            const companyExists = await Company.findById(company);
+            const companyExists = await Company.findById(company, { createdBy: req.user.userId });
             if (!companyExists) {
                 return res.status(404).json(
                     ApiResponse.notFound('Company not found')
@@ -268,80 +253,17 @@ class ExpenseController {
                 );
             }
 
+            if (expense.createdBy.toString() !== req.user.userId) {
+                return res.status(403).json(
+                    ApiResponse.error('Unauthorized, you are not allowed to delete this expense')
+                );
+            }
+
             return res.status(200).json(
                 ApiResponse.success('Expense deleted successfully')
             );
         } catch (error) {
             logger.error('Delete Expense Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError(error.message)
-            );
-        }
-    }
-
-    async addReceipts(req, res) {
-        try {
-            const expense = await Expense.findById(req.params.id);
-            if (!expense) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Expense not found')
-                );
-            }
-
-            if (!req.files || req.files.length === 0) {
-                return res.status(400).json(
-                    ApiResponse.error('No receipts provided')
-                );
-            }
-
-            const newReceipts = req.files.map(file => ({
-                name: file.originalname,
-                type: file.mimetype,
-                url: file.path,
-                uploadDate: new Date()
-            }));
-
-            expense.receipts.push(...newReceipts);
-            await expense.save();
-
-            return res.status(200).json(
-                ApiResponse.success('Receipts added successfully', expense.receipts)
-            );
-        } catch (error) {
-            logger.error('Add Receipts Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError(error.message)
-            );
-        }
-    }
-
-    async deleteReceipt(req, res) {
-        try {
-            const expense = await Expense.findById(req.params.id);
-            if (!expense) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Expense not found')
-                );
-            }
-
-            const receiptIndex = expense.receipts.findIndex(
-                receipt => receipt._id.toString() === req.params.receiptId
-            );
-
-            if (receiptIndex === -1) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Receipt not found')
-                );
-            }
-
-            expense.receipts.splice(receiptIndex, 1);
-            await expense.save();
-
-            return res.status(200).json(
-                ApiResponse.success('Receipt deleted successfully')
-            );
-        } catch (error) {
-            logger.error('Delete Receipt Error:', error);
             return res.status(500).json(
                 ApiResponse.serverError(error.message)
             );
@@ -356,6 +278,12 @@ class ExpenseController {
             if (!expense) {
                 return res.status(404).json(
                     ApiResponse.notFound('Expense not found')
+                );
+            }
+
+            if (expense.createdBy.toString() !== req.user.userId) {
+                return res.status(403).json(
+                    ApiResponse.error('Unauthorized, you are not allowed to update the status of this expense')
                 );
             }
 

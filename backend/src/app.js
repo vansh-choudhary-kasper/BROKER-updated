@@ -31,10 +31,11 @@ connectDB();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(cors({
-    origin: process.env.FRONTEND_URL,
-    credentials: true
-}));
+// app.use(cors({
+//     origin: process.env.FRONTEND_URL,
+//     credentials: true
+// }));
+app.use(cors());
 
 // Remove Morgan logging middleware
 // app.use(morgan(morganFormat, { stream: logger.stream }));

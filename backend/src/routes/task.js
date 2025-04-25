@@ -42,8 +42,6 @@ router.post('/',
 
 router.get('/', taskController.getTasks);
 
-router.get('/:id', taskController.getTask);
-
 router.put('/:id',
     taskValidation,
     validateRequest,

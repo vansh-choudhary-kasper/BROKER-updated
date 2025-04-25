@@ -7,6 +7,8 @@ class BankController {
         try {
             const { customFields, ...bankData } = req.body;
 
+            bankData.createdBy = req.user.userId;
+
             const bank = await Bank.create({
                 ...bankData,
                 customFields: customFields || {}
@@ -25,7 +27,7 @@ class BankController {
 
     async getBanks(req, res) {
         try {
-            const { page = 1, limit = 10, isActive, accountType, search, owner, ownerType } = req.query;
+            const { page = 1, limit = 10, isActive, accountType, search, ownerType } = req.query;
             const query = {};
 
             // Handle isActive filter
@@ -38,15 +40,12 @@ class BankController {
                 query.accountType = accountType;
             }
 
-            // Handle owner filter
-            if (owner) {
-                query.owner = owner;
-            }
-
             // Handle ownerType filter
             if (ownerType) {
                 query.ownerType = ownerType;
             }
+
+            query.createdBy = req.user.userId;
 
             // Handle search
             if (search) {
@@ -81,34 +80,20 @@ class BankController {
         }
     }
 
-    async getBank(req, res) {
+    async updateBank(req, res) {
         try {
-            const bank = await Bank.findById(req.params.id).populate('owner');
-            if (!bank) {
+            const { owner, ownerType, customFields, ...updateData } = req.body;
+            const bank = await Bank.findById(req.params.id);
+
+            if (!bank) {    
                 return res.status(404).json(
                     ApiResponse.notFound('Bank account not found')
                 );
             }
 
-            return res.status(200).json(
-                ApiResponse.success('Bank account retrieved successfully', bank)
-            );
-        } catch (error) {
-            logger.error('Get Bank Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError()
-            );
-        }
-    }
-
-    async updateBank(req, res) {
-        try {
-            const { owner, ownerType, customFields, ...updateData } = req.body;
-            const bank = await Bank.findById(req.params.id);
-            
-            if (!bank) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Bank account not found')
+            if (bank.createdBy.toString() !== req.user.userId) {
+                return res.status(403).json(
+                    ApiResponse.error('Unauthorized')
                 );
             }
 
@@ -140,6 +125,12 @@ class BankController {
                 );
             }
 
+            if (bank.createdBy.toString() !== req.user.userId) {
+                return res.status(403).json(
+                    ApiResponse.error('Unauthorized')
+                );
+            }
+
             await Bank.deleteOne({ _id: req.params.id });
 
             return res.status(200).json(
@@ -147,159 +138,6 @@ class BankController {
             );
         } catch (error) {
             logger.error('Delete Bank Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError()
-            );
-        }
-    }
-
-    async addTransaction(req, res) {
-        try {
-            const bank = await Bank.findById(req.params.id);
-            if (!bank) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Bank account not found')
-                );
-            }
-
-            const { type, amount, description, reference, relatedTask, relatedExpense } = req.body;
-
-            // Update balance based on transaction type
-            if (type === 'credit') {
-                bank.balance += amount;
-            } else if (type === 'debit') {
-                if (bank.balance < amount) {
-                    return res.status(400).json(
-                        ApiResponse.error('Insufficient balance')
-                    );
-                }
-                bank.balance -= amount;
-            }
-
-            // Add transaction
-            bank.transactions.push({
-                type,
-                amount,
-                date: new Date(),
-                description,
-                reference,
-                relatedTask,
-                relatedExpense
-            });
-
-            await bank.save();
-
-            return res.status(200).json(
-                ApiResponse.success('Transaction added successfully', bank)
-            );
-        } catch (error) {
-            logger.error('Add Transaction Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError()
-            );
-        }
-    }
-
-    async getTransactions(req, res) {
-        try {
-            const { page = 1, limit = 10, startDate, endDate, type } = req.query;
-            const bank = await Bank.findById(req.params.id);
-            
-            if (!bank) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Bank account not found')
-                );
-            }
-
-            let transactions = bank.transactions;
-
-            // Apply filters
-            if (startDate && endDate) {
-                transactions = transactions.filter(t => 
-                    t.date >= new Date(startDate) && t.date <= new Date(endDate)
-                );
-            }
-            if (type) {
-                transactions = transactions.filter(t => t.type === type);
-            }
-
-            // Apply pagination
-            const startIndex = (page - 1) * limit;
-            const endIndex = startIndex + limit;
-            const paginatedTransactions = transactions.slice(startIndex, endIndex);
-
-            return res.status(200).json(
-                ApiResponse.success('Transactions retrieved successfully', {
-                    transactions: paginatedTransactions,
-                    totalPages: Math.ceil(transactions.length / limit),
-                    currentPage: page
-                })
-            );
-        } catch (error) {
-            logger.error('Get Transactions Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError()
-            );
-        }
-    }
-
-    async addDocument(req, res) {
-        try {
-            const bank = await Bank.findById(req.params.id);
-            if (!bank) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Bank account not found')
-                );
-            }
-
-            const { name, type, url } = req.body;
-            bank.documents.push({
-                name,
-                type,
-                url,
-                uploadDate: new Date()
-            });
-
-            await bank.save();
-
-            return res.status(200).json(
-                ApiResponse.success('Document added successfully', bank)
-            );
-        } catch (error) {
-            logger.error('Add Document Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError()
-            );
-        }
-    }
-
-    async removeDocument(req, res) {
-        try {
-            const bank = await Bank.findById(req.params.id);
-            if (!bank) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Bank account not found')
-                );
-            }
-
-            const docIndex = bank.documents.findIndex(
-                doc => doc._id.toString() === req.params.docId
-            );
-
-            if (docIndex === -1) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Document not found')
-                );
-            }
-
-            bank.documents.splice(docIndex, 1);
-            await bank.save();
-
-            return res.status(200).json(
-                ApiResponse.success('Document removed successfully')
-            );
-        } catch (error) {
-            logger.error('Remove Document Error:', error);
             return res.status(500).json(
                 ApiResponse.serverError()
             );
@@ -315,6 +153,12 @@ class BankController {
                 );
             }
 
+            if (bank.createdBy.toString() !== req.user.userId) {
+                return res.status(403).json(
+                    ApiResponse.error('Unauthorized')
+                );
+            }
+
             bank.isActive = !bank.isActive;
             await bank.save();
 
@@ -323,76 +167,6 @@ class BankController {
             );
         } catch (error) {
             logger.error('Toggle Bank Status Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError()
-            );
-        }
-    }
-
-    async addDocuments(req, res) {
-        try {
-            const bank = await Bank.findById(req.params.id);
-            if (!bank) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Bank account not found')
-                );
-            }
-
-            if (!req.files || req.files.length === 0) {
-                return res.status(400).json(
-                    ApiResponse.error('No documents provided')
-                );
-            }
-
-            const newDocuments = req.files.map(file => ({
-                name: file.originalname,
-                type: file.mimetype,
-                url: file.path,
-                uploadDate: new Date()
-            }));
-
-            bank.documents = bank.documents || [];
-            bank.documents.push(...newDocuments);
-            await bank.save();
-
-            return res.status(200).json(
-                ApiResponse.success('Documents added successfully', bank.documents)
-            );
-        } catch (error) {
-            logger.error('Add Documents Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError()
-            );
-        }
-    }
-
-    async deleteDocument(req, res) {
-        try {
-            const bank = await Bank.findById(req.params.id);
-            if (!bank) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Bank account not found')
-                );
-            }
-
-            const documentIndex = bank.documents.findIndex(
-                doc => doc._id.toString() === req.params.documentId
-            );
-
-            if (documentIndex === -1) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Document not found')
-                );
-            }
-
-            bank.documents.splice(documentIndex, 1);
-            await bank.save();
-
-            return res.status(200).json(
-                ApiResponse.success('Document deleted successfully')
-            );
-        } catch (error) {
-            logger.error('Delete Document Error:', error);
             return res.status(500).json(
                 ApiResponse.serverError()
             );

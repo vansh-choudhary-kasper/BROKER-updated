@@ -156,6 +156,11 @@ const companySchema = new mongoose.Schema({
 //     documents: [{ type: String, url: String }] // Supporting documents
 //   }],
 
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+
   // Timestamps
   createdAt: {
     type: Date,

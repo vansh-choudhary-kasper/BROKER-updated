@@ -55,26 +55,11 @@ const bankSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
-  transactions: [{
-    type: {
-      type: String,
-      enum: ['credit', 'debit'],
-      required: true
-    },
-    amount: {
-      type: Number,
-      required: true
-    },
-    date: {
-      type: Date,
-      required: true,
-      default: Date.now
-    },
-    companyName: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Company'
-    }
-  }],
+
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
 
   createdAt: {
     type: Date,

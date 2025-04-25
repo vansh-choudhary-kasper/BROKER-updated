@@ -12,6 +12,8 @@ class CompanyController {
         try {
             const companyData = buildNestedObject(req.body); // Flattened form parsing
 
+            companyData.createdBy = req.user.userId;
+
             // Validate company data
             const validationResult = validateCompanyData(companyData);
             if (!validationResult.isValid) {
@@ -67,11 +69,14 @@ class CompanyController {
                 try {
                     let newBank = await Bank.findOne({accountNumber: bank.accountNumber}); 
                     if(!newBank) {
+                        bank.createdBy = req.user.userId;
                         newBank = new Bank(bank);
+                    } else if (newBank.createdBy.toString() !== req.user.userId)  {
+                        continue;
                     } else {
                         Object.assign(newBank, bank);
+                        await newBank.save();
                     }
-                    await newBank.save();   
                     bankDetails.push({_id: newBank._id});
                 } catch (error) {
                     logger.error('Create Bank Error:', error);
@@ -120,7 +125,8 @@ class CompanyController {
                                 $or: [
                                     { accountNumber: searchRegex },
                                     { ifscCode: searchRegex }
-                                ]
+                                ],
+                                createdBy: req.user.userId
                             }
                         }
                     }
@@ -162,7 +168,9 @@ class CompanyController {
             ];
     
             const result = await Company.aggregate(aggregatePipeline);
-            const companies = result[0]?.data || [];
+            let companies = result[0]?.data || [];
+            companies = companies.filter(company => company.createdBy.toString() === req.user.userId);
+            
             const meta = result[0]?.metadata[0] || {
                 total: 0,
                 currentPage: page,
@@ -182,27 +190,6 @@ class CompanyController {
             return res.status(500).json(ApiResponse.serverError(error.message));
         }
     }
-    
-
-    async getCompany(req, res) {
-        try {
-            const company = await Company.findById(req.params.id).populate('bankDetails');
-            if (!company) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Company not found')
-                );
-            }
-
-            return res.status(200).json(
-                ApiResponse.success('Company retrieved successfully', company)
-            );
-        } catch (error) {
-            logger.error('Get Company Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError(error.message)
-            );
-        }
-    }
 
     async updateCompany(req, res) {
         try {
@@ -211,6 +198,12 @@ class CompanyController {
             const company = await Company.findById(req.params.id).populate('bankDetails');
             if (!company) {
                 return res.status(404).json({ message: 'Company not found' });
+            }
+
+            if (company.createdBy.toString() !== req.user.userId) {
+                return res.status(403).json(
+                    ApiResponse.error('Unauthorized, you are not allowed to update this company')
+                );
             }
 
             const validationResult = validateCompanyData(companyData);
@@ -264,10 +257,14 @@ class CompanyController {
                 for (const bankData of companyData.bankDetails) {
                     let bank = await Bank.findOne({accountNumber: bankData.accountNumber}); 
                     if(bank) {
+                        if(bank.createdBy.toString() !== req.user.userId) {
+                            continue;
+                        }
                         Object.assign(bank, bankData);
                         await bank.save();
                         bankDetails.push({_id: bank._id});
                     } else {
+                        bankData.createdBy = req.user.userId;
                         // Create new bank record and link to company
                         const newBank = new Bank(bankData);
                         await newBank.save();
@@ -306,8 +303,14 @@ class CompanyController {
                 );
             }
 
+            if (company.createdBy.toString() !== req.user.userId) {
+                return res.status(403).json(
+                    ApiResponse.error('Unauthorized, you are not allowed to delete this company')
+                );
+            }
+
             //delete banks
-            await Bank.deleteMany({ _id: { $in: company.bankDetails.map(bank => bank._id) } });
+            await Bank.deleteMany({ _id: { $in: company.bankDetails.map(bank => bank._id) }, createdBy: req.user.userId });
 
             //delete company
             await Company.findByIdAndDelete(req.params.id);
@@ -333,6 +336,12 @@ class CompanyController {
                 );
             }
 
+            if (company.createdBy.toString() !== req.user.userId) {
+                return res.status(403).json(
+                    ApiResponse.error('Unauthorized, you are not allowed to update the status of this company')
+                );
+            }
+
             company.status = status;
             await company.save();
 
@@ -347,43 +356,18 @@ class CompanyController {
         }
     }
 
-    async updateRiskAssessment(req, res) {
-        try {
-            const { score, factors } = req.body;
-            const company = await Company.findById(req.params.id);
-            
-            if (!company) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Company not found')
-                );
-            }
-
-            company.riskAssessment = {
-                score,
-                factors,
-                lastAssessedBy: req.user.userId,
-                lastAssessedDate: new Date()
-            };
-
-            await company.save();
-
-            return res.status(200).json(
-                ApiResponse.success('Risk assessment updated successfully', company)
-            );
-        } catch (error) {
-            logger.error('Update Risk Assessment Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError(error.message)
-            );
-        }
-    }
-
     async addDocuments(req, res) {
         try {
             const company = await Company.findById(req.params.id);
             if (!company) {
                 return res.status(404).json(
                     ApiResponse.notFound('Company not found')
+                );
+            }
+
+            if (company.createdBy.toString() !== req.user.userId) {
+                return res.status(403).json(
+                    ApiResponse.error('Unauthorized, you are not allowed to add documents to this company')
                 );
             }
 
@@ -431,6 +415,12 @@ class CompanyController {
             if (!company) {
                 return res.status(404).json(
                     ApiResponse.notFound('Company not found')
+                );
+            }
+
+            if (company.createdBy.toString() !== req.user.userId) {
+                return res.status(403).json(
+                    ApiResponse.error('Unauthorized, you are not allowed to delete this document')
                 );
             }
 

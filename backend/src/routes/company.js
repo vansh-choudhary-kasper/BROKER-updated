@@ -32,9 +32,6 @@ router.post('/',
 // Get all companies with pagination and search
 router.get('/', companyController.getCompanies);
 
-// Get a single company
-router.get('/:id', companyController.getCompany);
-
 // Update a company
 router.put('/:id',
   upload.fields([

@@ -38,8 +38,6 @@ router.post('/',
 
 router.get('/', expenseController.getExpenses);
 
-router.get('/:id', expenseController.getExpense);
-
 router.put('/:id',
     expenseValidation,
     validateRequest,
@@ -48,16 +46,6 @@ router.put('/:id',
 );
 
 router.delete('/:id', expenseController.deleteExpense);
-
-// Receipt routes
-router.post('/:id/receipts',
-    upload.array('receipts', 5),
-    expenseController.addReceipts
-);
-
-router.delete('/:id/receipts/:receiptId',
-    expenseController.deleteReceipt
-);
 
 // Update expense status
 router.patch('/:id/status', [

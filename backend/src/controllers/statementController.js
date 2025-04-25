@@ -127,7 +127,7 @@ const uploadStatement = async (req, res) => {
     // Process each company's transactions
     for (const [companyName, companyTrans] of Object.entries(companyTransactions)) {
       // Find the company
-      const company = await Company.findOne({ name: companyName });
+      const company = await Company.findOne({ name: companyName, createdBy: userId });
       if (!company) {
         throw new Error(`Company not found: ${companyName}`);
       }

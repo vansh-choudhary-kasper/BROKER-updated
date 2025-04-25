@@ -7,10 +7,10 @@ const getDashboardStats = async (req, res) => {
     try {
         // Get total companies count, type-wise counts, total brokers, and total accounts
         const [totalCompanies, companyTypeCounts, totalBrokers, totalAccounts, accountTypeCounts] = await Promise.all([
-            Company.countDocuments({ name: { $ne: 'other' } }),
+            Company.countDocuments({ name: { $ne: 'other' }, createdBy: req.user.userId }),
             Company.aggregate([
                 {
-                    $match: { name: { $ne: 'other' } }
+                    $match: { name: { $ne: 'other' }, createdBy: req.user.userId }
                 },
                 {
                     $group: {
@@ -19,9 +19,12 @@ const getDashboardStats = async (req, res) => {
                     }
                 }
             ]),
-            Broker.countDocuments(),
-            Bank.countDocuments(),
+            Broker.countDocuments({ createdBy: req.user.userId }),
+            Bank.countDocuments({ createdBy: req.user.userId }),
             Bank.aggregate([
+                {   
+                    $match: { createdBy: req.user.userId }
+                },
                 {
                     $group: {
                         _id: '$isActive',
@@ -60,6 +63,7 @@ const getDashboardStats = async (req, res) => {
         const monthlyExpenses = await Expense.aggregate([
             {
                 $match: {
+                    createdBy: req.user.userId,
                     date: { $gte: startOfMonth }
                 }
             },
@@ -75,6 +79,7 @@ const getDashboardStats = async (req, res) => {
         const yearlyExpenses = await Expense.aggregate([
             {
                 $match: {
+                    createdBy: req.user.userId,
                     date: { $gte: startOfYear }
                 }
             },

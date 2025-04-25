@@ -42,21 +42,7 @@ const brokerValidation = [
 // Routes
 router.post('/', protect, brokerValidation, validateRequest, createBroker);
 router.get('/', protect, getBrokers);
-router.get('/:id', protect, getBrokerById);
 router.put('/:id', protect, brokerValidation, validateRequest, updateBroker);
 router.delete('/:id', protect, deleteBroker);
-
-// Referral routes
-router.post('/:id/referrals', protect, admin, [
-  body('companyId').isMongoId().withMessage('Invalid company ID'),
-  body('commission').isFloat({ min: 0 }).withMessage('Commission must be a positive number')
-], validateRequest, addReferral);
-
-router.put('/:id/referrals/:referralId', protect, admin, [
-  body('status').optional().isIn(['pending', 'paid']).withMessage('Invalid status'),
-  body('commission').optional().isFloat({ min: 0 }).withMessage('Commission must be a positive number')
-], validateRequest, updateReferral);
-
-router.delete('/:id/referrals/:referralId', protect, admin, deleteReferral);
 
 module.exports = router; 

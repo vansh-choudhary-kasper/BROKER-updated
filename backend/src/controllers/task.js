@@ -12,7 +12,6 @@ class TaskController {
         this.createTask = this.createTask.bind(this);
         this.updateTask = this.updateTask.bind(this);
         this.getTasks = this.getTasks.bind(this);
-        this.getTask = this.getTask.bind(this);
         this.deleteTask = this.deleteTask.bind(this);
     }
 
@@ -54,7 +53,7 @@ class TaskController {
             const finalTaskNumber = taskNumber || await this.generateTaskNumber();
 
             // Verify client company exists
-            const clientCompanyExists = await Company.findById(clientCompany);
+            const clientCompanyExists = await Company.findById(clientCompany, { createdBy: req.user.userId });
             if (!clientCompanyExists) {
                 return res.status(404).json(
                     ApiResponse.notFound('Client company not found')
@@ -62,7 +61,7 @@ class TaskController {
             }
 
             // Verify provider company exists
-            const providerCompanyExists = await Company.findById(providerCompany);
+            const providerCompanyExists = await Company.findById(providerCompany, { createdBy: req.user.userId });
             if (!providerCompanyExists) {
                 return res.status(404).json(
                     ApiResponse.notFound('Provider company not found')
@@ -79,7 +78,8 @@ class TaskController {
                     clientCompany,
                     providerCompany,
                     helperBroker,
-                    payment
+                    payment,
+                    createdBy: req.user.userId
                 });
             } else {
                 task = new Task({
@@ -88,7 +88,8 @@ class TaskController {
                     taskNumber: finalTaskNumber,
                     clientCompany,
                     providerCompany,
-                    payment
+                    payment,
+                    createdBy: req.user.userId
                 });
             }
 
@@ -96,7 +97,7 @@ class TaskController {
 
             // Verify helper broker exists if provided and update broker's task payments
             if (helperBroker && helperBroker.broker) {
-                const brokerDoc = await Broker.findById(helperBroker.broker);
+                const brokerDoc = await Broker.findById(helperBroker.broker, { createdBy: req.user.userId });
                 if (!brokerDoc) {
                     return res.status(404).json(
                         ApiResponse.notFound('Helper broker not found')
@@ -160,13 +161,15 @@ class TaskController {
                 query.providerCompany = providerCompany;
             }
 
+            query.createdBy = req.user.userId;
+
             // Add search functionality
             if (search) {
                 console.error("search", search);
                 // First, find brokers whose names match the search term
                 const brokers = await Broker.find({
                     name: { $regex: search, $options: 'i' }
-                }).select('_id');
+                }, { createdBy: req.user.userId }).select('_id');
 
                 const brokerIds = brokers.map(broker => broker._id);
 
@@ -199,31 +202,6 @@ class TaskController {
         }
     }
 
-    async getTask(req, res) {
-        try {
-            const task = await Task.findById(req.params.id)
-                .populate('assignedTo', 'name email')
-                .populate('clientCompany', 'name')
-                .populate('providerCompany', 'name')
-                .populate('comments.user', 'name');
-
-            if (!task) {
-                return res.status(404).json(
-                    ApiResponse.notFound('Task not found')
-                );
-            }
-
-            return res.status(200).json(
-                ApiResponse.success('Task retrieved successfully', task)
-            );
-        } catch (error) {
-            logger.error('Get Task Error:', error);
-            return res.status(500).json(
-                ApiResponse.serverError(error.message)
-            );
-        }
-    }
-
     async updateTask(req, res) {
         try {
             const { id } = req.params;
@@ -238,16 +216,22 @@ class TaskController {
             } = req.body;
 
             // Find the task
-            const task = await Task.findById(id);
+            const task = await Task.findById(id, { createdBy: req.user.userId });
             if (!task) {
                 return res.status(404).json(
                     ApiResponse.notFound('Task not found')
                 );
             }
 
+            if (task.createdBy.toString() !== req.user.userId) {
+                return res.status(403).json(
+                    ApiResponse.error('Unauthorized, you are not allowed to update this task')
+                );
+            }
+
             // Verify client company exists if provided
             if (clientCompany) {
-                const clientCompanyExists = await Company.findById(clientCompany);
+                const clientCompanyExists = await Company.findById(clientCompany, { createdBy: req.user.userId });
                 if (!clientCompanyExists) {
                     return res.status(404).json(
                         ApiResponse.notFound('Client company not found')
@@ -257,7 +241,7 @@ class TaskController {
 
             // Verify provider company exists if provided
             if (providerCompany) {
-                const providerCompanyExists = await Company.findById(providerCompany);
+                const providerCompanyExists = await Company.findById(providerCompany, { createdBy: req.user.userId });
                 if (!providerCompanyExists) {
                     return res.status(404).json(
                         ApiResponse.notFound('Provider company not found')
@@ -267,7 +251,7 @@ class TaskController {
 
             // Verify helper broker exists if provided
             if (helperBroker && helperBroker.broker) {
-                const brokerDoc = await Broker.findById(helperBroker.broker);
+                const brokerDoc = await Broker.findById(helperBroker.broker, { createdBy: req.user.userId });
                 if (!brokerDoc) {
                     return res.status(404).json(
                         ApiResponse.notFound('Helper broker not found')
@@ -408,6 +392,12 @@ class TaskController {
             if (!task) {
                 return res.status(404).json(
                     ApiResponse.notFound('Task not found')
+                );
+            }
+
+            if (task.createdBy.toString() !== req.user.userId) {
+                return res.status(403).json(
+                    ApiResponse.error('Unauthorized, you are not allowed to delete this task')
                 );
             }
 

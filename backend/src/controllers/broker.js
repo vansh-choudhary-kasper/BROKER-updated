@@ -7,14 +7,19 @@ exports.createBroker = async (req, res) => {
   try {
     const { bankDetails, ...brokerData } = req.body;
     const bankIds = [];
+
+    brokerData.createdBy = req.user.userId;
     // forEach doesn't wait for async operations, use for...of instead
     for (const bank of bankDetails) {
       try {
         let bankData = await Bank.findOne({ accountNumber: bank.accountNumber });
         if (!bankData) {
+          bank.createdBy = req.user.userId;
           bankData = await Bank.create(bank);
+        } else if (bankData.createdBy.toString() !== req.user.userId) {
+          continue;
         }
-        bankIds.push({_id: bankData._id});
+        bankIds.push({ _id: bankData._id });
       } catch (error) {
         console.error("Error processing bank:", error);
         throw error; // Re-throw to be caught by outer try-catch
@@ -32,9 +37,9 @@ exports.createBroker = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in creating broker:", error);
-    res.status(400).json({ 
+    res.status(400).json({
       success: false,
-      message: error.message 
+      message: error.message
     });
   }
 };
@@ -43,10 +48,12 @@ exports.createBroker = async (req, res) => {
 exports.getBrokers = async (req, res) => {
   try {
     const { page = 1, limit = 10, search = '', status = '' } = req.query;
-    
+
     // Build query
     const query = {};
-    
+
+    query.createdBy = req.user.userId;
+
     // Add search functionality
     if (search) {
       query.$or = [
@@ -55,12 +62,12 @@ exports.getBrokers = async (req, res) => {
         { phone: { $regex: search, $options: 'i' } }
       ];
     }
-    
+
     // Add status filter
     if (status) {
       query.status = status.toLowerCase();
     }
-    
+
     // Execute query with pagination
     const brokers = await Broker.find(query)
       .populate('bankDetails')
@@ -68,10 +75,10 @@ exports.getBrokers = async (req, res) => {
       .limit(limit * 1)
       .skip((page - 1) * limit)
       .exec();
-    
+
     // Get total count for pagination
     const total = await Broker.countDocuments(query);
-    
+
     res.json({
       success: true,
       data: brokers,
@@ -88,24 +95,11 @@ exports.getBrokers = async (req, res) => {
   }
 };
 
-// Get broker by ID
-exports.getBrokerById = async (req, res) => {
-  try {
-    const broker = await Broker.findById(req.params.id);
-    if (!broker) {
-      return res.status(404).json({ message: 'Broker not found' });
-    }
-    res.json(broker);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
 // Update broker
 exports.updateBroker = async (req, res) => {
   try {
     const { bankDetails, ...brokerData } = req.body;
-    
+
     // First find the broker
     const broker = await Broker.findById(req.params.id);
     if (!broker) {
@@ -115,11 +109,17 @@ exports.updateBroker = async (req, res) => {
       });
     }
 
+    if (broker.createdBy.toString() !== req.user.userId) {
+      return res.status(403).json(
+        ApiResponse.error('Unauthorized')
+      );
+    }
+
     // Update bank accounts
     if (bankDetails && bankDetails.length > 0) {
       // Clear existing bank accounts
       broker.bankDetails = [];
-      
+
       // Create/update bank accounts
       for (let bank of bankDetails) {
         try {
@@ -128,14 +128,16 @@ exports.updateBroker = async (req, res) => {
             throw new Error('Missing required bank details');
           }
 
-          let bankAccount = await Bank.findOneAndUpdate(
-            { accountNumber: bank.accountNumber },
-            { ...bank, updatedAt: new Date() },
-            { new: true, runValidators: true, upsert: true }
-          );
-
+          let bankAccount = await Bank.findOne({ accountNumber: bank.accountNumber });
+          bank.createdBy = req.user.userId;
           if (!bankAccount) {
             bankAccount = await Bank.create(bank);
+          } else if (bankAccount.createdBy.toString() !== req.user.userId) {
+            continue;
+          } else {
+            // Update all fields from `bank` to `bankAccount`
+            Object.assign(bankAccount, bank);
+            await bankAccount.save();
           }
 
           broker.bankDetails.push(bankAccount._id);
@@ -154,7 +156,7 @@ exports.updateBroker = async (req, res) => {
 
     // Save the updated broker
     await broker.save();
-    
+
     // Fetch the updated broker with populated references
     const updatedBroker = await Broker.findById(broker._id)
       .populate({
@@ -169,9 +171,9 @@ exports.updateBroker = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in updateBroker:", error);
-    res.status(400).json({ 
+    res.status(400).json({
       success: false,
-      message: error.message 
+      message: error.message
     });
   }
 };
@@ -184,14 +186,20 @@ exports.deleteBroker = async (req, res) => {
     for (let bank of bankDetails) {
       await Bank.findByIdAndDelete(bank._id);
     }
-    
+
     if (!broker) {
       return res.status(404).json({
         success: false,
         message: 'Broker not found'
       });
     }
-    
+
+    if (broker.createdBy.toString() !== req.user.userId) {
+      return res.status(403).json(
+        ApiResponse.error('Unauthorized')
+      );
+    }
+
     res.json({
       success: true,
       message: 'Broker deleted successfully'
@@ -203,117 +211,3 @@ exports.deleteBroker = async (req, res) => {
     });
   }
 };
-
-// Add referral
-exports.addReferral = async (req, res) => {
-  try {
-    const { companyId, commission } = req.body;
-    
-    const company = await Company.findById(companyId);
-    if (!company) {
-      return res.status(404).json({
-        success: false,
-        message: 'Company not found'
-      });
-    }
-
-    const broker = await Broker.findById(req.params.id);
-    if (!broker) {
-      return res.status(404).json({
-        success: false,
-        message: 'Broker not found'
-      });
-    }
-
-    broker.referrals.push({
-      company: companyId,
-      date: new Date(),
-      commission: commission,
-      status: 'pending'
-    });
-
-    await broker.save();
-    
-    res.status(201).json({
-      success: true,
-      data: broker
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
-};
-
-// Update referral
-exports.updateReferral = async (req, res) => {
-  try {
-    const { status, commission } = req.body;
-    
-    const broker = await Broker.findById(req.params.id);
-    if (!broker) {
-      return res.status(404).json({
-        success: false,
-        message: 'Broker not found'
-      });
-    }
-
-    const referral = broker.referrals.id(req.params.referralId);
-    if (!referral) {
-      return res.status(404).json({
-        success: false,
-        message: 'Referral not found'
-      });
-    }
-
-    if (status) referral.status = status;
-    if (commission) referral.commission = commission;
-
-    await broker.save();
-    
-    res.json({
-      success: true,
-      data: broker
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
-};
-
-// Delete referral
-exports.deleteReferral = async (req, res) => {
-  try {
-    const broker = await Broker.findById(req.params.id);
-    if (!broker) {
-      return res.status(404).json({
-        success: false,
-        message: 'Broker not found'
-      });
-    }
-
-    const referral = broker.referrals.id(req.params.referralId);
-    if (!referral) {
-      return res.status(404).json({
-        success: false,
-        message: 'Referral not found'
-      });
-    }
-
-    referral.remove();
-    await broker.save();
-    
-    res.json({
-      success: true,
-      message: 'Referral deleted successfully'
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
-}; 

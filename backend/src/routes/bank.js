@@ -3,7 +3,6 @@ const { body } = require('express-validator');
 const router = express.Router();
 
 const bankController = require('../controllers/bank');
-const bankStatementController = require('../controllers/bankStatement');
 const validateRequest = require('../middleware/validator');
 const { protect } = require('../middleware/auth');
 const { upload } = require('../middleware/fileUpload');
@@ -43,8 +42,6 @@ router.post('/',
 
 router.get('/', bankController.getBanks);
 
-router.get('/:id', bankController.getBank);
-
 router.put('/:id',
     bankValidation,
     validateRequest,
@@ -54,30 +51,7 @@ router.put('/:id',
 
 router.delete('/:id', bankController.deleteBank);
 
-// Document routes
-router.post('/:id/documents',
-    upload.array('documents', 5),
-    bankController.addDocuments
-);
-
-router.delete('/:id/documents/:docId', bankController.removeDocument);
-
-// Transaction routes
-router.post('/:id/transactions', [
-    body('type').isIn(['credit', 'debit']).withMessage('Transaction type must be credit or debit'),
-    body('amount').isNumeric().withMessage('Amount must be a number'),
-    body('date').isISO8601().withMessage('Invalid date format'),
-    validateRequest
-], bankController.addTransaction);
-
-router.get('/:id/transactions', bankController.getTransactions);
-
 // Toggle bank status
 router.patch('/:id/toggle-status', bankController.toggleBankStatus);
-
-// Bank Statement routes
-router.post('/statements/upload',
-    bankStatementController.uploadStatement
-);
 
 module.exports = router; 

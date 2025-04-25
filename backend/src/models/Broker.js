@@ -117,6 +117,11 @@ const brokerSchema = new mongoose.Schema({
     default: 'active'
   },
 
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+
   // Timestamps
   createdAt: {
     type: Date,
