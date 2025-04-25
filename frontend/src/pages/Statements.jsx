@@ -167,7 +167,7 @@ const Statements = () => {
 
       {/* Upload Section */}
       {showUpload && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" style={{margin: 0}}>
           <div className="relative top-20 mx-auto p-5 border w-4/5 shadow-lg rounded-md bg-white">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Upload New Statement</h2>

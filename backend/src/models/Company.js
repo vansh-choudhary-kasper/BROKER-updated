@@ -179,7 +179,7 @@ companySchema.index({ 'businessDetails.gstNumber': 1 }, { unique: true , sparse:
 companySchema.index({ 'businessDetails.panNumber': 1 }, { unique: true , sparse: true});
 companySchema.index({ 'businessDetails.cinNumber': 1 }, { unique: true , sparse: true});
 companySchema.index({ 'businessDetails.tdsNumber': 1 }, { unique: true , sparse: true});
-companySchema.index({ name: 1 });
+companySchema.index({ name: 1 }, { unique: true, sparse: true });
 companySchema.index({ 'verificationStatus.gstVerified': 1 });
 companySchema.index({ 'verificationStatus.panVerified': 1 });
 companySchema.index({ status: 1 });
