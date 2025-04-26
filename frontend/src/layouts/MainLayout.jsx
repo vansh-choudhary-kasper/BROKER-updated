@@ -153,6 +153,11 @@ const MainLayout = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
+      {/* Watermark */}
+      <div className="fixed bottom-8 right-16 px-4 py-2 bg-white/80 backdrop-blur-sm border-t border-l border-r border-b border-gray-200 rounded-tl-lg rounded-br-lg text-gray-600 text-xs font-medium pointer-events-none">
+        Design and Developed by Kasper Infotech Pvt. Ltd.
+      </div>
+      
       {/* Sidebar */}
       <div
         className={`${
@@ -160,7 +165,18 @@ const MainLayout = () => {
         } bg-white shadow-lg transition-all duration-300`}
       >
         <div className="flex items-center justify-between p-4 border-b">
-          {isSidebarOpen && <h1 className="text-xl font-bold">BMS</h1>}
+          {isSidebarOpen && (
+            <>
+              <img 
+                src="https://kasperinfotech.net/static/media/MUNCSMALL.248e32a2.svg"
+                alt="MUN-C Logo"
+                className="h-12 w-auto" 
+              />
+              <div className="flex items-center">
+                <span className="ml-2 text-2xl font-bold text-blue-600">MUN-C</span>
+              </div>
+            </>
+          )}
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100"
@@ -265,7 +281,7 @@ const MainLayout = () => {
         {/* Header */}
         <header className="bg-white shadow-sm">
           <div className="flex items-center justify-between p-4">
-            <h2 className="text-xl font-semibold">Broker Management System</h2>
+            <h2 className="text-xl font-semibold text-blue-900">Broker Management System</h2>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">
                 {user?.name || 'User'}
