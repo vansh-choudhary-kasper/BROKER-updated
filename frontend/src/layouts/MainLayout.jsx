@@ -2,12 +2,27 @@ import { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  return isMobile;
+};
+
 const MainLayout = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const isMobile = useIsMobile();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [key, setKey] = useState(0);
+
+  useEffect(() => {
+    setIsSidebarOpen(!isMobile);
+  }, [isMobile]);
 
   const handleLogout = () => {
     logout();
@@ -15,23 +30,22 @@ const MainLayout = () => {
   };
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+    setIsSidebarOpen((prev) => !prev);
   };
 
   const isActive = (path) => {
     return location.pathname === path;
   };
 
-  // Force re-render of the Outlet component when navigating to the same route
   useEffect(() => {
     setKey(prevKey => prevKey + 1);
   }, [location.pathname, location.search]);
 
   const handleNavigation = (path) => {
     if (location.pathname === path) {
-      // If already on the same path, force a reload of the component
       setKey(prevKey => prevKey + 1);
     }
+    if (isMobile) setIsSidebarOpen(false);
   };
 
   const navItems = [
@@ -152,17 +166,28 @@ const MainLayout = () => {
   ];
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100 relative">
       {/* Watermark */}
-      <div className="fixed bottom-8 right-16 px-4 py-2 bg-white/80 backdrop-blur-sm border-t border-l border-r border-b border-gray-200 rounded-tl-lg rounded-br-lg text-gray-600 text-xs font-medium pointer-events-none">
+      <div className="fixed bottom-8 right-16 px-4 py-2 bg-white/80 backdrop-blur-sm border-t border-l border-r border-b border-gray-200 rounded-tl-lg rounded-br-lg text-gray-600 text-xs font-medium pointer-events-none z-40">
         Design and Developed by Kasper Infotech Pvt. Ltd.
       </div>
-      
-      {/* Sidebar */}
+
+      {/* Sidebar for desktop, Drawer for mobile */}
+      {/* Backdrop for mobile */}
+      {isMobile && isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-40 z-40"
+          onClick={toggleSidebar}
+        ></div>
+      )}
       <div
-        className={`${
-          isSidebarOpen ? 'w-64' : 'w-20'
-        } bg-white shadow-lg transition-all duration-300`}
+        className={`
+          ${isMobile
+            ? `fixed top-0 left-0 h-full z-50 transition-transform duration-300 bg-white shadow-lg ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`
+            : `${isSidebarOpen ? 'w-64' : 'w-20'} bg-white shadow-lg transition-all duration-300 h-full`
+          }
+        `}
+        style={isMobile ? { width: '16rem' } : {}}
       >
         <div className="flex items-center justify-between p-4 border-b">
           {isSidebarOpen && (
@@ -196,7 +221,6 @@ const MainLayout = () => {
             </svg>
           </button>
         </div>
-
         <nav className="p-4">
           <ul className="space-y-2">
             {navItems.map((item) => (
@@ -205,9 +229,7 @@ const MainLayout = () => {
                   <div className="relative group">
                     <Link
                       to={item.path}
-                      className={`nav-link ${
-                        isActive(item.path) ? 'active' : ''
-                      }`}
+                      className={`nav-link ${isActive(item.path) ? 'active' : ''}`}
                       onClick={() => handleNavigation(item.path)}
                     >
                       <svg
@@ -254,9 +276,7 @@ const MainLayout = () => {
                 ) : (
                   <Link
                     to={item.path}
-                    className={`nav-link ${
-                      isActive(item.path) ? 'active' : ''
-                    }`}
+                    className={`nav-link ${isActive(item.path) ? 'active' : ''}`}
                     onClick={() => handleNavigation(item.path)}
                   >
                     <svg
@@ -281,7 +301,28 @@ const MainLayout = () => {
         {/* Header */}
         <header className="bg-white shadow-sm">
           <div className="flex items-center justify-between p-4">
-            <h2 className="text-xl font-semibold text-blue-900">Broker Management System</h2>
+            {/* Mobile menu icon */}
+            {isMobile && (
+              <button
+                onClick={toggleSidebar}
+                className="p-2 rounded-lg hover:bg-gray-100 md:hidden mr-2"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+            )}
+            <h2 className="text-xl font-semibold text-blue-900">{isMobile ? '' : 'Broker Management System'}</h2>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">
                 {user?.name || 'User'}
