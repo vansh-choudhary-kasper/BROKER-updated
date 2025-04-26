@@ -6,12 +6,8 @@ const validateRequest = require('../middleware/validator');
 const {
   createBroker,
   getBrokers,
-  getBrokerById,
   updateBroker,
   deleteBroker,
-  addReferral,
-  updateReferral,
-  deleteReferral
 } = require('../controllers/broker');
 
 // Validation middleware

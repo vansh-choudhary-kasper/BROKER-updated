@@ -97,7 +97,10 @@ class TaskController {
 
             // Verify helper broker exists if provided and update broker's task payments
             if (helperBroker && helperBroker.broker) {
-                const brokerDoc = await Broker.findById(helperBroker.broker, { createdBy: req.user.userId });
+                let brokerDoc = await Broker.find({_id: helperBroker.broker, createdBy: req.user.userId });
+                if(brokerDoc && brokerDoc.length > 0) {
+                    brokerDoc = brokerDoc[0];
+                }
                 if (!brokerDoc) {
                     return res.status(404).json(
                         ApiResponse.notFound('Helper broker not found')
@@ -106,7 +109,7 @@ class TaskController {
 
                 // Add task payment record with the actual task ID
                 let commission = payment.amount * (helperBroker.commission / 100);
-                brokerDoc.taskPayments.push({
+                brokerDoc.taskPayments?.push({
                     taskId: task._id,
                     taskNumber: finalTaskNumber,
                     commission: helperBroker.commission,
@@ -251,7 +254,10 @@ class TaskController {
 
             // Verify helper broker exists if provided
             if (helperBroker && helperBroker.broker) {
-                const brokerDoc = await Broker.findById(helperBroker.broker, { createdBy: req.user.userId });
+                let brokerDoc = await Broker.findById(helperBroker.broker, { createdBy: req.user.userId });
+                if(brokerDoc && brokerDoc.length > 0) {
+                    brokerDoc = brokerDoc[0];
+                }
                 if (!brokerDoc) {
                     return res.status(404).json(
                         ApiResponse.notFound('Helper broker not found')

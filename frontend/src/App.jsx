@@ -13,6 +13,7 @@ import Expenses from './pages/Expenses';
 import Broker from './pages/Broker';
 import Slabs from './pages/Slabs';
 import Statements from './pages/Statements';
+import Advances from './pages/Advances';
 import { useAuth } from './context/AuthContext';
 
 // Protected Route component
@@ -117,6 +118,7 @@ function App() {
             <Route path="banks" element={<Banks />} />
             <Route path="brokers" element={<Broker />} />
             <Route path="expenses" element={<Expenses />} />
+            <Route path="advances" element={<Advances />} />
             <Route path="slabs" element={<Slabs />} />
             <Route path="statements" element={<Statements />} />
           </Route>

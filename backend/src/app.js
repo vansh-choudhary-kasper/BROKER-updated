@@ -21,6 +21,7 @@ const dashboardRoutes = require('./routes/dashboard');
 const userRoutes = require('./routes/user');
 const todoRoutes = require('./routes/todo');
 const statementRoutes = require('./routes/statementRoutes');
+const advanceRoutes = require('./routes/advance');
 // Create Express app
 const app = express();
 
@@ -53,6 +54,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/todos', todoRoutes);
 app.use('/api/statements', statementRoutes);
+app.use('/api/advances', advanceRoutes);
 // Error handling
 app.use(errorHandler);
 
