@@ -82,6 +82,23 @@ const Expenses = () => {
     }
   }, [formError]);
 
+  // Add ESC key handler
+  useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape' && showForm) {
+        setShowForm(false);
+        setFormData(initialFormState);
+        setEditingExpense(null);
+        setFormError(null);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscKey);
+    };
+  }, [showForm]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({

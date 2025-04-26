@@ -103,6 +103,29 @@ const Broker = () => {
     }
   }, [formError]);
 
+  // Add ESC key handler
+  useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape') {
+        if (showForm) {
+          setShowForm(false);
+          setFormData(initialFormState);
+          setEditingBroker(null);
+          setFormError(null);
+        }
+        if (showDetailsModal) {
+          setShowDetailsModal(false);
+          setSelectedBroker(null);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscKey);
+    };
+  }, [showForm, showDetailsModal]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -743,7 +766,7 @@ const Broker = () => {
                 <div className="space-y-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-500">Total Deals</label>
-                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.financialSummary?.totalDeals || 0}</p>
+                    <p className="mt-1 text-sm text-gray-900">{selectedBroker.financialSummary?.totalTasks || 0}</p>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-500">Total Commission</label>

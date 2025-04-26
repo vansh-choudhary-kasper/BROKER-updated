@@ -17,6 +17,27 @@ const Statements = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedCompanyId, setSelectedCompanyId] = useState(null);
 
+  // Add ESC key handler
+  useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape') {
+        if (showUpload) {
+          setShowUpload(false);
+        }
+        if (showDetailsModal) {
+          setShowDetailsModal(false);
+          setSelectedStatement(null);
+          setSelectedCompanyId(null);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscKey);
+    };
+  }, [showUpload, showDetailsModal]);
+
   useEffect(() => {
     fetchStatements();
   }, []);

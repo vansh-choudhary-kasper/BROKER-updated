@@ -31,6 +31,22 @@ const AdvanceForm = ({ open, onClose, onSuccess }) => {
     const [error, setError] = useState(null);
     const { companies = [], brokers = [], fetchCompanies, fetchBrokers } = useData();
 
+    // Add ESC key handler
+    useEffect(() => {
+        const handleEscKey = (event) => {
+            if (event.key === 'Escape' && open) {
+                onClose();
+                setFormData(initialFormState);
+                setError(null);
+            }
+        };
+
+        document.addEventListener('keydown', handleEscKey);
+        return () => {
+            document.removeEventListener('keydown', handleEscKey);
+        };
+    }, [open, onClose]);
+
     useEffect(() => {
         if (open) {
             fetchCompanies && fetchCompanies();

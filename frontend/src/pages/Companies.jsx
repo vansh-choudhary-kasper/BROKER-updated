@@ -100,6 +100,29 @@ const Companies = () => {
   const formErrorRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Add ESC key handler
+  useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape') {
+        if (showForm) {
+          setShowForm(false);
+          setFormData(initialFormState);
+          setEditingCompany(null);
+          setFormError(null);
+        }
+        if (showDetailsModal) {
+          setShowDetailsModal(false);
+          setSelectedCompany(null);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscKey);
+    };
+  }, [showForm, showDetailsModal]);
+
   // Debounced search function
   const debouncedSearch = useCallback(
     debounce((value) => {
@@ -1279,7 +1302,7 @@ const Companies = () => {
 
         {/* Company Details Modal */}
         {showDetailsModal && selectedCompany && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" style={{margin: 0}}>
             <div className="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
               <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
                 <h2 className="text-2xl font-bold text-gray-900">

@@ -139,6 +139,23 @@ const Tasks = () => {
     }
   }, [formError]);
 
+  // Add ESC key handler
+  useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape' && showForm) {
+        setShowForm(false);
+        setFormData(initialFormState);
+        setEditingTask(null);
+        setFormError(null);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscKey);
+    };
+  }, [showForm]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     // if status is paid, then payment date should be present
