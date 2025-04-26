@@ -31,13 +31,13 @@ import AdvanceForm from './AdvanceForm';
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const AdvanceList = () => {
+    const { checkAuth } = useAuth();
     const [advances, setAdvances] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [openForm, setOpenForm] = useState(false);
     const [filterType, setFilterType] = useState('all');
     const [filterStatus, setFilterStatus] = useState('all');
-    const { user } = useAuth();
     const [selectedAdvance, setSelectedAdvance] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [editMode, setEditMode] = useState(false);
@@ -72,6 +72,7 @@ const AdvanceList = () => {
         try {
             await axios.put(`${backendUrl}/api/advances/${id}/toggle`);
             fetchAdvances();
+            checkAuth();
         } catch (err) {
             setError('Failed to toggle advance status');
             console.error(err);
@@ -123,6 +124,7 @@ const AdvanceList = () => {
             setModalOpen(false);
             setEditMode(false);
             fetchAdvances();
+            checkAuth();
         } catch (err) {
             setError('Failed to update advance');
             console.error(err);

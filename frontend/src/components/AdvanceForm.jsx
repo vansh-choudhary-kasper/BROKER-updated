@@ -13,10 +13,12 @@ import {
     MenuItem,
     Box
 } from '@mui/material';
+import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 const AdvanceForm = ({ open, onClose, onSuccess }) => {
+    const { checkAuth } = useAuth();
     const initialFormState = {
         title: '',
         description: '',
@@ -63,6 +65,7 @@ const AdvanceForm = ({ open, onClose, onSuccess }) => {
             await axios.post(`${backendUrl}/api/advances`, payload);
             onSuccess();
             setFormData(initialFormState);
+            checkAuth();
         } catch (err) {
             setError('Failed to create advance');
             console.error(err);

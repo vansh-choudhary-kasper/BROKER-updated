@@ -166,8 +166,8 @@ class AdvanceController {
     async updateAdvance(req, res) {
         try {
             const { id } = req.params;
-            const { title, description, amount, type, counterpartyType, counterpartyId } = req.body;
-
+            let { title, description, amount, type, counterpartyType, counterpartyId } = req.body;
+            amount = Number(amount);
             const counterpartyTypeRef = counterpartyType === 'company' ? 'Company' : 'Broker';
 
             // Optionally, validate the counterparty exists
@@ -187,7 +187,7 @@ class AdvanceController {
             }
 
             const prevType = advance.type;
-            const prevAmount = advance.amount;
+            const prevAmount = advance.amount
             advance.title = title;
             advance.description = description;
             advance.amount = amount;
