@@ -97,6 +97,11 @@ const Dashboard = () => {
       total: 0,
       categories: {}
     },
+    activeAdvances: {
+      given: 0,
+      received: 0,
+      totalAmount: 0
+    },
     loading: true,
     error: null
   });
@@ -114,8 +119,33 @@ const Dashboard = () => {
           signal: controller.signal
         });
 
+        // Fetch active advances
+        const advancesResponse = await axios.get(`${backendUrl}/api/advances`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { status: 'active' },
+          signal: controller.signal
+        });
+
         if (isMounted) {
           if (statsResponse.data?.success) {
+            const activeAdvances = {
+              given: 0,
+              received: 0,
+              totalAmount: 0
+            };
+
+            if (Array.isArray(advancesResponse.data.data)) {
+              advancesResponse.data.data.forEach(advance => {
+                if (advance.type === 'given') {
+                  activeAdvances.given += 1;
+                  activeAdvances.amountToReceive = (activeAdvances.amountToReceive || 0) + advance.amount;
+                } else if (advance.type === 'received') {
+                  activeAdvances.received += 1;
+                  activeAdvances.amountToPay = (activeAdvances.amountToPay || 0) + advance.amount;
+                }
+              });
+            }
+
             setDashboardStats({
               totalCompanies: statsResponse.data.totalCompanies || 0,
               totalBrokers: statsResponse.data.totalBrokers || 0,
@@ -131,6 +161,7 @@ const Dashboard = () => {
               },
               monthlyExpenses: statsResponse.data.monthlyExpenses || { total: 0, categories: {} },
               yearlyExpenses: statsResponse.data.yearlyExpenses || { total: 0, categories: {} },
+              activeAdvances,
               loading: false,
               error: null
             });
@@ -248,6 +279,12 @@ const Dashboard = () => {
     name: name.charAt(0).toUpperCase() + name.slice(1),
     value
   }));
+
+  // Prepare data for active advances graph
+  const activeAdvancesData = [
+    { name: 'Given', value: dashboardStats.activeAdvances.given },
+    { name: 'Received', value: dashboardStats.activeAdvances.received }
+  ];
 
   // Get recent activities (only expenses)
   const recentActivities = Array.isArray(expenses)
@@ -601,6 +638,74 @@ const Dashboard = () => {
       {/* Todo List Section */}
       <div className="mt-6">
         <TodoList />
+      </div>
+
+      {/* Active Advances Section */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold mb-4">Active Advances</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h3 className="text-lg font-semibold mb-4">Advance Distribution</h3>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={activeAdvancesData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {activeAdvancesData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h3 className="text-lg font-semibold mb-4">Advance Summary</h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Total Active Advances:</span>
+                <span className="font-semibold">{dashboardStats.activeAdvances.given + dashboardStats.activeAdvances.received}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Given Advances:</span>
+                <span className="font-semibold">{dashboardStats.activeAdvances.given}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Received Advances:</span>
+                <span className="font-semibold">{dashboardStats.activeAdvances.received}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Amount to Receive:</span>
+                <span className="font-semibold text-green-600">
+                  ₹{(dashboardStats.activeAdvances.amountToReceive || 0).toLocaleString()}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Amount to Pay Back:</span>
+                <span className="font-semibold text-red-600">
+                  ₹{(dashboardStats.activeAdvances.amountToPay || 0).toLocaleString()}
+                </span>
+              </div>
+              <div className="flex justify-between items-center border-t pt-2">
+                <span className="text-gray-600">Net Amount:</span>
+                <span className={`font-semibold ${(dashboardStats.activeAdvances.amountToReceive || 0) >= (dashboardStats.activeAdvances.amountToPay || 0) ? 'text-green-600' : 'text-red-600'}`}>
+                  ₹{Math.abs(((dashboardStats.activeAdvances.amountToReceive || 0) - (dashboardStats.activeAdvances.amountToPay || 0))).toLocaleString()}
+                  {(dashboardStats.activeAdvances.amountToReceive || 0) >= (dashboardStats.activeAdvances.amountToPay || 0) ? ' (To Receive)' : ' (To Return)'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
