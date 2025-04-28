@@ -183,6 +183,12 @@ const Broker = () => {
     e.preventDefault();
     setFormError(null);
     setIsSubmitting(true);
+    if(formData.panNumber === '') {
+      formData.panNumber = undefined;
+    }
+    if(formData.gstNumber === '') {
+      formData.gstNumber = undefined;
+    }
     try {
       if (editingBroker) {
         const result = await updateBroker(editingBroker._id, formData);

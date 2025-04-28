@@ -29,19 +29,27 @@ const uploadToStorage = async (file) => {
   try {
     // Convert buffer to base64
     const base64Data = `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
-    
-    // Determine resource type
-    const isPDF = file.mimetype === 'application/pdf';
-    const resourceType = isPDF ? 'raw' : 'auto';
 
-    // Upload to Cloudinary
-    const result = await cloudinary.uploader.upload(base64Data, {
+    // Determine resource type and options
+    let uploadOptions = {
       folder: 'broker-management',
-      resource_type: resourceType,
       use_filename: true,
       unique_filename: true
-    });
-    
+    };
+
+    // For PDFs, use specific settings to preserve the PDF format
+    if (file.mimetype === 'application/pdf') {
+      uploadOptions.resource_type = 'raw';
+      // Add this to force Cloudinary to treat it as a PDF
+      uploadOptions.format = 'pdf';
+    } else {
+      // For non-PDFs, continue using auto detection
+      uploadOptions.resource_type = 'auto';
+    }
+
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(base64Data, uploadOptions);
+
     return {
       url: result.secure_url,
       originalName: file.originalname,
