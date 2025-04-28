@@ -53,7 +53,7 @@ class TaskController {
             const finalTaskNumber = taskNumber || await this.generateTaskNumber();
 
             // Verify client company exists
-            const clientCompanyExists = await Company.find({_id: clientCompany, createdBy: req.user.userId });
+            const clientCompanyExists = await Company.findOne({_id: clientCompany, createdBy: req.user.userId });
             if (!clientCompanyExists) {
                 return res.status(404).json(
                     ApiResponse.notFound('Client company not found')
@@ -61,7 +61,7 @@ class TaskController {
             }
 
             // Verify provider company exists
-            const providerCompanyExists = await Company.find({_id: providerCompany, createdBy: req.user.userId });
+            const providerCompanyExists = await Company.findOne({_id: providerCompany, createdBy: req.user.userId });
             if (!providerCompanyExists) {
                 return res.status(404).json(
                     ApiResponse.notFound('Provider company not found')
@@ -97,11 +97,8 @@ class TaskController {
 
             // Verify helper broker exists if provided and update broker's task payments
             if (helperBroker && helperBroker.broker) {
-                let brokerDoc = await Broker.find({_id: helperBroker.broker, createdBy: req.user.userId });
-                if(brokerDoc && brokerDoc.length > 0) {
-                    brokerDoc = brokerDoc[0];
-                }
-                if (!brokerDoc) {
+                let brokerDoc = await Broker.findOne({_id: helperBroker.broker, createdBy: req.user.userId });
+                if(!brokerDoc) {
                     return res.status(404).json(
                         ApiResponse.notFound('Helper broker not found')
                     );
@@ -219,8 +216,11 @@ class TaskController {
             } = req.body;
 
             // Find the task
-            const task = await Task.find({_id: id, createdBy: req.user.userId });
-            if (!task) {
+            let task = await Task.find({_id: id, createdBy: req.user.userId });
+            if(task && task.length > 0) {
+                task = task[0];
+            }
+            if (!task || task.length === 0) {
                 return res.status(404).json(
                     ApiResponse.notFound('Task not found')
                 );
@@ -234,7 +234,7 @@ class TaskController {
 
             // Verify client company exists if provided
             if (clientCompany) {
-                const clientCompanyExists = await Company.find({_id: clientCompany, createdBy: req.user.userId });
+                const clientCompanyExists = await Company.findOne({_id: clientCompany, createdBy: req.user.userId });
                 if (!clientCompanyExists) {
                     return res.status(404).json(
                         ApiResponse.notFound('Client company not found')
@@ -244,7 +244,7 @@ class TaskController {
 
             // Verify provider company exists if provided
             if (providerCompany) {
-                const providerCompanyExists = await Company.find({_id: providerCompany, createdBy: req.user.userId });
+                const providerCompanyExists = await Company.findOne({_id: providerCompany, createdBy: req.user.userId });
                 if (!providerCompanyExists) {
                     return res.status(404).json(
                         ApiResponse.notFound('Provider company not found')
@@ -254,10 +254,7 @@ class TaskController {
 
             // Verify helper broker exists if provided
             if (helperBroker && helperBroker.broker) {
-                let brokerDoc = await Broker.find({_id: helperBroker.broker, createdBy: req.user.userId });
-                if(brokerDoc && brokerDoc.length > 0) {
-                    brokerDoc = brokerDoc[0];
-                }
+                let brokerDoc = await Broker.findOne({_id: helperBroker.broker, createdBy: req.user.userId });
                 console.log("brokerDoc", brokerDoc);
                 if (!brokerDoc) {
                     return res.status(404).json(

@@ -18,7 +18,7 @@ class ExpenseController {
             } = req.body;
 
             // Verify company exists
-            const companyExists = await Company.find({_id: company, createdBy: req.user.userId });
+            const companyExists = await Company.findOne({_id: company, createdBy: req.user.userId });
             if (!companyExists) {
                 return res.status(404).json(
                     ApiResponse.notFound('Company not found')
@@ -160,7 +160,7 @@ class ExpenseController {
             }
 
             // Verify company exists
-            const companyExists = await Company.find({_id: company, createdBy: req.user.userId });
+            const companyExists = await Company.findOne({_id: company, createdBy: req.user.userId });
             if (!companyExists) {
                 return res.status(404).json(
                     ApiResponse.notFound('Company not found')
