@@ -88,6 +88,12 @@ const AdvanceForm = ({ open, onClose, onSuccess }) => {
         }
     };
 
+    const handleCancel = () => {
+        onClose();
+        setFormData(initialFormState);
+        setError(null);
+    }
+
     // Get the list to show in dropdown
     const counterpartyList = formData.counterpartyType === 'company' ? (Array.isArray(companies) ? companies : []) : (Array.isArray(brokers) ? brokers : []);
 
@@ -168,7 +174,7 @@ const AdvanceForm = ({ open, onClose, onSuccess }) => {
                     </Box>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={onClose}>Cancel</Button>
+                    <Button onClick={handleCancel}>Cancel</Button>
                     <Button type="submit" variant="contained" color="primary">
                         Create
                     </Button>
