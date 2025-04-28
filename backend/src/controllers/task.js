@@ -42,6 +42,7 @@ class TaskController {
             const {
                 title,
                 description,
+                taskDate,
                 taskNumber,
                 clientCompany,
                 providerCompany,
@@ -74,6 +75,7 @@ class TaskController {
                 task = new Task({
                     title,
                     description,
+                    taskDate,
                     taskNumber: finalTaskNumber,
                     clientCompany,
                     providerCompany,
@@ -85,6 +87,7 @@ class TaskController {
                 task = new Task({
                     title,
                     description,
+                    taskDate,
                     taskNumber: finalTaskNumber,
                     clientCompany,
                     providerCompany,
@@ -208,6 +211,7 @@ class TaskController {
             const {
                 title,
                 description,
+                taskDate,
                 taskNumber,
                 clientCompany,
                 providerCompany,
@@ -363,6 +367,7 @@ class TaskController {
             // Update task fields
             if (title) task.title = title;
             if (description !== undefined) task.description = description;
+            if (taskDate) task.taskDate = taskDate;
             if (taskNumber) task.taskNumber = taskNumber;
             if (clientCompany) task.clientCompany = clientCompany;
             if (providerCompany) task.providerCompany = providerCompany;

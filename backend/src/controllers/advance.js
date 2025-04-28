@@ -20,6 +20,7 @@ async function updateUserTotalAmount(userId, amount, type) {
     }
     const yearMap = user.totalAmount.get(year);
     let current = yearMap.get(month) || 0;
+    current = Number(current);
     if (type === 'given') {
         current -= amount;
     } else if (type === 'received') {
@@ -48,6 +49,7 @@ class AdvanceController {
     async createAdvance(req, res) {
         try {
             const { title, description, amount, type, counterpartyType, counterpartyId } = req.body;
+            amount = Number(amount);
 
             // Set the ref for population
             const counterpartyTypeRef = counterpartyType === 'company' ? 'Company' : 'Broker';

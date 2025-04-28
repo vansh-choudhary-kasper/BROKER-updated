@@ -25,6 +25,7 @@ const Tasks = () => {
     taskNumber: undefined,
     title: '',
     description: '',
+    taskDate: '',
     clientCompany: '',
     providerCompany: '',
     helperBroker: {
@@ -369,6 +370,16 @@ const Tasks = () => {
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     />
                   </div>
+                  <div>
+                    <label htmlFor="taskDate" className="block text-sm font-medium text-gray-700">
+                      Deal Date
+                    </label>
+                    <input type="date" id="taskDate" name="taskDate" value={formData.taskDate}
+                     onChange={handleChange}
+                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                     max={new Date().toISOString().split('T')[0]}
+                     />
+                  </div>
                 </div>
               </div>
 
@@ -492,6 +503,7 @@ const Tasks = () => {
                       onChange={handleChange}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                       disabled={statusPaid.includes(formData.taskNumber)}
+                      max={new Date().toISOString().split('T')[0]}
                     />
                   </div>
                 </div>
@@ -639,7 +651,7 @@ const Tasks = () => {
                     {task.helperBroker?.commission ? `${task.helperBroker.commission}%` : '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '-'}
+                    {task.taskDate ? new Date(task.taskDate).toLocaleDateString() : '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {task.payment?.amount ?

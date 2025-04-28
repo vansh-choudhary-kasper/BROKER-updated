@@ -12,6 +12,11 @@ const taskSchema = new mongoose.Schema({
     type: String,
     // Detailed explanation of the task requirements and scope
   },
+  taskDate: {
+    type: Date,
+    required: true
+    // Date of the task
+  },
   taskNumber: {
     type: String,
     required: true,
