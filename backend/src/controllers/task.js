@@ -53,7 +53,7 @@ class TaskController {
             const finalTaskNumber = taskNumber || await this.generateTaskNumber();
 
             // Verify client company exists
-            const clientCompanyExists = await Company.findById(clientCompany, { createdBy: req.user.userId });
+            const clientCompanyExists = await Company.find({_id: clientCompany, createdBy: req.user.userId });
             if (!clientCompanyExists) {
                 return res.status(404).json(
                     ApiResponse.notFound('Client company not found')
@@ -61,7 +61,7 @@ class TaskController {
             }
 
             // Verify provider company exists
-            const providerCompanyExists = await Company.findById(providerCompany, { createdBy: req.user.userId });
+            const providerCompanyExists = await Company.find({_id: providerCompany, createdBy: req.user.userId });
             if (!providerCompanyExists) {
                 return res.status(404).json(
                     ApiResponse.notFound('Provider company not found')
@@ -219,7 +219,7 @@ class TaskController {
             } = req.body;
 
             // Find the task
-            const task = await Task.findById(id, { createdBy: req.user.userId });
+            const task = await Task.find({_id: id, createdBy: req.user.userId });
             if (!task) {
                 return res.status(404).json(
                     ApiResponse.notFound('Task not found')
@@ -234,7 +234,7 @@ class TaskController {
 
             // Verify client company exists if provided
             if (clientCompany) {
-                const clientCompanyExists = await Company.findById(clientCompany, { createdBy: req.user.userId });
+                const clientCompanyExists = await Company.find({_id: clientCompany, createdBy: req.user.userId });
                 if (!clientCompanyExists) {
                     return res.status(404).json(
                         ApiResponse.notFound('Client company not found')
@@ -244,7 +244,7 @@ class TaskController {
 
             // Verify provider company exists if provided
             if (providerCompany) {
-                const providerCompanyExists = await Company.findById(providerCompany, { createdBy: req.user.userId });
+                const providerCompanyExists = await Company.find({_id: providerCompany, createdBy: req.user.userId });
                 if (!providerCompanyExists) {
                     return res.status(404).json(
                         ApiResponse.notFound('Provider company not found')
@@ -254,10 +254,11 @@ class TaskController {
 
             // Verify helper broker exists if provided
             if (helperBroker && helperBroker.broker) {
-                let brokerDoc = await Broker.findById(helperBroker.broker, { createdBy: req.user.userId });
+                let brokerDoc = await Broker.find({_id: helperBroker.broker, createdBy: req.user.userId });
                 if(brokerDoc && brokerDoc.length > 0) {
                     brokerDoc = brokerDoc[0];
                 }
+                console.log("brokerDoc", brokerDoc);
                 if (!brokerDoc) {
                     return res.status(404).json(
                         ApiResponse.notFound('Helper broker not found')
@@ -265,7 +266,7 @@ class TaskController {
                 }
 
                 // Check if task payment already exists
-                const existingTaskPayment = brokerDoc.taskPayments.find(
+                const existingTaskPayment = brokerDoc.taskPayments?.find(
                     tp => tp.taskId.toString() === id
                 );
 
@@ -313,7 +314,8 @@ class TaskController {
                 else if (!existingTaskPayment && helperBroker.status === 'paid') {
                     // Add new task payment
                     let commission = payment.amount * (helperBroker.commission / 100);
-                    brokerDoc.taskPayments.push({
+                    brokerDoc.taskPayments = brokerDoc.taskPayments || [];
+                    brokerDoc.taskPayments?.push({
                         taskId: id,
                         taskNumber: task.taskNumber,
                         commission: helperBroker.commission,
@@ -330,7 +332,8 @@ class TaskController {
                 else if (!existingTaskPayment && helperBroker.status === 'pending') {
                     // Add new task payment
                     let commission = payment.amount * (helperBroker.commission / 100);
-                    brokerDoc.taskPayments.push({
+                    brokerDoc.taskPayments = brokerDoc.taskPayments || [];
+                    brokerDoc.taskPayments?.push({
                         taskId: id,
                         taskNumber: task.taskNumber,
                         commission: helperBroker.commission,
