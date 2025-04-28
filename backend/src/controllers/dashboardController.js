@@ -2,6 +2,7 @@ const Company = require('../models/Company');
 const Bank = require('../models/Bank');
 const Expense = require('../models/Expense');
 const Broker = require('../models/Broker');
+const mongoose = require('mongoose');
 
 const getDashboardStats = async (req, res) => {
     try {
@@ -10,7 +11,7 @@ const getDashboardStats = async (req, res) => {
             Company.countDocuments({ name: { $ne: 'other' }, createdBy: req.user.userId }),
             Company.aggregate([
                 {
-                    $match: { name: { $ne: 'other' }, createdBy: req.user.userId }
+                    $match: { name: { $ne: 'other' }, createdBy: new mongoose.Types.ObjectId(req.user.userId) }
                 },
                 {
                     $group: {
@@ -23,7 +24,7 @@ const getDashboardStats = async (req, res) => {
             Bank.countDocuments({ createdBy: req.user.userId }),
             Bank.aggregate([
                 {   
-                    $match: { createdBy: req.user.userId }
+                    $match: { createdBy: new mongoose.Types.ObjectId(req.user.userId) }
                 },
                 {
                     $group: {
@@ -34,6 +35,7 @@ const getDashboardStats = async (req, res) => {
             ])
         ]);
 
+        console.log(companyTypeCounts);
         // Convert company type counts array to object
         const companyTypes = companyTypeCounts.reduce((acc, curr) => {
             acc[curr._id] = curr.count;
@@ -63,7 +65,7 @@ const getDashboardStats = async (req, res) => {
         const monthlyExpenses = await Expense.aggregate([
             {
                 $match: {
-                    createdBy: req.user.userId,
+                    createdBy: new mongoose.Types.ObjectId(req.user.userId),
                     date: { $gte: startOfMonth },
                     status: 'approved'
                 }
@@ -83,7 +85,7 @@ const getDashboardStats = async (req, res) => {
         const yearlyExpenses = await Expense.aggregate([
             {
                 $match: {
-                    createdBy: req.user.userId,
+                    createdBy: new mongoose.Types.ObjectId(req.user.userId),
                     date: { $gte: startOfYear },
                     status: 'approved'
                 }
