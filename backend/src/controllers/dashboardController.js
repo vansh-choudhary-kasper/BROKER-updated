@@ -64,7 +64,8 @@ const getDashboardStats = async (req, res) => {
             {
                 $match: {
                     createdBy: req.user.userId,
-                    date: { $gte: startOfMonth }
+                    date: { $gte: startOfMonth },
+                    status: 'approved'
                 }
             },
             {
@@ -83,7 +84,8 @@ const getDashboardStats = async (req, res) => {
             {
                 $match: {
                     createdBy: req.user.userId,
-                    date: { $gte: startOfYear }
+                    date: { $gte: startOfYear },
+                    status: 'approved'
                 }
             },
             {

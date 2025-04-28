@@ -45,7 +45,7 @@ class AdvanceController {
     // Create a new advance
     async createAdvance(req, res) {
         try {
-            const { title, description, amount, type, counterpartyType, counterpartyId } = req.body;
+            let { title, description, amount, type, counterpartyType, counterpartyId } = req.body;
             amount = Number(amount);
 
             // Set the ref for population

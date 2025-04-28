@@ -236,7 +236,7 @@ const Dashboard = () => {
   const yearlyData = getYearlyData();
 
   const expenseCategories = Array.isArray(expenses)
-    ? expenses.reduce((acc, expense) => {
+    ? expenses.filter(expense => expense.status === 'approved').reduce((acc, expense) => {
       // Handle both predefined and custom categories
       const categoryName = expense.category;
       // Format the category name for display
