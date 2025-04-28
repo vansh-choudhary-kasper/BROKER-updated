@@ -137,8 +137,8 @@ const brokerSchema = new mongoose.Schema({
 });
 
 // Indexes for better query performance
-brokerSchema.index({ email: 1 });
-brokerSchema.index({ phone: 1 });
+brokerSchema.index({ email: 1 }, { unique: true , sparse: true});
+brokerSchema.index({ phone: 1 }, { unique: true , sparse: true});
 brokerSchema.index({ gstNumber: 1 });
 brokerSchema.index({ panNumber: 1 });
 brokerSchema.index({ status: 1 });
