@@ -13,7 +13,6 @@ async function updateUserTotalAmount(userId, amount, type) {
     const months = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
     const month = months[now.getMonth()];
     const user = await User.findById(userId);
-    console.log(user.totalAmount);
     if (!user) return;
     if (!user.totalAmount.has(year)) {
         user.totalAmount.set(year, {});
@@ -26,7 +25,6 @@ async function updateUserTotalAmount(userId, amount, type) {
     } else if (type === 'received') {
         current += amount;
     }
-    console.log(yearMap);
     yearMap.set(month, current);
     user.totalAmount.set(year, yearMap);
     // Convert Map to plain object
@@ -41,7 +39,6 @@ async function updateUserTotalAmount(userId, amount, type) {
     user.totalAmount = totalAmountObj;
 
     let use = await user.save();
-    console.log(use.totalAmount);
 }
 
 class AdvanceController {
@@ -116,7 +113,6 @@ class AdvanceController {
             advance.updatedAt = new Date();
 
             await advance.save();
-            console.log(advance.createdBy);
             // Reverse previous, apply new
             await updateUserTotalAmount(advance.createdBy, advance.amount, advance.type);
 

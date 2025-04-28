@@ -259,7 +259,6 @@ class TaskController {
             // Verify helper broker exists if provided
             if (helperBroker && helperBroker.broker) {
                 let brokerDoc = await Broker.findOne({_id: helperBroker.broker, createdBy: req.user.userId });
-                console.log("brokerDoc", brokerDoc);
                 if (!brokerDoc) {
                     return res.status(404).json(
                         ApiResponse.notFound('Helper broker not found')
