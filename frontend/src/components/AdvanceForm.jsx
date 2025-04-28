@@ -129,37 +129,43 @@ const AdvanceForm = ({ open, onClose, onSuccess }) => {
                             required
                             fullWidth
                         />
-                        <FormControl fullWidth>
-                            <InputLabel>Type</InputLabel>
+                        <FormControl fullWidth variant="outlined">
+                            <InputLabel id="type-label">Type</InputLabel>
                             <Select
+                                labelId="type-label"
                                 name="type"
                                 value={formData.type}
                                 onChange={handleChange}
                                 required
+                                label="Type"
                             >
                                 <MenuItem value="given">Given</MenuItem>
                                 <MenuItem value="received">Received</MenuItem>
                             </Select>
                         </FormControl>
-                        <FormControl fullWidth>
-                            <InputLabel>Counterparty Type</InputLabel>
+                        <FormControl fullWidth variant="outlined">
+                            <InputLabel id="counterparty-type-label">Counterparty Type</InputLabel>
                             <Select
+                                labelId="counterparty-type-label"
                                 name="counterpartyType"
                                 value={formData.counterpartyType}
                                 onChange={handleChange}
                                 required
+                                label="Counterparty Type"
                             >
                                 <MenuItem value="company">Company</MenuItem>
                                 <MenuItem value="broker">Broker</MenuItem>
                             </Select>
                         </FormControl>
-                        <FormControl fullWidth>
-                            <InputLabel>{formData.counterpartyType === 'company' ? 'Company' : 'Broker'}</InputLabel>
+                        <FormControl fullWidth variant="outlined">
+                            <InputLabel id="counterparty-label">{formData.counterpartyType === 'company' ? 'Company' : 'Broker'}</InputLabel>
                             <Select
+                                labelId="counterparty-label"
                                 name="counterpartyId"
                                 value={formData.counterpartyId}
                                 onChange={handleChange}
                                 required
+                                label={formData.counterpartyType === 'company' ? 'Company' : 'Broker'}
                             >
                                 {counterpartyList.map(item => (
                                     <MenuItem key={item._id} value={item._id}>
