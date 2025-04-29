@@ -155,7 +155,7 @@ const MainLayout = () => {
       path: '/statements',
       name: 'Statements',
       icon: (
-        <path 
+        <path
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth={2}
@@ -168,9 +168,14 @@ const MainLayout = () => {
   return (
     <div className="flex h-screen bg-gray-100 relative">
       {/* Watermark */}
-      <div className="fixed bottom-8 right-16 px-4 py-2 bg-white/80 backdrop-blur-sm border-t border-l border-r border-b border-gray-200 rounded-tl-lg rounded-br-lg text-gray-600 text-xs font-medium pointer-events-none z-40">
-        Design and Developed by Kasper Infotech Pvt. Ltd.
+      {isMobile ? <div className="fixed bottom-0 right-4 px-4 py-2 bg-white/10 backdrop-blur-md border-t border-l border-r border-b border-gray-200 rounded-tl-lg rounded-br-lg text-gray-600 text-xs font-medium pointer-events-none z-40">
+        by Kasper Infotech Pvt. Ltd.
       </div>
+        :
+        <div className="fixed bottom-8 right-16 px-4 py-2 bg-white/80 backdrop-blur-sm border-t border-l border-r border-b border-gray-200 rounded-tl-lg rounded-br-lg text-gray-600 text-xs font-medium pointer-events-none z-40">
+          Design and Developed by Kasper Infotech Pvt. Ltd.
+        </div>}
+
 
       {/* Sidebar for desktop, Drawer for mobile */}
       {/* Backdrop for mobile */}
@@ -192,10 +197,10 @@ const MainLayout = () => {
         <div className="flex items-center justify-between p-4 border-b">
           {isSidebarOpen && (
             <>
-              <img 
+              <img
                 src="https://kasperinfotech.net/static/media/MUNCSMALL.248e32a2.svg"
                 alt="MUN-C Logo"
-                className="h-12 w-auto" 
+                className="h-12 w-auto"
               />
               <div className="flex items-center">
                 <span className="ml-2 text-2xl font-bold text-blue-600">MUN-C</span>
