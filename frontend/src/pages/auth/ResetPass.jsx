@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams, useParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import AuthLayout from './layout/AuthLayout';
-
+import { Eye, EyeOff } from "lucide-react";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -22,6 +22,8 @@ const ResetPass = () => {
   const [searchParams] = useSearchParams();
   const errorRef = useRef(null);
   const { token } = useParams();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -89,7 +91,7 @@ const ResetPass = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    
+
     if (!validateForm()) {
       return;
     }
@@ -108,7 +110,7 @@ const ResetPass = () => {
       });
       setSuccess('Password has been reset successfully');
       setFormData({ password: '', confirmPassword: '' });
-      
+
       // Redirect to login after 3 seconds
       setTimeout(() => {
         navigate('/login');
@@ -159,10 +161,9 @@ const ResetPass = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div 
-        className={`max-w-md w-full space-y-8 bg-transparent p-4 rounded-lg transform transition-all duration-500 ease-in-out ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-        }`}
+      <div
+        className={`max-w-md w-full space-y-8 bg-transparent p-4 rounded-lg transform transition-all duration-500 ease-in-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}
       >
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 animate-fade-in">
@@ -174,9 +175,9 @@ const ResetPass = () => {
         </div>
 
         {error && (
-          <div 
+          <div
             ref={errorRef}
-            className="bg-red-50 border-l-4 border-red-500 p-4 mb-4 rounded-md animate-shake" 
+            className="bg-red-50 border-l-4 border-red-500 p-4 mb-4 rounded-md animate-shake"
             role="alert"
           >
             <div className="flex">
@@ -209,41 +210,59 @@ const ResetPass = () => {
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="rounded-md shadow-sm -space-y-px">
-            <div className="mb-4 animate-fade-in animation-delay-300">
+            <div className="mb-4 animate-fade-in animation-delay-300 relative">
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                 New Password
               </label>
               <input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 autoComplete="new-password"
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className={`appearance-none relative block w-full px-3 py-2 border ${
-                  error && (!formData.password.trim() || formData.password.length < 6) ? 'border-red-500' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm transition-all duration-300 hover:border-purple-300`}
+                className={`appearance-none relative block w-full px-3 py-2 pr-10 border ${error && (!formData.password.trim() || formData.password.length < 6)
+                  ? 'border-red-500'
+                  : 'border-gray-300'
+                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm transition-all duration-300 hover:border-purple-300`}
                 placeholder="Enter your new password"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute top-9 right-3 text-gray-500 hover:text-purple-600"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
-            <div className="mb-4 animate-fade-in animation-delay-400">
+            <div className="mb-4 animate-fade-in animation-delay-400 relative">
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
                 Confirm New Password
               </label>
               <input
                 id="confirmPassword"
                 name="confirmPassword"
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 autoComplete="new-password"
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className={`appearance-none relative block w-full px-3 py-2 border ${
-                  error && formData.password !== formData.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm transition-all duration-300 hover:border-purple-300`}
+                className={`appearance-none relative block w-full px-3 py-2 pr-10 border ${error && formData.password !== formData.confirmPassword
+                    ? 'border-red-500'
+                    : 'border-gray-300'
+                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm transition-all duration-300 hover:border-purple-300`}
                 placeholder="Confirm your new password"
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute top-9 right-3 text-gray-500 hover:text-purple-600"
+                tabIndex={-1}
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
 
@@ -251,9 +270,8 @@ const ResetPass = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white transition-all duration-300 ${
-                isSubmitting ? 'bg-purple-400 cursor-not-allowed' : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transform hover:scale-[1.02]'
-              }`}
+              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white transition-all duration-300 ${isSubmitting ? 'bg-purple-400 cursor-not-allowed' : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transform hover:scale-[1.02]'
+                }`}
             >
               {isSubmitting ? (
                 <>

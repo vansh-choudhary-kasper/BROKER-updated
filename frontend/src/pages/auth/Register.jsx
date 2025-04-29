@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import AuthLayout from './layout/AuthLayout';
+import { Eye, EyeOff } from "lucide-react";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -19,6 +20,8 @@ const Register = () => {
   const { register, isAuthenticated, loading, error: authError, clearError } = useAuth();
   const navigate = useNavigate();
   const errorRef = useRef(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -59,42 +62,42 @@ const Register = () => {
   const validateForm = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&#^()]{6,}$/;
-  
+
     if (!formData.name.trim()) {
       setError('Name is required');
       return false;
     }
-  
+
     if (!formData.email.trim()) {
       setError('Email is required');
       return false;
     }
-  
+
     if (!emailRegex.test(formData.email)) {
       setError('Please enter a valid email');
       return false;
     }
-  
+
     if (!formData.password.trim()) {
       setError('Password is required');
       return false;
     }
-  
+
     if (formData.password.length < 6) {
       setError('Password must be at least 6 characters long');
       return false;
     }
-  
+
     if (!passwordRegex.test(formData.password)) {
       setError('Password must contain at least one uppercase letter, one lowercase letter, one number and one special character');
       return false;
     }
-  
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return false;
     }
-  
+
     setError('');
     return true;
   };
@@ -216,39 +219,59 @@ const Register = () => {
                 placeholder="Enter your email"
               />
             </div>
-            <div className="mb-4 animate-fade-in animation-delay-500">
+            <div className="mb-4 animate-fade-in animation-delay-500 relative">
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                 Password
               </label>
               <input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 autoComplete="new-password"
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className={`appearance-none relative block w-full px-3 py-2 border ${error && (!formData.password.trim() || formData.password.length < 6) ? 'border-red-500' : 'border-gray-300'
+                className={`appearance-none relative block w-full px-3 py-2 pr-10 border ${error && (!formData.password.trim() || formData.password.length < 6)
+                    ? 'border-red-500'
+                    : 'border-gray-300'
                   } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm transition-all duration-300 hover:border-purple-300`}
                 placeholder="Create a password"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute top-9 right-3 text-gray-500 hover:text-purple-600"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
-            <div className="mb-4 animate-fade-in animation-delay-600">
+            <div className="mb-4 animate-fade-in animation-delay-600 relative">
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
                 Confirm Password
               </label>
               <input
                 id="confirmPassword"
                 name="confirmPassword"
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 autoComplete="new-password"
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className={`appearance-none relative block w-full px-3 py-2 border ${error && formData.password !== formData.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                className={`appearance-none relative block w-full px-3 py-2 pr-10 border ${error && formData.password !== formData.confirmPassword
+                  ? 'border-red-500'
+                  : 'border-gray-300'
                   } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm transition-all duration-300 hover:border-purple-300`}
                 placeholder="Confirm your password"
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute top-9 right-3 text-gray-500 hover:text-purple-600"
+                tabIndex={-1}
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
 
