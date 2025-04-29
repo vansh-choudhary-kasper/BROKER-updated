@@ -11,7 +11,8 @@ import {
     InputLabel,
     Select,
     MenuItem,
-    Box
+    Box,
+    Autocomplete
 } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
@@ -157,23 +158,35 @@ const AdvanceForm = ({ open, onClose, onSuccess }) => {
                                 <MenuItem value="broker">Broker</MenuItem>
                             </Select>
                         </FormControl>
-                        <FormControl fullWidth variant="outlined">
-                            <InputLabel id="counterparty-label">{formData.counterpartyType === 'company' ? 'Company' : 'Broker'}</InputLabel>
-                            <Select
-                                labelId="counterparty-label"
-                                name="counterpartyId"
-                                value={formData.counterpartyId}
-                                onChange={handleChange}
-                                required
-                                label={formData.counterpartyType === 'company' ? 'Company' : 'Broker'}
-                            >
-                                {counterpartyList.map(item => (
-                                    <MenuItem key={item._id} value={item._id}>
-                                        {item.name} {item.email ? `(${item.email})` : ''}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
+                        <Autocomplete
+                            fullWidth
+                            options={counterpartyList}
+                            getOptionLabel={(option) =>
+                                `${option.name}${option.email ? ` (${option.email})` : ''}`
+                            }
+                            value={
+                                counterpartyList.find(item => item._id === formData.counterpartyId) || null
+                            }
+                            onChange={(event, newValue) => {
+                                handleChange({
+                                    target: {
+                                        name: 'counterpartyId',
+                                        value: newValue ? newValue._id : '',
+                                    },
+                                });
+                            }}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label={
+                                        formData.counterpartyType === 'company'
+                                            ? 'Company (Client/Provider/Both)'
+                                            : 'Broker'
+                                    }
+                                    required
+                                />
+                            )}
+                        />
                         {error && (
                             <Box color="error.main">{error}</Box>
                         )}
