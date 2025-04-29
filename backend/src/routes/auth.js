@@ -18,7 +18,7 @@ const registerValidation = [
     body('password')
         .isLength({ min: 6 })
         .withMessage('Password must be at least 6 characters long')
-        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/)
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&#^()]{6,}$/)
         .withMessage('Password must contain at least one uppercase letter, one lowercase letter, one number and one special character'),
     // body('role').isIn(['admin']).withMessage('Invalid role')
 ];

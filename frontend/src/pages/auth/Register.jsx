@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
-import AuthLayout from './layout/AuthLayout'; 
+import AuthLayout from './layout/AuthLayout';
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -57,33 +57,52 @@ const Register = () => {
   };
 
   const validateForm = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&#^()]{6,}$/;
+  
     if (!formData.name.trim()) {
       setError('Name is required');
       return false;
     }
+  
     if (!formData.email.trim()) {
       setError('Email is required');
       return false;
     }
+  
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email');
+      return false;
+    }
+  
     if (!formData.password.trim()) {
       setError('Password is required');
       return false;
     }
+  
     if (formData.password.length < 6) {
       setError('Password must be at least 6 characters long');
       return false;
     }
+  
+    if (!passwordRegex.test(formData.password)) {
+      setError('Password must contain at least one uppercase letter, one lowercase letter, one number and one special character');
+      return false;
+    }
+  
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return false;
     }
+  
+    setError('');
     return true;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
+
     if (!validateForm()) {
       return;
     }
@@ -100,15 +119,15 @@ const Register = () => {
       await axios.post(`${backendUrl}/api/auth/send-otp`, {
         email: formData.email,
       });
-      
+
       // Navigate to OTP verification with form data
-      navigate('/verify-otp', { 
-        state: { 
+      navigate('/verify-otp', {
+        state: {
           email: formData.email,
           name: formData.name,
           password: formData.password,
         },
-        replace: true 
+        replace: true
       });
     } catch (err) {
       console.error('OTP sending error:', err);
@@ -131,10 +150,9 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div 
-        className={`max-w-md w-full space-y-8 bg-transparent p-4 rounded-lg transform transition-all duration-500 ease-in-out ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-        }`}
+      <div
+        className={`max-w-md w-full space-y-8 bg-transparent p-4 rounded-lg transform transition-all duration-500 ease-in-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}
       >
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 animate-fade-in">Create Your Account</h2>
@@ -144,9 +162,9 @@ const Register = () => {
         </div>
 
         {error && (
-          <div 
+          <div
             ref={errorRef}
-            className="bg-red-50 border-l-4 border-red-500 p-4 mb-4 rounded-md animate-shake" 
+            className="bg-red-50 border-l-4 border-red-500 p-4 mb-4 rounded-md animate-shake"
             role="alert"
           >
             <div className="flex">
@@ -176,9 +194,8 @@ const Register = () => {
                 required
                 value={formData.name}
                 onChange={handleChange}
-                className={`appearance-none relative block w-full px-3 py-2 border ${
-                  error && !formData.name.trim() ? 'border-red-500' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm transition-all duration-300 hover:border-purple-300`}
+                className={`appearance-none relative block w-full px-3 py-2 border ${error && !formData.name.trim() ? 'border-red-500' : 'border-gray-300'
+                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm transition-all duration-300 hover:border-purple-300`}
                 placeholder="Enter your full name"
               />
             </div>
@@ -194,9 +211,8 @@ const Register = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className={`appearance-none relative block w-full px-3 py-2 border ${
-                  error && !formData.email.trim() ? 'border-red-500' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm transition-all duration-300 hover:border-purple-300`}
+                className={`appearance-none relative block w-full px-3 py-2 border ${error && !formData.email.trim() ? 'border-red-500' : 'border-gray-300'
+                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm transition-all duration-300 hover:border-purple-300`}
                 placeholder="Enter your email"
               />
             </div>
@@ -212,9 +228,8 @@ const Register = () => {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className={`appearance-none relative block w-full px-3 py-2 border ${
-                  error && (!formData.password.trim() || formData.password.length < 6) ? 'border-red-500' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm transition-all duration-300 hover:border-purple-300`}
+                className={`appearance-none relative block w-full px-3 py-2 border ${error && (!formData.password.trim() || formData.password.length < 6) ? 'border-red-500' : 'border-gray-300'
+                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm transition-all duration-300 hover:border-purple-300`}
                 placeholder="Create a password"
               />
             </div>
@@ -230,9 +245,8 @@ const Register = () => {
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className={`appearance-none relative block w-full px-3 py-2 border ${
-                  error && formData.password !== formData.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm transition-all duration-300 hover:border-purple-300`}
+                className={`appearance-none relative block w-full px-3 py-2 border ${error && formData.password !== formData.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                  } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm transition-all duration-300 hover:border-purple-300`}
                 placeholder="Confirm your password"
               />
             </div>
@@ -242,9 +256,8 @@ const Register = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white transition-all duration-300 ${
-                isSubmitting ? 'bg-purple-400 cursor-not-allowed' : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transform hover:scale-[1.02]'
-              }`}
+              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white transition-all duration-300 ${isSubmitting ? 'bg-purple-400 cursor-not-allowed' : 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transform hover:scale-[1.02]'
+                }`}
             >
               {isSubmitting ? (
                 <>
@@ -282,6 +295,6 @@ const RegisterWithLayout = () => {
       <Register />
     </AuthLayout>
   );
-}; 
+};
 
 export default RegisterWithLayout; 
