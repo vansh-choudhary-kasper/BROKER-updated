@@ -27,7 +27,8 @@ import {
   Tooltip,
   Grid,
   CircularProgress,
-  Autocomplete
+  Autocomplete, 
+  Alert
 } from '@mui/material';
 import { Add as AddIcon, Refresh as RefreshIcon, SwapHoriz as SwapIcon, Edit as EditIcon, Save as SaveIcon, Close as CloseIcon } from '@mui/icons-material';
 import AdvanceForm from './AdvanceForm';
@@ -71,15 +72,18 @@ const AdvanceList = () => {
     fetchAdvances();
   }, [filterType, filterStatus]);
 
-  const handleToggleAdvance = async (id) => {
+  const handleToggleAdvance = async (advance) => {
     if (window.confirm('Are you sure you want to toggle the advance status?')) {
-      try {
-        await axios.put(`${backendUrl}/api/advances/${id}/toggle`);
-        fetchAdvances();
-        checkAuth();
+      let amount = window.prompt(`Enter the ${advance.type === 'given' ? 'recieved' : 'given'} amount to toggle the advance status:`);
+      if(amount){
+        try {
+          await axios.put(`${backendUrl}/api/advances/${advance._id}/toggle/${amount}`);
+          fetchAdvances();
+          checkAuth();
       } catch (err) {
-        setError('Failed to toggle advance status');
+        setError(`Failed to toggle advance: ${err.response.data.message}`);
         console.error(err);
+        }
       }
     }
   };
@@ -228,6 +232,7 @@ const AdvanceList = () => {
                     <TableCell>Title</TableCell>
                     <TableCell>Amount</TableCell>
                     <TableCell>Type</TableCell>
+                    <TableCell></TableCell>
                     <TableCell>Status</TableCell>
                     <TableCell>From/To</TableCell>
                     <TableCell>Date</TableCell>
@@ -265,12 +270,29 @@ const AdvanceList = () => {
                           />
                         </TableCell>
                         <TableCell>
+                          {/* recieved amount  */}
+                          {advance.type === 'received' && (
+                            <Chip
+                              label={`Recieved: ₹${advance.toggleAmount}`}
+                              size="small"
+                            />
+                          )}
+                          {/* given amount */}
+                          {advance.type === 'given' && (
+                            <Chip
+                              label={`Given: ₹${advance.toggleAmount}`}
+                              size="small"
+                            />
+                          )}
+                        </TableCell>
+                        <TableCell>
                           <Chip
                             label={advance.status}
                             color={getStatusColor(advance.status)}
                             size="small"
                           />
                         </TableCell>
+                        
                         <TableCell>
                           {advance.type === 'given'
                             ? `To: ${advance.counterpartyId?.name || 'Unknown'}`
@@ -283,7 +305,7 @@ const AdvanceList = () => {
                           <Tooltip title={advance.type === 'given' ? 'Mark as Received' : 'Mark as Given'}>
                             <IconButton
                               size="small"
-                              onClick={() => handleToggleAdvance(advance._id)}
+                              onClick={() => handleToggleAdvance(advance)}
                               color={advance.type === 'given' ? 'success' : 'error'}
                             >
                               <SwapIcon />
@@ -425,25 +447,29 @@ const AdvanceList = () => {
                 fullWidth
                 size="small"
               />
-              <FormControl fullWidth size="small">
-                <InputLabel>Type</InputLabel>
+              <FormControl fullWidth size="small" variant="outlined">
+                <InputLabel id="type-label">Type</InputLabel>
                 <Select
+                  labelId="type-label"
                   name="type"
                   value={editData.type || ''}
                   onChange={handleEditChange}
                   disabled={!editMode}
+                  label="Type"  
                 >
                   <MenuItem value="given">Given</MenuItem>
                   <MenuItem value="received">Received</MenuItem>
                 </Select>
               </FormControl>
-              <FormControl fullWidth size="small">
-                <InputLabel>Counterparty Type</InputLabel>
+              <FormControl fullWidth size="small" variant="outlined">
+                <InputLabel id="counterparty-type-label">Counterparty Type</InputLabel>
                 <Select
+                  labelId="counterparty-type-label"
                   name="counterpartyType"
                   value={editData.counterpartyType || ''}
                   onChange={handleEditChange}
                   disabled={!editMode}
+                  label="Counterparty Type"
                 >
                   <MenuItem value="company">Company</MenuItem>
                   <MenuItem value="broker">Broker</MenuItem>

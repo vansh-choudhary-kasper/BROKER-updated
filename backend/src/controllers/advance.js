@@ -1,3 +1,4 @@
+
 const Advance = require('../models/Advance');
 const ApiResponse = require('../utils/apiResponse');
 const logger = require('../utils/logger');
@@ -94,7 +95,8 @@ class AdvanceController {
     // Toggle advance status between given and received
     async toggleAdvance(req, res) {
         try {
-            const { id } = req.params;
+            let { id, amount } = req.params;
+            console.log(id, Number(amount));
             const advance = await Advance.findById(id);
 
             if (!advance) {
@@ -105,10 +107,18 @@ class AdvanceController {
 
             const prevType = advance.type;
             // Toggle the type
-            advance.type = advance.type === 'given' ? 'received' : 'given';
+            let user = await User.findById(advance.createdBy);
+            amount = Number(amount);
+            if(amount > advance.amount || (advance.amount - advance.toggleAmount - amount) < 0){
+                return res.status(400).json(ApiResponse.badRequest('Amount is greater than the advance amount'));
+            }
+            advance.toggleAmount += amount;
+            if(advance.amount <= advance.toggleAmount){
+                advance.type = advance.type === 'given' ? 'received' : 'given';
+                advance.status = (advance.type === advance.initialType) ? 'active' : 'returned';
+            }
             // Do NOT update initialType here
             // Update status based on type and initialType
-            advance.status = (advance.type === advance.initialType) ? 'active' : 'returned';
             advance.updatedBy = req.user.userId;
             advance.updatedAt = new Date();
 

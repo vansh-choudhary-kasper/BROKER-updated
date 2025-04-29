@@ -13,6 +13,11 @@ const advanceSchema = new mongoose.Schema({
     required: true,
     min: 0
   },
+  toggleAmount: {
+    type: Number,
+    min: 0,
+    default: 0
+  },
   type: {
     type: String,
     enum: ['given', 'received'],

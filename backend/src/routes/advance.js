@@ -24,7 +24,7 @@ router.post(
 );
 
 router.put(
-    '/:id/toggle',
+    '/:id/toggle/:amount',
     protect,
     advanceController.toggleAdvance
 );
