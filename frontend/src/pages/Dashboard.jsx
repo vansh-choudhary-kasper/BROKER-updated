@@ -138,10 +138,10 @@ const Dashboard = () => {
               advancesResponse.data.data.forEach(advance => {
                 if (advance.type === 'given') {
                   activeAdvances.given += 1;
-                  activeAdvances.amountToReceive = (activeAdvances.amountToReceive || 0) + advance.amount;
+                  activeAdvances.amountToReceive = (activeAdvances.amountToReceive || 0) + advance.amount - advance.toggleAmount;
                 } else if (advance.type === 'received') {
                   activeAdvances.received += 1;
-                  activeAdvances.amountToPay = (activeAdvances.amountToPay || 0) + advance.amount;
+                  activeAdvances.amountToPay = (activeAdvances.amountToPay || 0) + advance.amount - advance.toggleAmount;
                 }
               });
             }
