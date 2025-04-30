@@ -273,14 +273,14 @@ const AdvanceList = () => {
                           {/* recieved amount  */}
                           {advance.type === 'received' && (
                             <Chip
-                              label={`Given: ₹${advance.toggleAmount}`}
+                              label={`${advance.amount === advance.toggleAmount ? 'Received' : 'Given'}: ₹${advance.toggleAmount}`}
                               size="small"
                             />
                           )}
                           {/* given amount */}
                           {advance.type === 'given' && (
                             <Chip
-                              label={`Recieved: ₹${advance.toggleAmount}`}
+                              label={`${advance.amount === advance.toggleAmount ? 'Given' : 'Received'}: ₹${advance.toggleAmount}`}
                               size="small"
                             />
                           )}
