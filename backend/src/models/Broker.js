@@ -29,6 +29,7 @@ const brokerSchema = new mongoose.Schema({
 
   gstNumber: {
     type: String,
+    unique: true,
     trim: true
   },
 
@@ -139,14 +140,20 @@ const brokerSchema = new mongoose.Schema({
 // Indexes for better query performance
 brokerSchema.index({ email: 1 }, { unique: true , sparse: true});
 brokerSchema.index({ phone: 1 }, { unique: true , sparse: true});
-brokerSchema.index({ gstNumber: 1 });
-brokerSchema.index({ panNumber: 1 });
+brokerSchema.index({ gstNumber: 1 }, {unique: true , sparse: true});
+brokerSchema.index({ panNumber: 1 }, {unique: true , sparse: true});
 brokerSchema.index({ status: 1 });
 brokerSchema.index({ 'financialSummary.totalCommission': 1 });
 brokerSchema.index({ 'taskPayments.taskId': 1 });
 brokerSchema.index({ 'taskPayments.status': 1 });
 brokerSchema.index({ company: 1 });
 brokerSchema.index({ bankAccounts: 1 });
+
+brokerSchema.pre("save", function(next) {
+  if (this.gstNumber === "") this.gstNumber = undefined;
+  if (this.panNumber === "") this.panNumber = undefined;
+  next();
+});
 
 const Broker = mongoose.model('Broker', brokerSchema);
 

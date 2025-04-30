@@ -74,7 +74,7 @@ const AdvanceList = () => {
 
   const handleToggleAdvance = async (advance) => {
     if (window.confirm('Are you sure you want to toggle the advance status?')) {
-      let amount = window.prompt(`Enter the ${advance.type === 'given' ? 'recieved' : 'given'} amount to toggle the advance status:`);
+      let amount = window.prompt(`Enter the ${advance.type === 'given' ? 'recieved' : 'given'} amount :`);
       if(amount){
         try {
           await axios.put(`${backendUrl}/api/advances/${advance._id}/toggle/${amount}`);
@@ -273,14 +273,14 @@ const AdvanceList = () => {
                           {/* recieved amount  */}
                           {advance.type === 'received' && (
                             <Chip
-                              label={`Recieved: ₹${advance.toggleAmount}`}
+                              label={`Given: ₹${advance.toggleAmount}`}
                               size="small"
                             />
                           )}
                           {/* given amount */}
                           {advance.type === 'given' && (
                             <Chip
-                              label={`Given: ₹${advance.toggleAmount}`}
+                              label={`Recieved: ₹${advance.toggleAmount}`}
                               size="small"
                             />
                           )}

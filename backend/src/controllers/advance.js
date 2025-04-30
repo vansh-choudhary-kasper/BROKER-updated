@@ -105,14 +105,13 @@ class AdvanceController {
                 );
             }
 
-            const prevType = advance.type;
-            // Toggle the type
-            let user = await User.findById(advance.createdBy);
             amount = Number(amount);
             if(amount > advance.amount || (advance.amount - advance.toggleAmount - amount) < 0){
                 return res.status(400).json(ApiResponse.badRequest('Amount is greater than the advance amount'));
             }
             advance.toggleAmount += amount;
+            let tempType = advance.type === 'given' ? 'received' : 'given';
+        
             if(advance.amount <= advance.toggleAmount){
                 advance.type = advance.type === 'given' ? 'received' : 'given';
                 advance.status = (advance.type === advance.initialType) ? 'active' : 'returned';
@@ -124,7 +123,7 @@ class AdvanceController {
 
             await advance.save();
             // Reverse previous, apply new
-            await updateUserTotalAmount(advance.createdBy, advance.amount, advance.type);
+            await updateUserTotalAmount(advance.createdBy, amount, tempType);
 
             return res.status(200).json(
                 ApiResponse.success('Advance status toggled successfully', advance)
