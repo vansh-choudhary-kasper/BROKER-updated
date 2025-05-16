@@ -321,7 +321,7 @@ const StatementUpload = ({ onUpload }) => {
             name="statementDate"
             value={selectedDate}
             onChange={handleDateChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            className="mt-1 block w-1/8 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             required
           />
         </div>
