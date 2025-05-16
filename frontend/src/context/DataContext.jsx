@@ -371,7 +371,7 @@ export const DataProvider = ({ children }) => {
       return response?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to add company';
-      setError(prev => ({ ...prev, companies: errorMessage }));
+      // setError(prev => ({ ...prev, companies: errorMessage }));
       throw new Error(errorMessage);
     } finally {
       setLoading(prev => ({ ...prev, companies: false }));
@@ -391,7 +391,7 @@ export const DataProvider = ({ children }) => {
       return response?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to add task';
-      setError(prev => ({ ...prev, tasks: errorMessage }));
+      // setError(prev => ({ ...prev, tasks: errorMessage }));
       throw new Error(errorMessage);
     } finally {
       setLoading(prev => ({ ...prev, tasks: false }));
@@ -409,7 +409,7 @@ export const DataProvider = ({ children }) => {
       return response?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to add bank';
-      setError(prev => ({ ...prev, banks: errorMessage }));
+      // setError(prev => ({ ...prev, banks: errorMessage }));
       throw new Error(errorMessage);
     } finally {
       setLoading(prev => ({ ...prev, banks: false }));
@@ -427,7 +427,7 @@ export const DataProvider = ({ children }) => {
       return response?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to add expense';
-      setError(prev => ({ ...prev, expenses: errorMessage }));
+      // setError(prev => ({ ...prev, expenses: errorMessage }));
       throw new Error(errorMessage);
     } finally {
       setLoading(prev => ({ ...prev, expenses: false }));
@@ -521,7 +521,7 @@ export const DataProvider = ({ children }) => {
       return response?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to update company';
-      setError(prev => ({ ...prev, companies: errorMessage }));
+      // setError(prev => ({ ...prev, companies: errorMessage }));
       throw new Error(errorMessage);
     } finally {
       setLoading(prev => ({ ...prev, companies: false }));
@@ -541,7 +541,7 @@ export const DataProvider = ({ children }) => {
       return response?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to update task';
-      setError(prev => ({ ...prev, tasks: errorMessage }));
+      // setError(prev => ({ ...prev, tasks: errorMessage }));
       throw new Error(errorMessage);
     } finally {
       setLoading(prev => ({ ...prev, tasks: false }));
@@ -561,7 +561,7 @@ export const DataProvider = ({ children }) => {
       return response?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to update bank';
-      setError(prev => ({ ...prev, banks: errorMessage }));
+      // setError(prev => ({ ...prev, banks: errorMessage }));
       throw new Error(errorMessage);
     } finally {
       setLoading(prev => ({ ...prev, banks: false }));
@@ -581,7 +581,7 @@ export const DataProvider = ({ children }) => {
       return response?.data;
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to update expense';
-      setError(prev => ({ ...prev, expenses: errorMessage }));
+      // setError(prev => ({ ...prev, expenses: errorMessage }));
       throw new Error(errorMessage);
     } finally {
       setLoading(prev => ({ ...prev, expenses: false }));
@@ -598,7 +598,7 @@ export const DataProvider = ({ children }) => {
       setCompanies(prev => prev.filter(company => company._id !== id));
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to delete company';
-      setError(prev => ({ ...prev, companies: errorMessage }));
+      // setError(prev => ({ ...prev, companies: errorMessage }));
       throw new Error(errorMessage);
     } finally {
       setLoading(prev => ({ ...prev, companies: false }));
@@ -615,7 +615,7 @@ export const DataProvider = ({ children }) => {
       setTasks(prev => prev.filter(task => task._id !== id));
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to delete task';
-      setError(prev => ({ ...prev, tasks: errorMessage }));
+      // setError(prev => ({ ...prev, tasks: errorMessage }));
       throw new Error(errorMessage);
     } finally {
       setLoading(prev => ({ ...prev, tasks: false }));
@@ -632,7 +632,7 @@ export const DataProvider = ({ children }) => {
       setBanks(prev => prev.filter(bank => bank._id !== id));
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to delete bank';
-      setError(prev => ({ ...prev, banks: errorMessage }));
+      // setError(prev => ({ ...prev, banks: errorMessage }));
       throw new Error(errorMessage);
     } finally {
       setLoading(prev => ({ ...prev, banks: false }));
@@ -649,7 +649,7 @@ export const DataProvider = ({ children }) => {
       setExpenses(prev => prev.filter(expense => expense._id !== id));
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Failed to delete expense';
-      setError(prev => ({ ...prev, expenses: errorMessage }));
+      // setError(prev => ({ ...prev, expenses: errorMessage }));
       throw new Error(errorMessage);
     } finally {
       setLoading(prev => ({ ...prev, expenses: false }));
@@ -698,17 +698,17 @@ export const DataProvider = ({ children }) => {
         fetchBrokers();
         return { success: true, data: response.data.data };
       } else {
-        setError(prev => ({
-          ...prev,
-          brokers: response.data.message || 'Failed to add broker'
-        }));
+        // setError(prev => ({
+        //   ...prev,
+        //   brokers: response.data.message || 'Failed to add broker'
+        // }));
         return { success: false, message: response.data.message || 'Failed to add broker' };
       }
     } catch (err) {
-      setError(prev => ({
-        ...prev,
-        brokers: err.response?.data?.message || 'Failed to add broker'
-      }));
+      // setError(prev => ({
+      //   ...prev,
+      //   brokers: err.response?.data?.message || 'Failed to add broker'
+      // }));
       return { success: false, message: err.response?.data?.message || 'Failed to add broker' };
     } finally {
       setLoading(prev => ({ ...prev, brokers: false }));
@@ -732,17 +732,17 @@ export const DataProvider = ({ children }) => {
         fetchBrokers();
         return { success: true, data: response.data.data };
       } else {
-        setError(prev => ({
-          ...prev,
-          brokers: response.data.message || 'Failed to update broker'
-        }));
+        // setError(prev => ({
+        //   ...prev,
+        //   brokers: response.data.message || 'Failed to update broker'
+        // }));
         return { success: false, message: response.data.message || 'Failed to update broker' };
       }
     } catch (err) {
-      setError(prev => ({
-        ...prev,
-        brokers: err.response?.data?.message || 'Failed to update broker'
-      }));
+      // setError(prev => ({
+      //   ...prev,
+      //   brokers: err.response?.data?.message || 'Failed to update broker'
+      // }));
       return { success: false, message: err.response?.data?.message || 'Failed to update broker' };
     } finally {
       setLoading(prev => ({ ...prev, brokers: false }));
@@ -766,17 +766,17 @@ export const DataProvider = ({ children }) => {
         fetchBrokers();
         return { success: true };
       } else {
-        setError(prev => ({
-          ...prev,
-          brokers: response.data.message || 'Failed to delete broker'
-        }));
+        // setError(prev => ({
+        //   ...prev,
+        //   brokers: response.data.message || 'Failed to delete broker'
+        // }));
         return { success: false, message: response.data.message || 'Failed to delete broker' };
       }
     } catch (err) {
-      setError(prev => ({
-        ...prev,
-        brokers: err.response?.data?.message || 'Failed to delete broker'
-      }));
+      // setError(prev => ({
+      //   ...prev,
+      //   brokers: err.response?.data?.message || 'Failed to delete broker'
+      // }));
       return { success: false, message: err.response?.data?.message || 'Failed to delete broker' };
     } finally {
       setLoading(prev => ({ ...prev, brokers: false }));
