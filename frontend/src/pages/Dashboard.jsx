@@ -202,18 +202,13 @@ const Dashboard = () => {
   const { currentMonthValue, lastMonthValue, currentYearTotal, lastYearTotal } = getTotalAmountValues();
 
   // Calculate profit growth percentages
-  const monthlyGrowth = 
-  lastMonthValue === 0
-    ? currentMonthValue
-    : currentMonthValue === 0
-      ? -lastMonthValue : +(((currentMonthValue - lastMonthValue) / Math.abs(lastMonthValue)) * 100).toFixed(2);
+  const monthlyGrowth = lastMonthValue !== 0
+    ? +(((currentMonthValue - lastMonthValue) / Math.abs(lastMonthValue)) * 100).toFixed(2)
+    : currentMonthValue;
 
-
-  const yearlyGrowth = 
-  lastYearTotal === 0
-    ? currentYearTotal
-    : currentYearTotal === 0
-      ? -lastYearTotal : +(((currentYearTotal - lastYearTotal) / Math.abs(lastYearTotal)) * 100).toFixed(2);
+   const yearlyGrowth = lastYearTotal !== 0
+    ? +(((currentYearTotal - lastYearTotal) / Math.abs(lastYearTotal)) * 100).toFixed(2)
+    : currentYearTotal;
 
   // Prepare monthly and yearly data for charts from totalAmount
   const getMonthlyData = () => {
