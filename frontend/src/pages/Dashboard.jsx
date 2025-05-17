@@ -205,13 +205,15 @@ const Dashboard = () => {
   const monthlyGrowth = 
   lastMonthValue === 0
     ? currentMonthValue
-    : +(((currentMonthValue - lastMonthValue) / Math.abs(lastMonthValue)) * 100).toFixed(2);
+    : currentMonthValue === 0
+      ? -lastMonthValue : +(((currentMonthValue - lastMonthValue) / Math.abs(lastMonthValue)) * 100).toFixed(2);
 
 
   const yearlyGrowth = 
   lastYearTotal === 0
     ? currentYearTotal
-    : +(((currentYearTotal - lastYearTotal) / Math.abs(lastYearTotal)) * 100).toFixed(2);
+    : currentYearTotal === 0
+      ? -lastYearTotal : +(((currentYearTotal - lastYearTotal) / Math.abs(lastYearTotal)) * 100).toFixed(2);
 
   // Prepare monthly and yearly data for charts from totalAmount
   const getMonthlyData = () => {
