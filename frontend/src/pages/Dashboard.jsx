@@ -235,7 +235,6 @@ const Dashboard = () => {
   const monthlyData = getMonthlyData();
   const yearlyData = getYearlyData();
 
-  console.log(dashboardStats);
   // const expenseCategories = Array.isArray(expenses) 
   //   ? expenses.filter(expense => expense.status === 'approved').reduce((acc, expense) => {
   //     // Handle both predefined and custom categories
@@ -248,17 +247,21 @@ const Dashboard = () => {
   //   }, {})
   //   : {};
   //   console.log(expenseCategories);
-  const expenseCategories = dashboardStats.monthlyExpenses.categories;
-  // const [expenseCategories, setExpenseCategories] = useState(dashboardStats.monthlyExpenses.categories);
-  // useEffect(() => {
-  //   console.log("useeffect");
-  //   setExpenseCategories(dashboardStats.monthlyExpenses.categories);
-  // }, [dashboardStats]);
+  // const expenseCategories = dashboardStats.monthlyExpenses.categories;
+  const [expenseCategories, setExpenseCategories] = useState(dashboardStats.monthlyExpenses.categories);
+  useEffect(() => {
+    setExpenseCategories(dashboardStats.monthlyExpenses.categories);
+  }, [dashboardStats]);
 
-  // console.log(expenseCategories);
-  // console.log(dashboardStats.monthlyExpenses.categories);
+  useEffect(() => {
+    setExpenseCategories((expenseViewType === 'monthly' ? dashboardStats.monthlyExpenses.categories : dashboardStats.yearlyExpenses.categories));
+  }, [expenseViewType]);
+
+  const handleExpenseViewTypeChange = (e) => {
+    setExpenseViewType(e.target.value);
+  };
+
   const expenseCategoryData = () => {
-    console.log(expenseCategories);
     return Object.entries(expenseCategories)
     .map(([name, value]) => ({
       name,
@@ -518,14 +521,14 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Expense Categories Chart */}
+        {/* Expense Categories Chart */} 
         <div className="bg-white rounded-lg shadow p-4">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-medium text-gray-900">Expense Categories</h3>
             <div className="flex items-center gap-2">
               <select
                 value={expenseViewType}
-                onChange={(e) => setExpenseViewType(e.target.value)}
+                onChange={handleExpenseViewTypeChange}
                 className="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="monthly">Monthly</option>
