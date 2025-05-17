@@ -235,27 +235,41 @@ const Dashboard = () => {
   const monthlyData = getMonthlyData();
   const yearlyData = getYearlyData();
 
-  const expenseCategories = Array.isArray(expenses)
-    ? expenses.filter(expense => expense.status === 'approved').reduce((acc, expense) => {
-      // Handle both predefined and custom categories
-      const categoryName = expense.category;
-      // Format the category name for display
-      const displayName = categoryName === 'other' ? expense.customCategory || 'Other' : 
-        categoryName.charAt(0).toUpperCase() + categoryName.slice(1).replace('_', ' ');
-      acc[displayName] = (acc[displayName] || 0) + (Number(expense.amount) || 0);
-      return acc;
-    }, {})
-    : {};
+  console.log(dashboardStats);
+  // const expenseCategories = Array.isArray(expenses) 
+  //   ? expenses.filter(expense => expense.status === 'approved').reduce((acc, expense) => {
+  //     // Handle both predefined and custom categories
+  //     const categoryName = expense.category;
+  //     // Format the category name for display
+  //     const displayName = categoryName === 'other' ? expense.customCategory || 'Other' : 
+  //       categoryName.charAt(0).toUpperCase() + categoryName.slice(1).replace('_', ' ');
+  //     acc[displayName] = (acc[displayName] || 0) + (Number(expense.amount) || 0);
+  //     return acc;
+  //   }, {})
+  //   : {};
+  //   console.log(expenseCategories);
+  const expenseCategories = dashboardStats.monthlyExpenses.categories;
+  // const [expenseCategories, setExpenseCategories] = useState(dashboardStats.monthlyExpenses.categories);
+  // useEffect(() => {
+  //   console.log("useeffect");
+  //   setExpenseCategories(dashboardStats.monthlyExpenses.categories);
+  // }, [dashboardStats]);
 
-  const expenseCategoryData = Object.entries(expenseCategories)
+  // console.log(expenseCategories);
+  // console.log(dashboardStats.monthlyExpenses.categories);
+  const expenseCategoryData = () => {
+    console.log(expenseCategories);
+    return Object.entries(expenseCategories)
     .map(([name, value]) => ({
       name,
       value: Number(value)
     }))
-    .filter(item => item.value > 0); // Only include categories with values > 0
+    .filter(item => item.value > 0);
+  }; // Only include categories with values > 0
+  // console.log(expenseCategoryData());
 
   // Calculate total for percentage calculations
-  const totalExpenseAmount = expenseCategoryData.reduce((sum, item) => sum + item.value, 0);
+  // const totalExpenseAmount = expenseCategoryData.reduce((sum, item) => sum + item.value, 0);
 
   let unorderedCompanyTypes = Array.isArray(companies)
     ? companies.reduce((acc, company) => {
@@ -518,7 +532,7 @@ const Dashboard = () => {
                 <option value="yearly">Yearly</option>
               </select>
               <div className="text-sm font-medium text-gray-600">
-                Total: ₹{totalExpenseAmount.toLocaleString()}
+                Total: ₹{expenseViewType === 'monthly' ? dashboardStats.monthlyExpenses.total : dashboardStats.yearlyExpenses.total}
               </div>
             </div>
           </div>
@@ -526,7 +540,7 @@ const Dashboard = () => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={expenseCategoryData}
+                  data={expenseCategoryData()}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -535,7 +549,7 @@ const Dashboard = () => {
                   dataKey="value"
                   label={false}
                 >
-                  {expenseCategoryData.map((entry, index) => (
+                  {expenseCategoryData().map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={getCategoryColor(entry.name)} />
                   ))}
                 </Pie>
@@ -550,8 +564,8 @@ const Dashboard = () => {
                   formatter={(value, entry) => {
                     const { payload } = entry;
                     // Use the calculated total
-                    const percentage = totalExpenseAmount > 0 
-                      ? ((payload.value / totalExpenseAmount) * 100).toFixed(1)
+                    const percentage = (expenseViewType === 'monthly' ? dashboardStats.monthlyExpenses.total: dashboardStats.yearlyExpenses.total) > 0
+                      ? ((payload.value / (expenseViewType === 'monthly' ? dashboardStats.monthlyExpenses.total: dashboardStats.yearlyExpenses.total)) * 100).toFixed(1)
                       : '0.0';
                     return `${value} (${percentage}%)`;
                   }}
